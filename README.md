@@ -41,4 +41,8 @@ cd backend && npm install && npm run build:wc
 
 The deployed contract address is injected at deploy time from the `ODP_CONTRACT_ADDRESS` Actions secret, and falls back to the value written into the pages. Current addresses for every protocol version are in the [deployment table](https://github.com/object-digital-passport/object-digital-passport/blob/main/docs/GUIDE.md#current-release).
 
+## History
+
+[`CHANGELOG.md`](CHANGELOG.md). The site was `web/` inside the protocol repository until August 2026; its commits came across intact, so `git log` reaches back to the first release in March.
+
 MIT.
