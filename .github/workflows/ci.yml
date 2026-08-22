@@ -35,6 +35,17 @@ jobs:
           path: frontend/e2e/playwright-report
           retention-days: 7
 
+  unit:
+    name: Read-layer unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: SPEC 0.7 read layer, against the published vectors
+        run: node backend/test/odp-contract-0.7.test.mjs
+
   links:
     name: Markdown links
     runs-on: ubuntu-latest

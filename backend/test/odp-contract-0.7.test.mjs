@@ -1,11 +1,11 @@
 /**
  * Unit tests for the SPEC 0.7 §20 read layer in web/backend/js/odp-contract.js.
- * Pure logic only — no chain, no browser. Run: node web/backend/test/odp-contract-0.7.test.mjs
+ * Pure logic only — no chain, no browser. Run: node backend/test/odp-contract-0.7.test.mjs
  */
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import nodeCrypto from "node:crypto";
-const src = fs.readFileSync("web/backend/js/odp-contract.js", "utf8");
+const src = fs.readFileSync(new URL("../js/odp-contract.js", import.meta.url), "utf8");
 // the module is an IIFE bound to `window || globalThis`; in node that is globalThis.
 new Function(src)();
 const { odpCompareUnitKeySetRoot: cmp, odpSupportsV07: v07, odpReadUnitState: readState } = globalThis;
@@ -74,7 +74,7 @@ assert.equal(verifyLabel({}), "unsigned_edition", "empty input does not throw");
 // These are the same values chain/deploy/test/ODPEditionVectors.test.js asserts against
 // Solidity, so agreeing with them is agreeing with the contract.
 const { odpCheckUnitList: checkList, odpUnitTreeRoot: treeRoot } = globalThis;
-const V = JSON.parse(fs.readFileSync(new URL("../../../schema/vectors/edition-units.json", import.meta.url)));
+const V = JSON.parse(fs.readFileSync(new URL("./vectors/edition-units.json", import.meta.url)));
 
 const list = Buffer.concat(V.units.map((u) => Buffer.from(u.unitAddress.slice(2), "hex")));
 const listBytes = new Uint8Array(list);
