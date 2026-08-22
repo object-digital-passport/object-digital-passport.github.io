@@ -898,7 +898,7 @@
   }
 
   /** Public GitHub Pages base (trailing slash omitted); keep in sync with README live demo links. */
-  var ODP_LIVE_BASE = "https://object-digital-passport.github.io/object-digital-passport";
+  var ODP_LIVE_BASE = "https://object-digital-passport.github.io";
 
   /** Canonical public Verify base for reference exports, QR, and NFC helper links. */
   function odpCanonicalVerifyBase() {

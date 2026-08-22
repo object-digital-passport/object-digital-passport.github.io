@@ -1,0 +1,70 @@
+name: Deploy site to GitHub Pages
+
+# Publishes the reference web UI at https://object-digital-passport.github.io/
+#
+#   /            — frontend/ (verify, passport, creator)
+#   /backend/    — the browser-side registry client the pages load
+#
+# The specification is a separate repository and publishes its own pages; nothing here
+# builds or reads it.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/configure-pages@v6
+
+      - name: Stage the site
+        env:
+          ODP_CONTRACT_ADDRESS: ${{ secrets.ODP_CONTRACT_ADDRESS || vars.ODP_CONTRACT_ADDRESS }}
+        run: |
+          mkdir -p _site
+          cp -r frontend/. _site/
+          cp -r backend _site/backend
+          if [ -n "$ODP_CONTRACT_ADDRESS" ]; then
+            echo "Injecting ODP_CONTRACT_ADDRESS into NET.contract + registry-config.json"
+            for f in _site/creator.html _site/passport.html _site/verify.html; do
+              test -f "$f" || continue
+              sed -i "s|contract: \"[^\"]*\",|contract: \"${ODP_CONTRACT_ADDRESS}\",|" "$f"
+            done
+            printf '{"contract":"%s"}\n' "$ODP_CONTRACT_ADDRESS" > _site/backend/config/registry-config.json
+          else
+            echo "ODP_CONTRACT_ADDRESS empty — set the Actions secret or repo Variable, then redeploy"
+          fi
+
+      - name: Keep /demo/ working
+        # The monorepo served these pages under /demo/. Anything already linking there keeps
+        # working, query string intact.
+        run: |
+          mkdir -p _site/demo
+          for p in index verify creator passport; do
+            printf '%s\n' \
+              '<!doctype html><meta charset="utf-8">' \
+              "<title>Moved</title>" \
+              "<script>location.replace(\"../$p.html\" + location.search + location.hash);</script>" \
+              "<p>Moved to <a href=\"../$p.html\">../$p.html</a>.</p>" > "_site/demo/$p.html"
+          done
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v5
