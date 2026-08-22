@@ -18,6 +18,10 @@ history is in the [specification repository](https://github.com/object-digital-p
 - `ODP_LIVE_BASE`, the single constant every generated verify link derives from, points at the new origin.
 - The monorepo landing page is gone — the frontend has its own index, and the specification is published from its own repository now.
 
+### Security
+
+- `axios` pinned to ≥1.18.0 through `overrides`, resolving 28 advisories. The fix had landed in the protocol repository before this one was split off, and did not travel — the split was taken from a branch that predated it, so the alerts arrived here the day the repository was created. Nothing vulnerable ships either way: `axios` is absent from the built WalletConnect bundle.
+
 ### Added
 
 - **CI, for the first time.** The Playwright smoke test has been in this tree since v0.4.1 and no workflow had ever run it. A markdown link check and the read-layer unit tests run beside it.
