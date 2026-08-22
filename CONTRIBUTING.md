@@ -49,9 +49,17 @@ TMP=$(mktemp -d) && cp -r frontend/. "$TMP/" && cp -r backend "$TMP/backend" && 
 
 ## Translations
 
-Interface strings live in `frontend/localization/<lang>/*.json`. English and Russian exist. Adding a
-language means adding a directory with the same file and key names — no code change. Keys missing
-from a language fall back to English rather than showing blank.
+Interface strings live in `frontend/localization/<lang>/*.json`. English and Russian exist.
+
+**Fixing or improving an existing string is a pure data change** — edit the JSON, nothing else. A
+key you leave out falls back to the English string rather than rendering blank, because
+`odp-i18n.js` merges the translation over the English set and skips empty values. A partial
+translation is therefore usable, which makes it a reasonable first pull request.
+
+**Adding a third language is not yet a data change.** `frontend/js/odp-i18n.js` hard-codes `ru` as
+the only non-English locale — in the language list, in the three fetch paths, and in the `lang`
+attribute it sets on `<html>`. Adding German means generalising those to use the selected locale
+first. Open an issue before starting; that refactor is worth doing once, properly.
 
 Translations are **informational**. The normative text is
 [`SPEC.md`](https://github.com/object-digital-passport/object-digital-passport/blob/main/SPEC.md),
@@ -66,9 +74,12 @@ translation is a bug.
 4. Open the pull request into `main`. CI runs the same three jobs and all must pass.
 
 ```bash
-cd frontend/e2e && npm install && npx playwright test   # smoke tests
-cd backend && npm install && npm test                   # read-layer unit tests
+cd frontend/e2e && npm install && npx playwright test    # smoke tests
+node backend/test/odp-contract-0.7.test.mjs              # read-layer unit tests, from the repo root
 ```
+
+`backend` has no `npm test` — its `test` script is npm's default stub and exits 1. The read-layer
+tests are a plain Node script, run exactly as CI runs it above.
 
 `main` is protected: it takes pull requests only, and the three CI jobs are required. See
 [`.github/BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md).

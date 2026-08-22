@@ -19,7 +19,11 @@ labels: i18n
 ---
 
 <!--
-Proposing a whole new language? Say which. It needs a directory under
-frontend/localization/ with the same file and key names as en/ — no code change. Missing keys fall
-back to English rather than showing blank, so a partial translation is a usable first pull request.
+Fixing an existing string is a pure data change — edit the JSON, nothing else. Keys you leave out
+fall back to English rather than rendering blank, so a partial translation is a usable first pull
+request.
+
+Proposing a whole NEW language? Say which, but note it is not yet a data change:
+frontend/js/odp-i18n.js hard-codes 'ru' as the only non-English locale. That has to be generalised
+first. See CONTRIBUTING.md, "Translations".
 -->

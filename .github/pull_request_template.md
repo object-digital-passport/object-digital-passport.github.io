@@ -11,7 +11,7 @@
 <!-- Which pages, which browsers. Paste the test output if you ran it. -->
 
 - [ ] `cd frontend/e2e && npx playwright test` passes
-- [ ] `cd backend && npm test` passes
+- [ ] `node backend/test/odp-contract-0.7.test.mjs` passes
 - [ ] Checked in a browser, not only in the tests
 
 ## Scope
