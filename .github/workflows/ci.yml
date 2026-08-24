@@ -45,6 +45,8 @@ jobs:
           node-version: 22
       - name: SPEC 0.7 read layer, against the published vectors
         run: node backend/test/odp-contract-0.7.test.mjs
+      - name: i18n locale selection and English fallback
+        run: node frontend/test/odp-i18n.test.mjs
 
   links:
     name: Markdown links

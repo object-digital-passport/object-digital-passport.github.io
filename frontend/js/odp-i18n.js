@@ -1,15 +1,31 @@
 /**
  * ODP UI i18n — loads JSON from frontend/localization/<lang>/*.json (deployed as /localization/ on GitHub Pages).
- * localStorage odp_locale: "en" | "ru". Add languages under web/frontend/localization/<code>/.
+ *
+ * Adding a language:
+ *   1. create frontend/localization/<code>/ with common.json and one file per page,
+ *   2. add one entry to ODP_LOCALES below.
+ * Nothing else in this file knows a language by name. English is the base set: the selected
+ * locale is merged over it, so a missing key — or a missing file — falls back to English rather
+ * than rendering blank, which is what makes a partial translation usable.
+ *
+ * localStorage odp_locale holds the last explicit choice.
  */
 (function (global) {
   "use strict";
 
   var STORAGE_KEY = "odp_locale";
+  var BASE_LOCALE = "en";
   var ODP_LOCALES = [
-    { code: "en", emoji: "🇬🇧", abbr: "EN", label: "English" },
-    { code: "ru", emoji: "🇷🇺", abbr: "RU", label: "Русский" },
+    { code: "en", emoji: "🇬🇧", abbr: "EN", label: "English", readmeUrl: "https://github.com/object-digital-passport/specifications/blob/main/README.md" },
+    { code: "ru", emoji: "🇷🇺", abbr: "RU", label: "Русский", readmeUrl: "https://github.com/object-digital-passport/specifications/blob/main/README.ru.md" },
   ];
+
+  function odpLocaleEntry(code) {
+    for (var i = 0; i < ODP_LOCALES.length; i++) {
+      if (ODP_LOCALES[i].code === code) return ODP_LOCALES[i];
+    }
+    return null;
+  }
 
   var _locale = "en";
   var _merged = {};
@@ -40,12 +56,14 @@
   function odpResolveLocale() {
     try {
       var s = global.localStorage && global.localStorage.getItem(STORAGE_KEY);
-      if (s === "en" || s === "ru") return s;
+      if (s && odpLocaleEntry(s)) return s;
     } catch (e0) {}
-    var nav = (global.navigator && global.navigator.language) || "en";
+    var nav = (global.navigator && global.navigator.language) || BASE_LOCALE;
     nav = String(nav).toLowerCase();
-    if (nav.startsWith("ru")) return "ru";
-    return "en";
+    for (var i = 0; i < ODP_LOCALES.length; i++) {
+      if (nav.split("-")[0] === ODP_LOCALES[i].code) return ODP_LOCALES[i].code;
+    }
+    return BASE_LOCALE;
   }
 
   /** Clears flash-guard from odp-i18n-boot.js (RU) or no-ops if not pending. */
@@ -153,11 +171,9 @@
   }
 
   function odpReadmeUrlForLocale(locale) {
-    var loc = locale === "ru" ? "ru" : "en";
-    if (loc === "ru") {
-      return "https://github.com/object-digital-passport/specifications/blob/main/web/frontend/localization/ru/README.md";
-    }
-    return "https://github.com/object-digital-passport/specifications/blob/main/README.md";
+    var entry = odpLocaleEntry(locale);
+    if (entry && entry.readmeUrl) return entry.readmeUrl;
+    return odpLocaleEntry(BASE_LOCALE).readmeUrl;
   }
 
   function odpApplyReadmeLinks(root) {
@@ -194,7 +210,7 @@
     opts = opts || {};
     var page = opts.page || "index";
     _locale = odpResolveLocale();
-    if (_locale === "ru" && global.document && global.document.documentElement) {
+    if (_locale !== BASE_LOCALE && global.document && global.document.documentElement) {
       global.document.documentElement.classList.add("odp-i18n-pending");
     }
 
@@ -267,47 +283,37 @@
           _merged = enAll;
           return Promise.resolve();
         }
-        return global
-          .fetch(versionedI18nUrl(new URL("ru/common.json", base).toString()), { cache: "default" })
-          .then(function (r) {
-            if (!r.ok) throw new Error("ru common fetch failed: " + r.status);
-            return r.json();
-          })
-          .then(function (ruCommon) {
-            return global
-              .fetch(versionedI18nUrl(new URL("ru/" + page + ".json", base).toString()), { cache: "default" })
-              .then(function (r) {
-                if (!r.ok) throw new Error("ru page fetch failed: " + r.status);
-                return r.json();
-              })
-              .then(function (ruPage) {
-                return deepMerge(ruCommon, ruPage);
-              });
-          })
-          .then(function (ruAll) {
-            var mergeNames = opts.mergePages || [];
-            var ri = 0;
-            function mergeNextRu(a) {
-              if (ri >= mergeNames.length) return Promise.resolve(a);
-              var name = mergeNames[ri++];
-              return global
-                .fetch(versionedI18nUrl(new URL("ru/" + name + ".json", base).toString()), { cache: "default" })
-                .then(function (r) {
-                  if (!r.ok) throw new Error("i18n merge ru/" + name + " failed: " + r.status);
-                  return r.json();
-                })
-                .then(function (j) {
-                  return mergeNextRu(deepMerge(a, j));
-                });
-            }
-            return mergeNextRu(ruAll);
-          })
-          .then(function (ruAll) {
-            _merged = deepMerge(enAll, ruAll);
+        // Every file of the selected locale is optional. A 404 or a parse error yields an empty
+        // object, so the English set below shows through — the same fallback a missing key gets,
+        // extended to a missing file. Without it, one absent page file would blank the whole UI
+        // for anyone adding a language incrementally.
+        function localeFile(name) {
+          return global
+            .fetch(versionedI18nUrl(new URL(_locale + "/" + name + ".json", base).toString()), { cache: "default" })
+            .then(function (r) {
+              if (!r.ok) throw new Error(_locale + "/" + name + ".json: " + r.status);
+              return r.json();
+            })
+            .catch(function (err) {
+              console.warn("[ODP i18n] falling back to English for " + _locale + "/" + name + ".json", err);
+              return {};
+            });
+        }
+
+        var names = ["common", page].concat(opts.mergePages || []);
+        var i = 0;
+        function mergeNextLocale(acc) {
+          if (i >= names.length) return Promise.resolve(acc);
+          return localeFile(names[i++]).then(function (j) {
+            return mergeNextLocale(deepMerge(acc, j));
           });
+        }
+        return mergeNextLocale({}).then(function (locAll) {
+          _merged = deepMerge(enAll, locAll);
+        });
       })
       .then(function () {
-        global.document.documentElement.lang = _locale === "ru" ? "ru" : "en";
+        global.document.documentElement.lang = _locale;
         global.odpT = t;
         global.odpGetLocale = function () {
           return _locale;
@@ -349,7 +355,7 @@
         global.odpSetLocale = odpSetLocale;
         try {
           if (global.document && global.document.documentElement) {
-            global.document.documentElement.lang = _locale === "ru" ? "ru" : "en";
+            global.document.documentElement.lang = _locale;
           }
         } catch (eLang) {}
         try {

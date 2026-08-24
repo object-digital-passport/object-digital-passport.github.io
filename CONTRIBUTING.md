@@ -58,10 +58,14 @@ key you leave out falls back to the English string rather than rendering blank, 
 `odp-i18n.js` merges the translation over the English set and skips empty values. A partial
 translation is therefore usable, which makes it a reasonable first pull request.
 
-**Adding a third language is not yet a data change.** `frontend/js/odp-i18n.js` hard-codes `ru` as
-the only non-English locale — in the language list, in the three fetch paths, and in the `lang`
-attribute it sets on `<html>`. Adding German means generalising those to use the selected locale
-first. Open an issue before starting; that refactor is worth doing once, properly.
+**Adding a language is a folder and one line.** Create
+`frontend/localization/<code>/` with `common.json` and one file per page, then add an entry to
+`ODP_LOCALES` at the top of `frontend/js/odp-i18n.js` — code, flag, abbreviation, label, and the
+README URL for that language. Nothing else in that file knows a language by name.
+
+You do not have to translate everything first. A missing key, an empty string, and a missing
+*file* all fall back to the English text, so a language can land one page at a time.
+`frontend/test/odp-i18n.test.mjs` holds that behaviour in place.
 
 **Documentation is translated too, and CI enforces it.** Every document in this repository has a
 Russian version or a written reason why it does not — the record is
