@@ -155,9 +155,9 @@
   function odpReadmeUrlForLocale(locale) {
     var loc = locale === "ru" ? "ru" : "en";
     if (loc === "ru") {
-      return "https://github.com/object-digital-passport/object-digital-passport/blob/main/web/frontend/localization/ru/README.md";
+      return "https://github.com/object-digital-passport/specifications/blob/main/web/frontend/localization/ru/README.md";
     }
-    return "https://github.com/object-digital-passport/object-digital-passport/blob/main/README.md";
+    return "https://github.com/object-digital-passport/specifications/blob/main/README.md";
   }
 
   function odpApplyReadmeLinks(root) {

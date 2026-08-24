@@ -12,7 +12,7 @@ This repo keeps protocol rules, the web UI, and the handoff bridge only.
 
 | Layer | Where |
 |-------|--------|
-| Registry, hashes, SPEC | This repo — [SPEC.md](https://github.com/object-digital-passport/object-digital-passport/blob/main/SPEC.md) |
+| Registry, hashes, SPEC | This repo — [SPEC.md](https://github.com/object-digital-passport/specifications/blob/main/SPEC.md) |
 | Verify / Passport web UI | [web/frontend/verify.html](../frontend/verify.html), [web/frontend/passport.html](../frontend/passport.html) |
 | Web → Android handoff | [web/frontend/js/odp-android-companion.js](../frontend/js/odp-android-companion.js) |
 | NFC runtime on device | [odp-android-companion](https://github.com/object-digital-passport/odp-android-companion) |
@@ -49,8 +49,8 @@ First-link target remains Verify Pages until `odp://` resolver context exists (S
 5. Canonical `.odpass` / `dataHash`  
 
 Normative NFC wording: **SPEC** (issuer order, `highAssuranceSeal` for TagTamper).  
-Practical chip + TagWriter workflow: [ANDROID_NTAG424DNA_TAGTAMPER.md](https://github.com/object-digital-passport/object-digital-passport/blob/main/docs/ANDROID_NTAG424DNA_TAGTAMPER.md).  
-MVP scope checklist: [ANDROID_VERIFIER_MVP.md](https://github.com/object-digital-passport/object-digital-passport/blob/main/docs/ANDROID_VERIFIER_MVP.md).
+Practical chip + TagWriter workflow: [ANDROID_NTAG424DNA_TAGTAMPER.md](https://github.com/object-digital-passport/specifications/blob/main/docs/ANDROID_NTAG424DNA_TAGTAMPER.md).  
+MVP scope checklist: [ANDROID_VERIFIER_MVP.md](https://github.com/object-digital-passport/specifications/blob/main/docs/ANDROID_VERIFIER_MVP.md).
 
 ## Install (pilot)
 

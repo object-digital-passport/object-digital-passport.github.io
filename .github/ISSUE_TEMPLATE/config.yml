@@ -1,11 +1,11 @@
 blank_issues_enabled: true
 contact_links:
   - name: The standard itself — specification, schema, contracts
-    url: https://github.com/object-digital-passport/object-digital-passport/issues
+    url: https://github.com/object-digital-passport/specifications/issues
     about: This repository is one implementation. Anything about what a passport IS, or what verification MUST check, belongs in the protocol repository.
   - name: Report a security issue
-    url: https://github.com/object-digital-passport/object-digital-passport/blob/main/docs/SECURITY.md
+    url: https://github.com/object-digital-passport/specifications/blob/main/docs/SECURITY.md
     about: Do not post exploitable details in a public issue. The protocol repository's security policy covers this repository too.
   - name: Questions and ideas
-    url: https://github.com/object-digital-passport/object-digital-passport/discussions
+    url: https://github.com/object-digital-passport/specifications/discussions
     about: Discussions are hosted on the protocol repository for the whole project.

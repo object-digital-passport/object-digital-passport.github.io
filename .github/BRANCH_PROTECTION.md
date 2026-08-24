@@ -31,5 +31,5 @@ Named exactly as the jobs in [`ci.yml`](workflows/ci.yml) name themselves:
 `Playwright smoke` · `Read-layer unit tests` · `Markdown links`
 
 The protocol repository carries [the same
-pattern](https://github.com/object-digital-passport/object-digital-passport/blob/main/.github/BRANCH_PROTECTION.md),
+pattern](https://github.com/object-digital-passport/specifications/blob/main/.github/BRANCH_PROTECTION.md),
 with a stricter second ruleset for when there is more than one maintainer.

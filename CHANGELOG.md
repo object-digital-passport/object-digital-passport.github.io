@@ -8,7 +8,7 @@ change types only, with the optional per-release summary that 2.0.0 introduced.
 **This site is not versioned like the protocol.** Each `v0.x` of ODP is a separate on-chain
 registry; this repository is one implementation that talks to whichever registry it is pointed
 at. Entries here are dated, and note which protocol line the site targets. The protocol's own
-history is in the [specification repository](https://github.com/object-digital-passport/object-digital-passport/blob/main/CHANGELOG.md).
+history is in the [specification repository](https://github.com/object-digital-passport/specifications/blob/main/CHANGELOG.md).
 
 ## [Unreleased]
 
@@ -34,7 +34,7 @@ history is in the [specification repository](https://github.com/object-digital-p
 Before this repository existed, the site was `web/` inside the protocol repository. Its commits
 came across intact, so `git log` reaches back to **22 March 2026** and the first release. What
 changed in each protocol line — and what the site had to do to follow — is recorded in that
-repository's [changelog](https://github.com/object-digital-passport/object-digital-passport/blob/main/CHANGELOG.md)
-and [release notes](https://github.com/object-digital-passport/object-digital-passport/tree/main/docs/releases).
+repository's [changelog](https://github.com/object-digital-passport/specifications/blob/main/CHANGELOG.md)
+and [release notes](https://github.com/object-digital-passport/specifications/tree/main/docs/releases).
 
 [Unreleased]: https://github.com/object-digital-passport/object-digital-passport.github.io/commits/main

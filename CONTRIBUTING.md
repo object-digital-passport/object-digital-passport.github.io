@@ -1,21 +1,21 @@
 # Contributing to the reference website
 
 This repository is **one implementation** of [Object Digital
-Passport](https://github.com/object-digital-passport/object-digital-passport), not the standard. That
+Passport](https://github.com/object-digital-passport/specifications), not the standard. That
 distinction decides where your contribution belongs, so it is the first question to settle.
 
 ## Which repository does this belong in?
 
 | If it is about… | Open it in |
 |---|---|
-| What a passport **is**, what verification **must** check, the schema, the contracts | **[the protocol repository](https://github.com/object-digital-passport/object-digital-passport/issues)** |
+| What a passport **is**, what verification **must** check, the schema, the contracts | **[the protocol repository](https://github.com/object-digital-passport/specifications/issues)** |
 | What this site **looks like** or **does** — pages, wording, layout, browser bugs, translations | **here** |
 
 A useful test: if a different implementation would have to change too, it is a protocol question.
 If this site could fix it alone and still be conformant, it belongs here.
 
 Community conduct is governed by the protocol repository's [Code of
-Conduct](https://github.com/object-digital-passport/object-digital-passport/blob/main/docs/CODE_OF_CONDUCT.md),
+Conduct](https://github.com/object-digital-passport/specifications/blob/main/docs/CODE_OF_CONDUCT.md),
 which applies to both repositories.
 
 ## Language
@@ -26,7 +26,7 @@ the same thread. The interface itself is bilingual — see below.
 ## Security
 
 Do **not** post exploitable details in a public issue. Follow the protocol repository's [security
-policy](https://github.com/object-digital-passport/object-digital-passport/blob/main/docs/SECURITY.md);
+policy](https://github.com/object-digital-passport/specifications/blob/main/docs/SECURITY.md);
 it covers this repository too.
 
 ## Run it locally
@@ -62,7 +62,7 @@ attribute it sets on `<html>`. Adding German means generalising those to use the
 first. Open an issue before starting; that refactor is worth doing once, properly.
 
 Translations are **informational**. The normative text is
-[`SPEC.md`](https://github.com/object-digital-passport/object-digital-passport/blob/main/SPEC.md),
+[`SPEC.md`](https://github.com/object-digital-passport/specifications/blob/main/SPEC.md),
 in English; where a translation and the specification disagree, the specification is right and the
 translation is a bug.
 
