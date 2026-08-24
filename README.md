@@ -1,5 +1,7 @@
 # ODP — reference website
 
+*По-русски: [`README.ru.md`](README.ru.md).*
+
 The example web interface for **[Object Digital Passport](https://github.com/object-digital-passport/specifications)**: register an identity, issue a passport for an object, and verify one. Live at **https://object-digital-passport.github.io/**.
 
 Verification is free and needs no wallet: [**verify something**](https://object-digital-passport.github.io/verify.html).

@@ -1,7 +1,7 @@
 # Branch protection
 
 [`rulesets/main-default-branch.json`](rulesets/main-default-branch.json) is committed JSON that
-GitHub imports directly: changes to `main` go through a pull request, the three CI jobs must pass,
+GitHub imports directly: changes to `main` go through a pull request, the four CI jobs must pass,
 review threads must be resolved, and the branch cannot be deleted or force-pushed. Repository
 admins can bypass, so a solo owner is never locked out.
 
@@ -28,7 +28,7 @@ meant to prevent.
 
 Named exactly as the jobs in [`ci.yml`](workflows/ci.yml) name themselves:
 
-`Playwright smoke` · `Read-layer unit tests` · `Markdown links`
+`Playwright smoke` · `Read-layer unit tests` · `Markdown links` · `Translation parity`
 
 The protocol repository carries [the same
 pattern](https://github.com/object-digital-passport/specifications/blob/main/.github/BRANCH_PROTECTION.md),

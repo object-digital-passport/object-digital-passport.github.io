@@ -70,3 +70,18 @@ jobs:
           print(f"{len(files)} files checked, {len(bad)} broken")
           sys.exit(1 if bad else 0)
           PY
+
+  translations:
+    name: Translation parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The freshness check reads `git log` per file, so it needs the history.
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      # docs/TRANSLATIONS.md records what is translated; this enforces that record.
+      - name: Check the Russian docs against docs/TRANSLATIONS.md
+        run: node tools/check-translations.mjs --all

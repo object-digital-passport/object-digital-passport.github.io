@@ -1,21 +1,27 @@
 # Android companion — ODP integration
 
-The reference NFC verifier app lives in a separate repository:
+*По-русски: [`ru/ANDROID.md`](ru/ANDROID.md).*
 
-**[object-digital-passport/odp-android-companion](https://github.com/object-digital-passport/odp-android-companion)**
+The NFC verifier app lives in a separate repository, `android-verifier` — renamed from
+`odp-android-companion` on 2026-08-22. **It is private, and the app was started and never
+finished**, so the name is given here without a link and the pages below are unreachable. No
+public implementation of the `nfc` anchor exists on any platform; the reference implementation
+is now the ODP app for iOS.
 
-Build, guided UX, operator tools, and TagTamper pilot notes are documented there ([README](https://github.com/object-digital-passport/odp-android-companion/blob/main/README.md), [NTAG424 pilot](https://github.com/object-digital-passport/odp-android-companion/blob/main/docs/NTAG424_TAGTAMPER.md)).
+This repository keeps the web UI and the handoff bridge. Protocol rules are in the
+[specification repository](https://github.com/object-digital-passport/specifications).
 
-This repo keeps protocol rules, the web UI, and the handoff bridge only.
+What follows describes the handoff as it was designed. It is kept because the trust-step
+separation below is still the right shape for whatever reads a seal next.
 
 ## Role in ODP
 
 | Layer | Where |
 |-------|--------|
-| Registry, hashes, SPEC | This repo — [SPEC.md](https://github.com/object-digital-passport/specifications/blob/main/SPEC.md) |
-| Verify / Passport web UI | [web/frontend/verify.html](../frontend/verify.html), [web/frontend/passport.html](../frontend/passport.html) |
-| Web → Android handoff | [web/frontend/js/odp-android-companion.js](../frontend/js/odp-android-companion.js) |
-| NFC runtime on device | [odp-android-companion](https://github.com/object-digital-passport/odp-android-companion) |
+| Registry, hashes, SPEC | [Specification repository](https://github.com/object-digital-passport/specifications) — [SPEC.md](https://github.com/object-digital-passport/specifications/blob/main/SPEC.md) |
+| Verify / Passport web UI | [frontend/verify.html](../frontend/verify.html), [frontend/passport.html](../frontend/passport.html) |
+| Web → Android handoff | [frontend/js/odp-android-companion.js](../frontend/js/odp-android-companion.js) |
+| NFC runtime on device | `android-verifier` (private, unfinished) |
 
 The companion does **not** replace on-chain verification in the browser. It adds NFC carrier read/write, EV2/TagTamper evidence, and honest separate result rows.
 
@@ -31,7 +37,7 @@ Delivery:
 - **Deep link:** `odpcompanion://import?handoff=<url-encoded-json>`
 - **Share / copy** — same JSON as plain text
 
-Implementation: [`web/frontend/js/odp-android-companion.js`](../frontend/js/odp-android-companion.js) (`buildAndroidCompanionHandoff`, `openAndroidCompanionImport`).
+Implementation: [`frontend/js/odp-android-companion.js`](../frontend/js/odp-android-companion.js) (`buildAndroidCompanionHandoff`, `openAndroidCompanionImport`).
 
 ## Carrier shape (reference)
 
@@ -52,6 +58,6 @@ Normative NFC wording: **SPEC** (issuer order, `highAssuranceSeal` for TagTamper
 Practical chip + TagWriter workflow: [ANDROID_NTAG424DNA_TAGTAMPER.md](https://github.com/object-digital-passport/specifications/blob/main/docs/ANDROID_NTAG424DNA_TAGTAMPER.md).  
 MVP scope checklist: [ANDROID_VERIFIER_MVP.md](https://github.com/object-digital-passport/specifications/blob/main/docs/ANDROID_VERIFIER_MVP.md).
 
-## Install (pilot)
+## Install
 
-Download debug APK from [Releases](https://github.com/object-digital-passport/odp-android-companion/releases) or build from the companion repo (`./gradlew assembleDebug`).
+There is nothing to install. The app was never released, and its repository is private.

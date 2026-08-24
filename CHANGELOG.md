@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the ODP reference website are documented in this file.
+All notable changes to the ODP reference website are documented in this file. Russian translation: [`CHANGELOG.ru.md`](CHANGELOG.ru.md).
 
 The format is based on [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/) — the six
 change types only, with the optional per-release summary that 2.0.0 introduced.

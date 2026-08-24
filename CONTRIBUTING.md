@@ -1,5 +1,7 @@
 # Contributing to the reference website
 
+*По-русски: [`CONTRIBUTING.ru.md`](CONTRIBUTING.ru.md).*
+
 This repository is **one implementation** of [Object Digital
 Passport](https://github.com/object-digital-passport/specifications), not the standard. That
 distinction decides where your contribution belongs, so it is the first question to settle.
@@ -61,6 +63,11 @@ the only non-English locale — in the language list, in the three fetch paths, 
 attribute it sets on `<html>`. Adding German means generalising those to use the selected locale
 first. Open an issue before starting; that refactor is worth doing once, properly.
 
+**Documentation is translated too, and CI enforces it.** Every document in this repository has a
+Russian version or a written reason why it does not — the record is
+[`docs/TRANSLATIONS.md`](docs/TRANSLATIONS.md), checked by the `Translation parity` job. Adding a
+document means adding a row; changing one means checking its translation.
+
 Translations are **informational**. The normative text is
 [`SPEC.md`](https://github.com/object-digital-passport/specifications/blob/main/SPEC.md),
 in English; where a translation and the specification disagree, the specification is right and the
@@ -71,7 +78,7 @@ translation is a bug.
 1. Branch from `main` with a descriptive name — `fix/verify-mobile-layout`, `i18n/add-german`.
 2. Keep commits focused, and match the style already in the file you are editing.
 3. Run the tests below before opening the pull request.
-4. Open the pull request into `main`. CI runs the same three jobs and all must pass.
+4. Open the pull request into `main`. CI runs the same four jobs and all must pass.
 
 ```bash
 cd frontend/e2e && npm install && npx playwright test    # smoke tests
@@ -81,7 +88,7 @@ node backend/test/odp-contract-0.7.test.mjs              # read-layer unit tests
 `backend` has no `npm test` — its `test` script is npm's default stub and exits 1. The read-layer
 tests are a plain Node script, run exactly as CI runs it above.
 
-`main` is protected: it takes pull requests only, and the three CI jobs are required. See
+`main` is protected: it takes pull requests only, and the four CI jobs are required. See
 [`.github/BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md).
 
 ## One file is generated
