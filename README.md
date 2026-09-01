@@ -1,6 +1,8 @@
 # ODP — reference website
 
-The example web interface for **[Object Digital Passport](https://github.com/object-digital-passport/object-digital-passport)**: register an identity, issue a passport for an object, and verify one. Live at **https://object-digital-passport.github.io/**.
+*По-русски: [`README.ru.md`](README.ru.md).*
+
+The example web interface for **[Object Digital Passport](https://github.com/object-digital-passport/specifications)**: register an identity, issue a passport for an object, and verify one. Live at **https://object-digital-passport.github.io/**.
 
 Verification is free and needs no wallet: [**verify something**](https://object-digital-passport.github.io/verify.html).
 
@@ -8,8 +10,8 @@ Verification is free and needs no wallet: [**verify something**](https://object-
 
 The protocol lives in its own repository, and it is the normative source:
 
-- **[Specification](https://github.com/object-digital-passport/object-digital-passport/blob/main/SPEC.md)** — what a passport is and how verification works
-- **[Contracts, schema, deployed addresses](https://github.com/object-digital-passport/object-digital-passport)**
+- **[Specification](https://github.com/object-digital-passport/specifications/blob/main/SPEC.md)** — what a passport is and how verification works
+- **[Contracts, schema, deployed addresses](https://github.com/object-digital-passport/specifications)**
 
 Anything this site does that the specification does not require is a choice made here, and you are free to make a different one. Nothing about this site is privileged: a passport registered through it is readable by any implementation, forever, without asking anyone.
 
@@ -39,7 +41,7 @@ cd backend && npm install && npm run build:wc
 
 ## Which registry it talks to
 
-The deployed contract address is injected at deploy time from the `ODP_CONTRACT_ADDRESS` Actions secret, and falls back to the value written into the pages. Current addresses for every protocol version are in the [deployment table](https://github.com/object-digital-passport/object-digital-passport/blob/main/docs/GUIDE.md#current-release).
+The deployed contract address is injected at deploy time from the `ODP_CONTRACT_ADDRESS` Actions secret, and falls back to the value written into the pages. Current addresses for every protocol version are in the [deployment table](https://github.com/object-digital-passport/specifications/blob/main/docs/GUIDE.md#current-release).
 
 ## History
 

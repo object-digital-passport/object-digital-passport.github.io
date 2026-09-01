@@ -37,7 +37,8 @@
         "required_status_checks": [
           { "context": "Playwright smoke" },
           { "context": "Read-layer unit tests" },
-          { "context": "Markdown links" }
+          { "context": "Markdown links" },
+          { "context": "Translation parity" }
         ]
       }
     }

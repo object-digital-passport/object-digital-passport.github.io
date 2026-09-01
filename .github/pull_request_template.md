@@ -20,7 +20,7 @@
 
 <!--
 If the answer is no — if a conformant implementation would have to change too — the change belongs
-in https://github.com/object-digital-passport/object-digital-passport instead, or alongside a
+in https://github.com/object-digital-passport/specifications instead, or alongside a
 specification change there.
 -->
 

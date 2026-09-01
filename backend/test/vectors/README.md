@@ -1,7 +1,7 @@
 # Known-answer vectors
 
 `edition-units.json` is copied verbatim from the specification repository
-([`schema/vectors/`](https://github.com/object-digital-passport/object-digital-passport/tree/main/schema/vectors)),
+([`schema/vectors/`](https://github.com/object-digital-passport/specifications/tree/main/schema/vectors)),
 where it is generated and asserted against the deployed Solidity.
 
 Copying is what these are for. A second implementation proves it agrees with the contract by
