@@ -984,12 +984,6 @@ async function disconnectVerifyWallet() {
 async function connect() {
   await odpMergeRegistryConfigAsync(NET);
   const c = NET;
-  // #region agent log
-  odpVerifyDebugLog("verify.html:connect", "registry config after merge", {
-    contract: c.contract,
-    chainId: c.chainId,
-  }, "B");
-  // #endregion
   verifyContractError = null;
   let lastErr = null;
   const lbl = document.getElementById("odpStackLabel");
@@ -1008,14 +1002,6 @@ async function connect() {
       }
       const probed = await odpProbeContractGenerationCached(c.contract, c.chainId, POLYGON_RPC_FALLBACKS, ethers);
       odpContractGeneration = odpResolveGeneration(probed, c);
-      // #region agent log
-      odpVerifyDebugLog("verify.html:connect", "primary contract probed", {
-        rpcUrl,
-        contract: c.contract,
-        probed,
-        generation: odpContractGeneration,
-      }, "B");
-      // #endregion
       if (odpContractGeneration === 0) {
         verifyContractError =
           typeof ODP_UNSUPPORTED_LEGACY_CONTRACT_MSG !== "undefined"
@@ -1037,14 +1023,6 @@ async function connect() {
       }
       verifyReadAbi = odpBuildVerifyReadAbi(odpContractGeneration, c);
       contract = new ethers.Contract(c.contract, verifyReadAbi, provider);
-      // #region agent log
-      odpVerifyDebugLog("verify.html:connect", "verify contract ready", {
-        contract: contract.address,
-        generation: odpContractGeneration,
-        hasGetPassport: typeof contract.getPassport === "function",
-        hasSplitHeader: typeof contract.getPassportHeader === "function",
-      }, "C");
-      // #endregion
       if (lbl) {
         lbl.innerHTML = odpFormatStackSummaryHtml(odpContractGeneration);
         lbl.style.display = "";
@@ -1376,23 +1354,6 @@ function verifyBadTokenMessage(raw) {
   return t("verify.result.badTokenEthAddress");
 }
 
-// #region agent log
-function odpVerifyDebugLog(location, message, data, hypothesisId) {
-  fetch("http://127.0.0.1:7870/ingest/2f5a31df-775f-46ef-a661-30ac4fb319a1", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c94472" },
-    body: JSON.stringify({
-      sessionId: "c94472",
-      location,
-      message,
-      data: data || {},
-      timestamp: Date.now(),
-      hypothesisId,
-      runId: "pre-fix",
-    }),
-  }).catch(() => {});
-}
-// #endregion
 
 /** Multiline QR (ODP share): use first line that parses as Passport ID / profile ID / URL. */
 function pickVerifiableLine(text) {
@@ -1639,14 +1600,6 @@ async function verify() {
   const el    = document.getElementById("result");
   const token = parseVerifyToken(raw);
 
-  // #region agent log
-  odpVerifyDebugLog("verify.html:verify", "parse input", {
-    inputLen: String(raw ?? "").length,
-    looksEth: looksLikeEthAddressLoose(raw),
-    tokenKind: token ? token.kind : null,
-    registryContract: NET && NET.contract ? String(NET.contract).slice(0, 10) + "…" : "",
-  }, token ? "C" : looksLikeEthAddressLoose(raw) ? "A" : "E");
-  // #endregion
 
   if (!token) {
     el.innerHTML = `<div class="err-box">${esc(verifyBadTokenMessage(raw))}</div>`;
@@ -1679,30 +1632,11 @@ async function verify() {
     let readContract = null;
     for (const c of verifyReadContractsOrdered()) {
       try {
-        // #region agent log
-        odpVerifyDebugLog("verify.html:verify", "try read contract", {
-          humanId,
-          contract: c.address,
-          generation: odpContractGeneration,
-          hasGetPassport: typeof c.getPassport === "function",
-          hasSplitHeader: typeof c.getPassportHeader === "function",
-        }, "C");
-        // #endregion
         res = await fetchResolvedPassport(c, humanId);
         readContract = c;
         break;
       } catch (e) {
         const m = String(e && (e.reason || e.message) || "");
-        // #region agent log
-        odpVerifyDebugLog("verify.html:verify", "read contract failed", {
-          humanId,
-          contract: c.address,
-          code: e && e.code ? String(e.code) : "",
-          reason: e && e.reason ? String(e.reason) : "",
-          message: m.slice(0, 180),
-          data: e && e.data ? String(e.data).slice(0, 66) : "",
-        }, "C");
-        // #endregion
         if (m.includes("Passport not found")) {
           continue;
         }
@@ -1710,23 +1644,9 @@ async function verify() {
       }
     }
     if (!res || !readContract) {
-      // #region agent log
-      odpVerifyDebugLog("verify.html:verify", "registry miss", {
-        humanId,
-        generation: odpContractGeneration,
-        registryContract: NET && NET.contract ? NET.contract : "",
-        contractsTried: verifyReadContractsOrdered().map((c) => c && c.address).filter(Boolean).length,
-      }, "B");
-      // #endregion
       renderInvalid(humanId);
       return;
     }
-    // #region agent log
-    odpVerifyDebugLog("verify.html:verify", "registry hit", {
-      humanId,
-      contract: readContract.address,
-    }, "B");
-    // #endregion
     const resolvedOn = readContract.address;
     const rec = res.passport;
 
