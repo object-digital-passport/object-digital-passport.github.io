@@ -31,7 +31,6 @@
 <script src="js/odp-theme.js?v=0.3.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" integrity="sha384-Htz1SE4Sl5aitpvFgr2j0sfsGUIuSXI6t8hEyrlQ93zflEF3a29bH2AvkUROUw7J" crossorigin="anonymous"></script>
 <script src="backend/js/odp-contract.js?v=0.5.1"></script>
-<script src="js/odp-android-companion.js?v=1"></script>
 <script src="js/odp-date-format.js?v=1"></script>
 <script>window.ODP_I18N_VERSION="20260523";</script>
 <script src="js/odp-i18n.js?v=17"></script>
@@ -534,73 +533,6 @@ function odpVerifyAbsoluteUrl(humanId) {
   return new URL(rel, window.location.href).href;
 }
 
-async function verifyCopyGuideValue(value, statusId, okMessage) {
-  const statusEl = statusId ? document.getElementById(statusId) : null;
-  if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
-    if (statusEl) statusEl.textContent = t("verify.detail.nfcClipboardUnavailable");
-    return;
-  }
-  try {
-    await navigator.clipboard.writeText(String(value || ""));
-    if (statusEl) statusEl.textContent = String(okMessage || "");
-  } catch (_) {
-    if (statusEl) statusEl.textContent = t("verify.detail.nfcCopyFailed");
-  }
-}
-
-function buildVerifyAndroidHandoff(humanId, verifyUrl, ndppCommitmentHash, chipKey, dataHash, nfcModel, nfcUid) {
-  if (!humanId || typeof odpBuildAndroidCompanionHandoff !== "function") return null;
-  const chipBindingProfileId = String(chipKey || "").trim() &&
-    typeof odpAndroidCompanionPilotChipBindingProfileIdForNfcModel === "function"
-      ? odpAndroidCompanionPilotChipBindingProfileIdForNfcModel(nfcModel, chipKey)
-      : "";
-  return {
-    source: "verify",
-    passportId: String(humanId || "").trim(),
-    verifyUrl: String(verifyUrl || "").trim(),
-    ndppCommitmentHash: String(ndppCommitmentHash || "").trim(),
-    nfcPublicKey: String(chipKey || "").trim(),
-    nfcUid: String(nfcUid || "").trim(),
-    nfcModel: String(nfcModel || "").trim(),
-    dataHash: String(dataHash || "").trim(),
-    chipBindingProfileId: chipBindingProfileId,
-    initialStep: "ready-to-scan",
-  };
-}
-
-async function verifyUseAndroidHandoff(humanId, verifyUrl, ndppCommitmentHash, chipKey, dataHash, nfcModel, nfcUid, statusId, mode) {
-  const statusEl = statusId ? document.getElementById(statusId) : null;
-  const fields = buildVerifyAndroidHandoff(humanId, verifyUrl, ndppCommitmentHash, chipKey, dataHash, nfcModel, nfcUid);
-  if (!fields || typeof odpAndroidCompanionHandoffJson !== "function") {
-    if (statusEl) statusEl.textContent = t("verify.detail.nfcCopyFailed");
-    return;
-  }
-  const json = odpAndroidCompanionHandoffJson(fields);
-  if (mode === "open") {
-    window.location.href = odpAndroidCompanionHandoffDeepLink(fields);
-    return;
-  }
-  try {
-    if (mode === "share" && navigator.share) {
-      await navigator.share({
-        title: `ODP Android handoff ${fields.passportId || ""}`.trim(),
-        text: json,
-      });
-      if (statusEl) statusEl.textContent = t("verify.detail.nfcCopiedHandoff");
-      return;
-    }
-    if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
-      if (statusEl) statusEl.textContent = t("verify.detail.nfcClipboardUnavailable");
-      return;
-    }
-    await navigator.clipboard.writeText(json);
-    if (statusEl) statusEl.textContent = t("verify.detail.nfcCopiedHandoff");
-  } catch (e) {
-    if (e && e.name === "AbortError") return;
-    if (statusEl) statusEl.textContent = t("verify.detail.nfcCopyFailed");
-  }
-}
-
 function renderVerifyTrustLayersGuide(hasNFC, hasNdppAnchor) {
   const layer = (nameKey, webKey, chipKey, first) =>
     `<div style="margin-top:${first ? "4" : "12"}px;padding-top:${first ? "0" : "12"}px;${first ? "" : "border-top:1px solid var(--border)"}">
@@ -616,77 +548,11 @@ function renderVerifyTrustLayersGuide(hasNFC, hasNdppAnchor) {
       ${layer("trustLayer2Name", "trustLayer2Web", "trustLayer2Chip", false)}
       ${layer("trustLayer3Name", "trustLayer3Web", "trustLayer3Chip", false)}
       ${
-        hasNFC
-          ? `<p class="fhint" style="margin:12px 0 0;font-size:12px">${esc(t("verify.detail.trustLayersAndroidLead"))}</p>`
-          : ""
-      }
-      ${
         hasNdppAnchor && hasNFC
           ? `<p class="fhint" style="margin:8px 0 0;font-size:11px;opacity:0.9">${esc(t("verify.detail.ndppSourceChipHint"))}</p>`
           : ""
       }
     </div>`;
-}
-
-function renderVerifyAndroidNfcGuide(humanId, rec, passport) {
-  const verifyUrl = odpVerifyAbsoluteUrl(humanId);
-  const chipKey = bytesToHex(rec && rec.nfcPublicKey ? rec.nfcPublicKey : "");
-  const ndppCommitmentHash = odpBytes32HexLower(rec && rec.ndppCommitmentHash);
-  const dataHash = odpBytes32HexLower(rec && rec.dataHash);
-  const nfcModel = rec && rec.nfcModel ? String(rec.nfcModel).trim() : "";
-  const sealFromPassport = typeof odpAndroidCompanionPassportNfcSeal === "function"
-    ? odpAndroidCompanionPassportNfcSeal(passport)
-    : { uid: "", model: "" };
-  const nfcUid = sealFromPassport.uid || "";
-  const chipBindingProfileId = chipKey &&
-    typeof odpAndroidCompanionPilotChipBindingProfileIdForNfcModel === "function"
-      ? odpAndroidCompanionPilotChipBindingProfileIdForNfcModel(nfcModel, chipKey)
-      : "";
-  const ndppUrl = rec && rec.ndppCommitmentUri ? String(rec.ndppCommitmentUri).trim() : "";
-  const statusId = `nfcGuideStatus-${safeDomId(humanId)}`;
-  return `
-    <div class="section-title">${esc(t("verify.detail.nfcSectionTitle"))}</div>
-    <div class="vrow">
-      <span class="vbadge warn">${esc(t("verify.detail.nfcManualBadge"))}</span>
-      <div class="vinfo">
-        <div class="vinfo-label">${esc(t("verify.detail.nfcAppTitle"))}</div>
-        <div class="vinfo-val">${esc(t("verify.detail.nfcAppBody"))}</div>
-      </div>
-    </div>
-    <div class="vrow">
-      <span class="vbadge na">${esc(t("verify.detail.nfcTagWriterBadge"))}</span>
-      <div class="vinfo">
-        <div class="vinfo-label">${esc(t("verify.detail.nfcTagWriterTitle"))}</div>
-        <div class="vinfo-val">${esc(t("verify.detail.nfcTagWriterBody"))}</div>
-      </div>
-    </div>
-    <div class="vrow">
-      <span class="vbadge ok">${esc(t("verify.detail.nfcTrustLinkBadge"))}</span>
-      <div class="vinfo">
-        <div class="vinfo-label">${esc(t("verify.detail.nfcTrustLinkTitle"))}</div>
-        <div class="vinfo-val">${esc(t("verify.detail.nfcTrustLinkBody"))}</div>
-      </div>
-    </div>
-    ${chipKey ? `
-    <div class="vrow">
-      <span class="vbadge ok">${esc(t("verify.detail.nfcBindingBadge"))}</span>
-      <div class="vinfo">
-        <div class="vinfo-label">${esc(t("verify.detail.nfcBindingTitle"))}</div>
-        <div class="vinfo-val">${esc(t("verify.detail.nfcBindingBody"))}</div>
-      </div>
-    </div>` : ""}
-    <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
-      <button type="button" class="btn btn-sec" onclick='void verifyCopyGuideValue(${escAttr(JSON.stringify(String(humanId || "")))}, ${escAttr(JSON.stringify(statusId))}, ${escAttr(JSON.stringify(t("verify.detail.nfcCopiedPassportId")))})'>${esc(t("verify.detail.nfcCopyPassportId"))}</button>
-      <button type="button" class="btn btn-sec" onclick='void verifyCopyGuideValue(${escAttr(JSON.stringify(verifyUrl))}, ${escAttr(JSON.stringify(statusId))}, ${escAttr(JSON.stringify(t("verify.detail.nfcCopiedVerifyLink")))})'>${esc(t("verify.detail.nfcCopyVerifyLink"))}</button>
-      <button type="button" class="btn btn-sec" onclick='void verifyCopyGuideValue(${escAttr(JSON.stringify(chipKey))}, ${escAttr(JSON.stringify(statusId))}, ${escAttr(JSON.stringify(t("verify.detail.nfcCopiedChipKey")))})'>${esc(t("verify.detail.nfcCopyChipKey"))}</button>
-      <button type="button" class="btn btn-sec" onclick='void verifyUseAndroidHandoff(${escAttr(JSON.stringify(String(humanId || "")))}, ${escAttr(JSON.stringify(verifyUrl))}, ${escAttr(JSON.stringify(ndppCommitmentHash))}, ${escAttr(JSON.stringify(chipKey))}, ${escAttr(JSON.stringify(dataHash))}, ${escAttr(JSON.stringify(nfcModel))}, ${escAttr(JSON.stringify(nfcUid))}, ${escAttr(JSON.stringify(statusId))}, "copy")'>${esc(t("verify.detail.nfcCopyHandoff"))}</button>
-      <button type="button" class="btn btn-sec" onclick='void verifyUseAndroidHandoff(${escAttr(JSON.stringify(String(humanId || "")))}, ${escAttr(JSON.stringify(verifyUrl))}, ${escAttr(JSON.stringify(ndppCommitmentHash))}, ${escAttr(JSON.stringify(chipKey))}, ${escAttr(JSON.stringify(dataHash))}, ${escAttr(JSON.stringify(nfcModel))}, ${escAttr(JSON.stringify(nfcUid))}, ${escAttr(JSON.stringify(statusId))}, "share")'>${esc(t("verify.detail.nfcShareHandoff"))}</button>
-      <button type="button" class="btn btn-ghost" onclick='void verifyUseAndroidHandoff(${escAttr(JSON.stringify(String(humanId || "")))}, ${escAttr(JSON.stringify(verifyUrl))}, ${escAttr(JSON.stringify(ndppCommitmentHash))}, ${escAttr(JSON.stringify(chipKey))}, ${escAttr(JSON.stringify(dataHash))}, ${escAttr(JSON.stringify(nfcModel))}, ${escAttr(JSON.stringify(nfcUid))}, ${escAttr(JSON.stringify(statusId))}, "open")'>${esc(t("verify.detail.nfcOpenCompanion"))}</button>
-      <button type="button" class="btn btn-ghost" onclick='window.open(${escAttr(JSON.stringify(verifyUrl))}, "_blank", "noopener")'>${esc(t("verify.detail.nfcOpenVerifyLink"))}</button>
-      ${ndppUrl ? `<a class="btn btn-ghost" href="${esc(ndppUrl)}" target="_blank" rel="noopener noreferrer">${esc(t("verify.detail.nfcOpenNdppLink"))}</a>` : ""}
-    </div>
-    <div id="${esc(statusId)}" class="fhint" style="margin-top:8px;min-height:1.25em"></div>
-  `;
 }
 
 /** @returns {{ fileHash: string, imageHash: string, imageHash2: string, imageHash3: string }} */
@@ -2898,9 +2764,6 @@ function render(humanId, rec, creator, passport, proofs, dataStatus, resolvedOnA
           <span style="opacity:0.6">${esc(t("verify.detail.odpassSidecarPaths"))}</span></p>
         </div>
         <div id="imgResult3"></div>` : ""}
-
-        <!-- NFC hint -->
-        ${hasNFC ? renderVerifyAndroidNfcGuide(humanId, rec, passport) : ""}
 
         <!-- Seal number hint -->
         ${!isDigital && (rec.sealType === 2 || rec.sealType === 3) && passport?.seal?.numbered ? `
