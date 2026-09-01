@@ -19,7 +19,7 @@ Anything this site does that the specification does not require is a choice made
 |------|------|
 | [`frontend/`](frontend/) | HTML pages, CSS, UI scripts, interface strings under `localization/` |
 | [`backend/`](backend/) | Browser-side registry client: ABI helpers, WalletConnect bundle, `registry-config.json`. There is no server — "backend" here means the code that talks to the chain from the page |
-| [`docs/`](docs/) | How to use the site, and the Android companion integration |
+| [`docs/`](docs/) | How to use the site |
 | [`frontend/e2e/`](frontend/e2e/) | Playwright smoke tests |
 
 ## Run it locally

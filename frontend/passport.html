@@ -16,7 +16,6 @@
 <script src="js/odp-theme.js?v=0.3.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" integrity="sha384-Htz1SE4Sl5aitpvFgr2j0sfsGUIuSXI6t8hEyrlQ93zflEF3a29bH2AvkUROUw7J" crossorigin="anonymous"></script>
 <script src="backend/js/odp-contract.js?v=0.5.0"></script>
-<script src="js/odp-android-companion.js?v=1"></script>
 <script src="js/odp-date-format.js?v=1"></script>
 <script>window.ODP_I18N_VERSION="20260522";</script>
 <script src="js/odp-i18n.js?v=16"></script>
@@ -1169,157 +1168,9 @@ function passportManageIsZeroBytes32(v) {
   return passportManageBytes32Hex(v) === ZERO32;
 }
 
-function passportManageAndroidVerifyUrl() {
+function passportManageVerifyUrl() {
   if (!passportManageState || !passportManageState.hid) return "";
   return getVerifyAbsoluteUrl(passportManageState.hid);
-}
-
-function buildPassportManageAndroidHandoff() {
-  if (!passportManageState || !passportManageState.hid || !passportManageState.record) return null;
-  const record = passportManageState.record || {};
-  const draft = passportManageState.offlineDraft || null;
-  const nfcModel = String(record.nfcModel || "").trim();
-  const nfcPublicKeyHex = passportManageBytesHex(record.nfcPublicKey);
-  const hasWritePayload = !!(draft && draft.payloadBase64);
-  if (hasWritePayload && /ntag424/i.test(nfcModel) && !nfcPublicKeyHex) {
-    throw new Error("Android NFC write needs the NTAG424 EV2 key (nfcPublicKey), but this passport record does not expose it.");
-  }
-  const chipBindingProfileId = nfcPublicKeyHex &&
-    typeof odpAndroidCompanionPilotChipBindingProfileIdForNfcModel === "function"
-      ? odpAndroidCompanionPilotChipBindingProfileIdForNfcModel(nfcModel, nfcPublicKeyHex)
-      : "";
-  return {
-    source: "passport-manage",
-    passportId: passportManageState.hid,
-    verifyUrl: passportManageAndroidVerifyUrl(),
-    ndppCommitmentHash: passportManageBytes32Hex(record.ndppCommitmentHash),
-    nfcPublicKey: passportManageBytesHex(record.nfcPublicKey),
-    nfcModel: nfcModel,
-    dataHash: passportManageBytes32Hex(record.dataHash),
-    chipBindingProfileId,
-    initialStep: hasWritePayload ? "advanced-operator" : "ready-to-scan",
-    operatorFlowSuggested: hasWritePayload,
-    offlinePayloadBase64: hasWritePayload ? draft.payloadBase64 : "",
-    lockCarrierAfterWrite: hasWritePayload,
-  };
-}
-
-async function passportManageUseAndroidHandoff(mode) {
-  const statusEl = document.getElementById("passportManageOfflineStatus");
-  let fields = null;
-  try {
-    fields = buildPassportManageAndroidHandoff();
-  } catch (e) {
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(e && e.message ? e.message : t("passport.manage.androidCopyFailed"))}</div>`;
-    return;
-  }
-  if (!fields || typeof odpAndroidCompanionHandoffJson !== "function") {
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(t("passport.manage.androidCopyFailed"))}</div>`;
-    return;
-  }
-  const json = odpAndroidCompanionHandoffJson(fields);
-  if (mode === "open") {
-    window.location.href = odpAndroidCompanionHandoffDeepLink(fields);
-    return;
-  }
-  try {
-    if (mode === "share" && navigator.share) {
-      await navigator.share({
-        title: `ODP Android handoff ${fields.passportId || ""}`.trim(),
-        text: json,
-      });
-      if (statusEl) statusEl.innerHTML = `<div class="info n">${esc(t("passport.manage.androidCopiedHandoff"))}</div>`;
-      return;
-    }
-    await writeTextToClipboardSafe(json);
-    if (statusEl) statusEl.innerHTML = `<div class="info n">${esc(t("passport.manage.androidCopiedHandoff"))}</div>`;
-  } catch (e) {
-    if (e && e.name === "AbortError") return;
-    const msg = e && e.message === "clipboard_unavailable"
-      ? t("passport.manage.androidClipboardUnavailable")
-      : t("passport.manage.androidCopyFailed");
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(msg)}</div>`;
-  }
-}
-
-async function passportManageCopyAndroidValue(kind) {
-  const statusEl = document.getElementById("passportManageOfflineStatus");
-  const record = passportManageState && passportManageState.record ? passportManageState.record : {};
-  let value = "";
-  let okText = "";
-  if (kind === "passportId") {
-    value = String((passportManageState && passportManageState.hid) || "");
-    okText = t("passport.manage.androidCopiedPassportId");
-  } else if (kind === "verifyUrl") {
-    value = passportManageAndroidVerifyUrl();
-    okText = t("passport.manage.androidCopiedVerifyUrl");
-  } else if (kind === "chipKey") {
-    value = passportManageBytesHex(record.nfcPublicKey);
-    okText = t("passport.manage.androidCopiedChipKey");
-  }
-  if (!value) {
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(t("passport.manage.androidCopyFailed"))}</div>`;
-    return;
-  }
-  try {
-    await writeTextToClipboardSafe(value);
-    if (statusEl) statusEl.innerHTML = `<div class="info n">${esc(okText)}</div>`;
-  } catch (e) {
-    const msg = e && e.message === "clipboard_unavailable"
-      ? t("passport.manage.androidClipboardUnavailable")
-      : t("passport.manage.androidCopyFailed");
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(msg)}</div>`;
-  }
-}
-
-function openPassportManageAndroidVerifyUrl() {
-  const url = passportManageAndroidVerifyUrl();
-  if (!url) return;
-  window.open(url, "_blank", "noopener,noreferrer");
-}
-
-function renderPassportManageAndroidGuide() {
-  if (!passportManageState || !passportManageState.hid) return "";
-  const record = passportManageState.record || {};
-  const hasNfc = record.sealType === 1 || record.sealType === 3;
-  if (!hasNfc) return "";
-  const verifyUrl = passportManageAndroidVerifyUrl();
-  const chipKey = hasNfc ? passportManageBytesHex(record.nfcPublicKey) : "";
-  const chipKeyShort = chipKey ? (chipKey.length > 42 ? chipKey.slice(0, 42) + "…" : chipKey) : "";
-  const nfcModel = hasNfc ? String(record.nfcModel || "") : "";
-  const chipBindingProfileId = chipKey &&
-    typeof odpAndroidCompanionPilotChipBindingProfileIdForNfcModel === "function"
-      ? odpAndroidCompanionPilotChipBindingProfileIdForNfcModel(nfcModel, chipKey)
-      : "";
-  const draft = passportManageState.offlineDraft || null;
-  const hasPayloadDraft = !!(draft && draft.payloadBase64);
-  return `
-    <div class="section-label" style="margin-top:14px">${esc(t("passport.manage.androidSection"))}</div>
-    <p class="fhint" style="margin:0 0 10px;line-height:1.55">${esc(t("passport.manage.androidLead"))}</p>
-    <div class="info neutral" style="display:block;padding:12px 14px;border-radius:8px;text-align:left;font-size:12px;line-height:1.6">
-      <div><strong>TagWriter:</strong> ${esc(t("passport.manage.androidTagWriterLead"))}</div>
-      <div style="margin-top:6px"><strong>Tag TrustLink:</strong> ${esc(t("passport.manage.androidTrustLinkLead"))}</div>
-      ${nfcModel ? `<div style="margin-top:6px"><strong>${esc(t("passport.manage.androidNfcModelLabel"))}:</strong> ${esc(nfcModel)}</div>` : ""}
-      ${chipKeyShort ? `<div style="margin-top:6px"><strong>${esc(t("passport.manage.androidNfcKeyLabel"))}:</strong> <span class="mono">${esc(chipKeyShort)}</span></div>` : ""}
-      <div style="margin-top:6px"><strong>Verify URL:</strong> <span class="mono">${esc(verifyUrl)}</span></div>
-      <div style="margin-top:6px"><strong>Android companion:</strong> guided handoff with Passport ID, Verify URL, NDPP hash, chip key, data hash${chipBindingProfileId ? ", the current pilot mirror-profile proof mode" : ""}${hasPayloadDraft ? ", and the current odp:off payload draft in the operator route" : ""}.</div>
-      <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
-        <button type="button" class="btn btn-sec" onclick="void passportManageCopyAndroidValue('passportId')">${esc(t("passport.manage.androidCopyPassportId"))}</button>
-        <button type="button" class="btn btn-sec" onclick="void passportManageCopyAndroidValue('verifyUrl')">${esc(t("passport.manage.androidCopyVerifyUrl"))}</button>
-        ${chipKey ? `<button type="button" class="btn btn-sec" onclick="void passportManageCopyAndroidValue('chipKey')">${esc(t("passport.manage.androidCopyChipKey"))}</button>` : ""}
-        <button type="button" class="btn btn-sec" onclick="void passportManageUseAndroidHandoff('copy')">${esc(t("passport.manage.androidCopyHandoff"))}</button>
-        <button type="button" class="btn btn-sec" onclick="void passportManageUseAndroidHandoff('share')">${esc(t("passport.manage.androidShareHandoff"))}</button>
-        <button type="button" class="btn btn-ghost" onclick="void passportManageUseAndroidHandoff('open')">${esc(t("passport.manage.androidOpenCompanion"))}</button>
-        <button type="button" class="btn btn-ghost" onclick="openPassportManageAndroidVerifyUrl()">${esc(t("passport.manage.androidOpenVerifyUrl"))}</button>
-      </div>
-    </div>
-  `;
-}
-
-function refreshPassportManageAndroidGuide() {
-  const el = document.getElementById("passportManageAndroidGuide");
-  if (!el) return;
-  el.innerHTML = renderPassportManageAndroidGuide();
 }
 
 function passportManageSelectedOfflineCarrierMode() {
@@ -1757,7 +1608,6 @@ async function refreshPassportManageOffline() {
   const dlNdef = document.getElementById("passportManageOfflineDownloadNdef");
   const anchorBtn = document.getElementById("passportManageOfflineAnchor");
   if (!out || !passportManageState || !passportManageState.record || typeof odpOfflineEncode !== "function") return;
-  refreshPassportManageAndroidGuide();
   if (statusEl) statusEl.innerHTML = "";
   if (dlCbor) dlCbor.disabled = true;
   if (dlNdef) dlNdef.disabled = true;
@@ -1765,7 +1615,7 @@ async function refreshPassportManageOffline() {
   try {
     const includeState = !!(document.getElementById("passportManageOfflineIncludeState") || {}).checked;
     const carrierMode = passportManageSelectedOfflineCarrierMode();
-    const verifyUrl = passportManageAndroidVerifyUrl();
+    const verifyUrl = passportManageVerifyUrl();
     const built = odpOfflineEncode(passportManageState.record, {
       includeState,
       passportId: passportManageState.hid,
@@ -1842,7 +1692,6 @@ async function refreshPassportManageOffline() {
     passportManageState.offlineDraft = null;
     passportManageState.offlineHash = "";
     out.innerHTML = "";
-    refreshPassportManageAndroidGuide();
     if (statusEl) statusEl.innerHTML = `<div class="info e">${esc(e && e.message ? e.message : String(e))}</div>`;
   }
 }
@@ -3075,43 +2924,9 @@ function renderForm() {
             <div class="acc-body">
               <p class="fhint" style="margin:0 0 12px">${esc(t("passport.form.nfcLead"))}</p>
               <div id="nfcIssuerFlowBlock" style="display:block;margin-bottom:14px;line-height:1.55">
-                <p class="fhint" style="margin:0 0 12px">${esc(t("passport.form.nfcIssuerPixelHint"))}</p>
-
-                <div class="info neutral" style="padding:12px 14px;border-radius:8px;margin-bottom:10px">
-                  <div style="font-weight:600;margin-bottom:4px">${esc(t("passport.form.nfcIssuerStepATitle"))}</div>
-                  <p class="fhint" style="margin:0 0 10px">${esc(t("passport.form.nfcIssuerStepABody"))}</p>
-                  <div class="field" style="margin-bottom:8px">
-                    <label>${esc(t("passport.form.nfcIssuerChipKeyLabel"))}<span class="req">*</span></label>
-                    <input type="text" id="f_nkey_provision" placeholder="${esc(t("passport.form.phChipSecretKey"))}" oninput="passportOnProvisionKeyInput()" autocomplete="off">
-                    <p class="fhint" style="margin:6px 0 0">${esc(t("passport.form.nfcIssuerChipKeyHint"))}</p>
-                  </div>
-                  <div class="field" style="margin-bottom:8px">
-                    <label>${esc(t("passport.form.nfcIssuerProvisionPasteLabel"))}</label>
-                    <textarea id="f_chip_provision_import" rows="3" placeholder="${esc(t("passport.form.nfcIssuerProvisionPastePh"))}" style="width:100%;font-family:var(--mono);font-size:11px"></textarea>
-                  </div>
-                  <button type="button" class="btn btn-sec" onclick="void importChipProvisionFromTextarea()">${esc(t("passport.form.nfcIssuerProvisionImportBtn"))}</button>
-                  <div id="nfcProvisionStatus" class="fhint" style="margin-top:8px;min-height:1.1em"></div>
-                </div>
-
-                <div class="info neutral" style="padding:12px 14px;border-radius:8px;margin-bottom:10px">
-                  <div style="font-weight:600;margin-bottom:4px">${esc(t("passport.form.nfcIssuerStepBTitle"))}</div>
-                  <p class="fhint" style="margin:0 0 10px">${esc(t("passport.form.nfcIssuerStepBBody"))}</p>
-                  <div class="btn-row" style="flex-wrap:wrap;margin-bottom:8px">
-                    <button type="button" class="btn btn-sec" onclick="void openIssuerChipCompanionScan()">${esc(t("passport.form.nfcIssuerOpenCompanion"))}</button>
-                    <button type="button" class="btn btn-ghost" onclick="void copyIssuerChipCompanionHandoff()">${esc(t("passport.form.nfcIssuerCopyHandoff"))}</button>
-                  </div>
-                  <div class="field" style="margin-bottom:8px">
-                    <label>${esc(t("passport.form.nfcIssuerScanPasteLabel"))}</label>
-                    <textarea id="f_chip_setup_import" rows="4" placeholder="${esc(t("passport.form.nfcIssuerScanPastePh"))}" style="width:100%;font-family:var(--mono);font-size:11px"></textarea>
-                    <p class="fhint" style="margin:6px 0 0">${esc(t("passport.form.nfcIssuerScanPasteHint"))}</p>
-                  </div>
-                  <button type="button" class="btn btn-sec" onclick="void importIssuerChipSetupFromTextarea()">${esc(t("passport.form.nfcIssuerScanImportBtn"))}</button>
-                  <div id="nfcChipSetupStatus" class="fhint" style="margin-top:8px;min-height:1.1em"></div>
-                </div>
-
-                <div class="info neutral" style="padding:12px 14px;border-radius:8px">
-                  <div style="font-weight:600;margin-bottom:4px">${esc(t("passport.form.nfcIssuerStepCTitle"))}</div>
-                  <p class="fhint" style="margin:0">${esc(t("passport.form.nfcIssuerStepCBody"))}</p>
+                <div class="info warn" style="padding:12px 14px;border-radius:8px">
+                  <div style="font-weight:600;margin-bottom:4px">${esc(t("passport.form.nfcIssuerNoWebPathTitle"))}</div>
+                  <p class="fhint" style="margin:0">${esc(t("passport.form.nfcIssuerNoWebPathBody"))}</p>
                 </div>
               </div>
               <div class="field"><label>${esc(t("passport.form.labelNfcModel"))}<span class="req">*</span></label>
@@ -3361,7 +3176,6 @@ function renderForm() {
               <button type="button" class="btn btn-sec" id="passportManageOfflineDownloadNdef" onclick="void downloadPassportManageOffline('ndef')" disabled>${esc(t("passport.manage.offlineDownloadNdef"))}</button>
               <button type="button" class="btn" id="passportManageOfflineAnchor" onclick="void submitPassportManageNdpp()" disabled>${esc(t("passport.manage.offlineAnchorBtn"))}</button>
             </div>
-            <div id="passportManageAndroidGuide"></div>
           </div>
 
           <div id="passportManageRevokeSection" style="display:none;margin-top:14px">
@@ -3422,7 +3236,6 @@ function renderForm() {
       activatePassportTool("mint", false, false);
     }
     loadPassportFormDraftFromStorage();
-    tryImportIssuerChipSetupFromUrl();
     refreshPassportChipSetupUi();
     bindPassportFormDraftHooks();
   });
@@ -3541,205 +3354,12 @@ function setSeal(n) {
   schedulePassportDraftSave();
 }
 
-function passportChipSetupStatusEl() {
-  return document.getElementById("nfcChipSetupStatus");
-}
-
 function refreshPassportChipSetupUi() {
-  const statusEl = passportChipSetupStatusEl();
   const needsNfc = sealType === 1 || sealType === 3;
   const block = document.getElementById("nfcIssuerFlowBlock");
   const autoBlock = document.getElementById("nfcAutoFilledBlock");
   if (block) block.style.display = needsNfc ? "" : "none";
   if (autoBlock) autoBlock.style.display = needsNfc && passportChipSetup.confirmed ? "block" : "none";
-  if (!statusEl || !needsNfc) return;
-  if (passportChipSetup.confirmed) {
-    statusEl.innerHTML = `<div class="info n">${esc(t("passport.form.nfcIssuerConfirmed").replace("{at}", esc(passportChipSetup.scannedAt || "")))}</div>`;
-  } else {
-    statusEl.textContent = t("passport.form.nfcIssuerPending");
-  }
-}
-
-function passportProvisionStatusEl() {
-  return document.getElementById("nfcProvisionStatus");
-}
-
-function applyChipProvision(parsed) {
-  if (!parsed || !parsed.ok || !parsed.chip) return false;
-  const chip = parsed.chip;
-  const provEl = document.getElementById("f_nkey_provision");
-  const keyEl = document.getElementById("f_nkey");
-  const uidEl = document.getElementById("f_nuid");
-  const modelEl = document.getElementById("f_nmod");
-  const keyHex = String(chip.publicKey || "").replace(/^0x/i, "");
-  if (provEl) provEl.value = keyHex;
-  if (keyEl && !passportChipSetup.confirmed) keyEl.value = keyHex;
-  if (uidEl && chip.uid && !passportChipSetup.confirmed) uidEl.value = String(chip.uid).replace(/^0x/i, "");
-  if (modelEl && chip.model) modelEl.value = chip.model;
-  passportOnProvisionKeyInput();
-  schedulePassportDraftSave();
-  return true;
-}
-
-function importChipProvisionFromTextarea() {
-  const statusEl = passportProvisionStatusEl();
-  const ta = document.getElementById("f_chip_provision_import");
-  const raw = ta ? String(ta.value || "") : "";
-  if (typeof odpParseChipProvisionText !== "function") {
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(t("passport.form.nfcIssuerCompanionMissing"))}</div>`;
-    return;
-  }
-  const parsed = odpParseChipProvisionText(raw);
-  if (!parsed.ok) {
-    const errKey = {
-      empty: "nfcIssuerProvisionImportEmpty",
-      invalid_json: "nfcIssuerProvisionImportBadJson",
-      wrong_type: "nfcIssuerProvisionImportWrongType",
-      bad_key_length: "nfcIssuerProvisionImportBadKey",
-    }[parsed.error] || "nfcIssuerProvisionImportFailed";
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(t("passport.form." + errKey))}</div>`;
-    return;
-  }
-  if (applyChipProvision(parsed) && statusEl) {
-    statusEl.innerHTML = `<div class="info n">${esc(t("passport.form.nfcIssuerProvisionImportOk"))}</div>`;
-  }
-}
-
-function passportOnProvisionKeyInput() {
-  const prov = document.getElementById("f_nkey_provision");
-  const keyEl = document.getElementById("f_nkey");
-  if (prov && keyEl && !passportChipSetup.confirmed) {
-    keyEl.value = prov.value;
-  }
-  schedulePassportDraftSave();
-}
-
-function issuerChipCompanionFields() {
-  const modelEl = document.getElementById("f_nmod");
-  const prov = document.getElementById("f_nkey_provision");
-  const model = modelEl ? String(modelEl.value || "").trim() : "NTAG424DNA_TAGTAMPER";
-  const key = prov ? String(prov.value || "").trim() : "";
-  if (typeof odpBuildIssuerChipSetupCompanionFields === "function") {
-    return odpBuildIssuerChipSetupCompanionFields(model, key);
-  }
-  return null;
-}
-
-function decodeIssuerChipSetupParam(encoded) {
-  const trimmed = String(encoded || "").trim();
-  if (!trimmed) return "";
-  let uriDecoded = trimmed;
-  try { uriDecoded = decodeURIComponent(trimmed); } catch (e) { /* keep trimmed */ }
-  if (uriDecoded.trim().startsWith("{")) return uriDecoded.trim();
-  if (typeof odpDecodeBase64UrlUtf8 === "function") {
-    try {
-      const fromB64 = odpDecodeBase64UrlUtf8(uriDecoded);
-      if (fromB64 && fromB64.trim().startsWith("{")) return fromB64.trim();
-    } catch (e) { /* fall through */ }
-  }
-  return uriDecoded.trim();
-}
-
-function openIssuerChipCompanionScan() {
-  const statusEl = passportChipSetupStatusEl();
-  const fields = issuerChipCompanionFields();
-  if (!fields || !String(fields.nfcPublicKey || "").trim()) {
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(t("passport.form.nfcIssuerNeedKey"))}</div>`;
-    return;
-  }
-  flushPassportDraftSave();
-  const mintUrl = typeof odpPassportIssuerMintPageUrl === "function" ? odpPassportIssuerMintPageUrl() : "";
-  if (typeof odpAndroidCompanionIssuerChipSetupDeepLink === "function") {
-    window.location.href = odpAndroidCompanionIssuerChipSetupDeepLink(fields.nfcModel, fields.nfcPublicKey, mintUrl);
-    return;
-  }
-  if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(t("passport.form.nfcIssuerCompanionMissing"))}</div>`;
-}
-
-async function copyIssuerChipCompanionHandoff() {
-  const statusEl = passportChipSetupStatusEl();
-  const fields = issuerChipCompanionFields();
-  if (!fields || typeof odpAndroidCompanionHandoffJson !== "function") {
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(t("passport.form.nfcIssuerCompanionMissing"))}</div>`;
-    return;
-  }
-  if (!String(fields.nfcPublicKey || "").trim()) {
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(t("passport.form.nfcIssuerNeedKey"))}</div>`;
-    return;
-  }
-  try {
-    await writeTextToClipboardSafe(odpAndroidCompanionHandoffJson(fields));
-    if (statusEl) statusEl.innerHTML = `<div class="info n">${esc(t("passport.form.nfcIssuerCopiedHandoff"))}</div>`;
-  } catch (e) {
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(t("passport.form.nfcIssuerCopyFailed"))}</div>`;
-  }
-}
-
-function applyPassportChipSetup(parsed) {
-  if (!parsed || !parsed.ok || !parsed.chip) return false;
-  const chip = parsed.chip;
-  const uidEl = document.getElementById("f_nuid");
-  const keyEl = document.getElementById("f_nkey");
-  const provEl = document.getElementById("f_nkey_provision");
-  const modelEl = document.getElementById("f_nmod");
-  if (uidEl) uidEl.value = chip.uid.replace(/^0x/i, "");
-  if (keyEl) keyEl.value = chip.publicKey;
-  if (provEl) provEl.value = chip.publicKey;
-  if (modelEl && chip.model) modelEl.value = chip.model;
-  passportChipSetup = {
-    confirmed: true,
-    scannedAt: chip.scannedAt || new Date().toISOString(),
-    source: "android-companion",
-  };
-  refreshPassportChipSetupUi();
-  schedulePassportDraftSave();
-  return true;
-}
-
-function importIssuerChipSetupFromTextarea() {
-  const statusEl = passportChipSetupStatusEl();
-  const ta = document.getElementById("f_chip_setup_import");
-  const raw = ta ? String(ta.value || "") : "";
-  if (typeof odpParseIssuerChipSetupText !== "function") {
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(t("passport.form.nfcIssuerCompanionMissing"))}</div>`;
-    return;
-  }
-  const parsed = odpParseIssuerChipSetupText(raw);
-  if (!parsed.ok) {
-    const errKey = {
-      empty: "nfcIssuerImportEmpty",
-      invalid_json: "nfcIssuerImportBadJson",
-      wrong_type: "nfcIssuerImportWrongType",
-      missing_uid: "nfcIssuerImportNoUid",
-      bad_key_length: "nfcIssuerImportBadKey",
-      ev2_not_passed: "nfcIssuerImportEv2Failed",
-      tagtamper_not_intact: "nfcIssuerImportTamperOpen",
-    }[parsed.error] || "nfcIssuerImportFailed";
-    if (statusEl) statusEl.innerHTML = `<div class="info warn">${esc(t("passport.form." + errKey))}</div>`;
-    return;
-  }
-  if (applyPassportChipSetup(parsed) && statusEl) {
-    statusEl.innerHTML = `<div class="info n">${esc(t("passport.form.nfcIssuerImportOk"))}</div>`;
-  }
-}
-
-function tryImportIssuerChipSetupFromUrl() {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const encoded = params.get("chipSetup");
-    if (!encoded || typeof odpParseIssuerChipSetupText !== "function") return;
-    const parsed = odpParseIssuerChipSetupText(decodeIssuerChipSetupParam(encoded));
-    if (!parsed.ok) return;
-    if (!applyPassportChipSetup(parsed)) return;
-    const statusEl = passportChipSetupStatusEl();
-    if (statusEl) statusEl.innerHTML = `<div class="info n">${esc(t("passport.form.nfcIssuerImportOk"))}</div>`;
-    const u = new URL(window.location.href);
-    u.searchParams.delete("chipSetup");
-    history.replaceState({}, "", u.pathname + u.search + u.hash);
-    if (typeof activatePassportTool === "function") activatePassportTool("mint", false, false);
-    const nfcAcc = document.getElementById("nfcAcc");
-    if (nfcAcc) nfcAcc.classList.add("open");
-  } catch (e) {}
 }
 
 function tog(id) { document.getElementById(id).classList.toggle("open"); }
