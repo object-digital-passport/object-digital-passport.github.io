@@ -1774,30 +1774,6 @@ async function refreshPassportManageOffline() {
       carrierMode,
       verifyUrl,
     });
-    // #region agent log
-    fetch("http://127.0.0.1:7870/ingest/2f5a31df-775f-46ef-a661-30ac4fb319a1", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c94472" },
-      body: JSON.stringify({
-        sessionId: "c94472",
-        runId: "pre-fix",
-        hypothesisId: "A",
-        location: "passport.html:passportManageRefreshOfflineDraft",
-        message: "manage offline draft built",
-        data: {
-          passportId: passportManageState.hid,
-          includeState,
-          carrierMode,
-          verifyUrlChars: String(verifyUrl || "").length,
-          hostedPayloadUrlChars: String((document.getElementById("passportManageOfflineUri") || {}).value || "").length,
-          payloadBytes: built.payloadBytes ? built.payloadBytes.length : 0,
-          ndefFileBytes: built.ndefFileBytes ? built.ndefFileBytes.length : 0,
-          footprint: built.footprint || null,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
     const payloadHash = await odpOfflineSha256Hex(built.payloadBytes);
     passportManageState.offlineDraft = built;
     passportManageState.offlineHash = payloadHash;
@@ -4654,28 +4630,6 @@ async function buildPassportCardPngBlob(humanId) {
         }
       },
     });
-    // #region agent log
-    fetch("http://127.0.0.1:7870/ingest/2f5a31df-775f-46ef-a661-30ac4fb319a1", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c94472" },
-      body: JSON.stringify({
-        sessionId: "c94472",
-        location: "passport.html:buildPassportCardPngBlob",
-        message: "png export canvas",
-        data: {
-          isBlue: tok.isBlue,
-          canvasBg: null,
-          faceExport: "solid-bg2",
-          h2cRoot: h2cTarget.className || h2cTarget.tagName,
-          w: canvas.width,
-          h: canvas.height,
-        },
-        hypothesisId: "H7",
-        timestamp: Date.now(),
-        runId: "h2c-card-root",
-      }),
-    }).catch(() => {});
-    // #endregion
     const blob = await odpCanvasToPngBlobPassport(canvas);
     return { blob, filename };
   } finally {
@@ -4741,79 +4695,6 @@ function revokeShareModalPreviewUrl() {
   }
 }
 
-// #region agent log
-function _dbgLogPassportShareExportModal(phase) {
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      try {
-        const panel = document.querySelector(".share-modal-panel.share-modal-panel--export");
-        const nat = document.getElementById("shareModalNative");
-        const wrap = document.getElementById("shareModalPreviewWrap");
-        const imgEl = document.getElementById("shareModalPreviewImg");
-        if (!panel || !nat) {
-          fetch("http://127.0.0.1:7870/ingest/2f5a31df-775f-46ef-a661-30ac4fb319a1", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c94472" },
-            body: JSON.stringify({
-              sessionId: "c94472",
-              location: "passport.html:_dbgLogPassportShareExportModal",
-              message: "missing nodes",
-              data: { phase, hasPanel: !!panel, hasNat: !!nat },
-              timestamp: Date.now(),
-              runId: "post-fix",
-              hypothesisId: "H3",
-            }),
-          }).catch(() => {});
-          return;
-        }
-        const pr = panel.getBoundingClientRect();
-        const nr = nat.getBoundingClientRect();
-        const cs = getComputedStyle(nat);
-        const ws = wrap ? getComputedStyle(wrap) : null;
-        const shareBelowVisiblePanel = nr.bottom > pr.bottom + 2;
-        const data = {
-          phase,
-          panelScroll: { scrollHeight: panel.scrollHeight, clientHeight: panel.clientHeight, scrollTop: panel.scrollTop },
-          panelRect: { top: pr.top, bottom: pr.bottom, h: pr.height },
-          natRect: { top: nr.top, bottom: nr.bottom, h: nr.height },
-          shareBelowVisiblePanel,
-          natComputed: { display: cs.display, visibility: cs.visibility, opacity: cs.opacity, color: cs.color },
-          wrapComputed: ws ? { background: ws.backgroundColor, borderWidth: ws.borderWidth, padding: ws.padding } : null,
-          imgNatural: imgEl ? { w: imgEl.naturalWidth, h: imgEl.naturalHeight } : null,
-          viewportH: window.innerHeight,
-        };
-        fetch("http://127.0.0.1:7870/ingest/2f5a31df-775f-46ef-a661-30ac4fb319a1", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c94472" },
-          body: JSON.stringify({
-            sessionId: "c94472",
-            location: "passport.html:_dbgLogPassportShareExportModal",
-            message: "share export modal layout",
-            data,
-            timestamp: Date.now(),
-            runId: "post-fix",
-            hypothesisId: "H1-H4",
-          }),
-        }).catch(() => {});
-      } catch (e) {
-        fetch("http://127.0.0.1:7870/ingest/2f5a31df-775f-46ef-a661-30ac4fb319a1", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c94472" },
-          body: JSON.stringify({
-            sessionId: "c94472",
-            location: "passport.html:_dbgLogPassportShareExportModal",
-            message: "dbg err",
-            data: { err: String(e) },
-            timestamp: Date.now(),
-            runId: "post-fix",
-            hypothesisId: "H0",
-          }),
-        }).catch(() => {});
-      }
-    });
-  });
-}
-// #endregion
 
 async function refreshPassportShareModalPreview(humanId) {
   const loading = document.getElementById("shareModalPreviewLoading");
@@ -4834,7 +4715,6 @@ async function refreshPassportShareModalPreview(humanId) {
       img.hidden = false;
       img.alt = t("passport.form.sharePreviewAlt");
       wrap?.classList.remove("share-modal-preview-wrap--busy");
-      _dbgLogPassportShareExportModal("preview-ready");
     };
     img.onload = () => finishOk();
     img.onerror = () => {

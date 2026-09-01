@@ -3104,24 +3104,6 @@
     return new global.TextEncoder().encode(String(text == null ? "" : text));
   }
 
-  // #region agent log
-  function odpOfflineDebugLog(location, message, data, hypothesisId) {
-    if (!global || typeof global.fetch !== "function") return;
-    global.fetch("http://127.0.0.1:7870/ingest/2f5a31df-775f-46ef-a661-30ac4fb319a1", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c94472" },
-      body: JSON.stringify({
-        sessionId: "c94472",
-        runId: "pre-fix",
-        hypothesisId: hypothesisId || "A",
-        location: location,
-        message: message,
-        data: data || {},
-        timestamp: Date.now(),
-      }),
-    }).catch(function () {});
-  }
-  // #endregion
 
   function odpOfflineHexToBytes(hex, expectedLength) {
     var s = String(hex == null ? "" : hex).trim();
@@ -3448,19 +3430,6 @@
       payloadBytes: payload,
     });
     var encoded = odpOfflineEncodeNdefRecords(records);
-    // #region agent log
-    odpOfflineDebugLog("odp-contract.js:odpOfflineEncodeNdefMessage", "ndef message size breakdown", {
-      carrierMode: carrierMode,
-      recordCount: records.length,
-      verifyUrlChars: String(options.verifyUrl || "").length,
-      uriPayloadBytes: uriPayloadBytes ? uriPayloadBytes.length : 0,
-      payloadBytes: payload.length,
-      messageBytes: encoded.length,
-      messageOverheadBytes: encoded.length - payload.length - (uriPayloadBytes ? uriPayloadBytes.length : 0),
-      targetBytes: ODP_OFFLINE_TARGET_BYTES,
-      hardMaxBytes: ODP_OFFLINE_HARD_MAX_BYTES,
-    }, carrierMode === ODP_OFFLINE_CARRIER_NDPP ? "A" : "D");
-    // #endregion
     return encoded;
   }
 
@@ -3699,34 +3668,7 @@
         ndefFileBytes = encoded.ndefFileBytes;
         guard++;
       }
-      // #region agent log
-      odpOfflineDebugLog("odp-contract.js:odpOfflineEncode", "url-first carrier auto-fit", {
-        carrierMode: carrierMode,
-        finalMaxTitleBytes: maxTitleBytes,
-        titleBytes: built.titleBytes,
-        titleTruncated: built.titleTruncated,
-        ndefFileBytes: ndefFileBytes.length,
-        hardMaxBytes: ODP_OFFLINE_HARD_MAX_BYTES,
-        fit: ndefFileBytes.length <= ODP_OFFLINE_HARD_MAX_BYTES,
-      }, "B");
-      // #endregion
     }
-    // #region agent log
-    odpOfflineDebugLog("odp-contract.js:odpOfflineEncode", "offline payload size breakdown", {
-      carrierMode: carrierMode,
-      includeState: !!options.includeState,
-      passportIdChars: String(options.passportId || passport.passportId || passport.humanId || "").length,
-      creatorIdChars: String(passport.creatorId || "").length,
-      titleBytes: built.titleBytes,
-      titleTruncated: built.titleTruncated,
-      verifyUrlChars: String(options.verifyUrl || "").length,
-      payloadBytes: payloadBytes.length,
-      ndefMessageBytes: ndefMessageBytes.length,
-      ndefFileBytes: ndefFileBytes.length,
-      overTargetBytes: ndefFileBytes.length - ODP_OFFLINE_TARGET_BYTES,
-      overHardMaxBytes: ndefFileBytes.length - ODP_OFFLINE_HARD_MAX_BYTES,
-    }, options.includeState ? "C" : "A");
-    // #endregion
     return {
       version: ODP_OFFLINE_VERSION,
       payloadBytes: payloadBytes,

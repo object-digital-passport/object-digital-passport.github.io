@@ -45,21 +45,6 @@ function wcInitOpts(opts) {
  */
 async function odpWalletConnectTryRestoreSession(opts) {
   const { pid, initPayload } = wcInitOpts({ ...opts, showQrModal: false });
-  // #region agent log
-  fetch("http://127.0.0.1:7870/ingest/2f5a31df-775f-46ef-a661-30ac4fb319a1", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c94472" },
-    body: JSON.stringify({
-      sessionId: "c94472",
-      location: "odp-wallet-wc.entry.js:odpWalletConnectTryRestoreSession",
-      message: "wc restore entry",
-      data: { hasPid: !!pid },
-      timestamp: Date.now(),
-      runId: "wc-persist",
-      hypothesisId: "H1",
-    }),
-  }).catch(() => {});
-  // #endregion
   if (!pid) return null;
   if (wcSingleton && wcSingleton.connected) return wcSingleton;
   if (wcSingleton) {
@@ -82,21 +67,6 @@ async function odpWalletConnectTryRestoreSession(opts) {
         /* session may need user approval on device */
       }
     }
-    // #region agent log
-    fetch("http://127.0.0.1:7870/ingest/2f5a31df-775f-46ef-a661-30ac4fb319a1", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c94472" },
-      body: JSON.stringify({
-        sessionId: "c94472",
-        location: "odp-wallet-wc.entry.js:odpWalletConnectTryRestoreSession",
-        message: "wc after init accounts",
-        data: { accountCount: accounts && accounts.length, hasSession: !!p.session },
-        timestamp: Date.now(),
-        runId: "wc-persist",
-        hypothesisId: "H1",
-      }),
-    }).catch(() => {});
-    // #endregion
     if (accounts && accounts.length > 0) {
       wcSingleton = p;
       return p;
