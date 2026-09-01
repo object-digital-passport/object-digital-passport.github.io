@@ -422,6 +422,7 @@
       "verified": "verified now",
       "declared": "declared on-chain — bundle not verified",
       "components": "Seal anchor: {seal} · Institutional proofs: {proofs}",
+      "sealNote": "A seal anchor is recorded in the passport and bound by its hashes. This page did not read the chip — the challenge-response check runs only in an NFC-capable verifier.",
       "yes": "yes",
       "no": "no",
       "note": "The tier measures the strength of binding evidence, not authenticity. The decision stays with you: check the issuer's published profile ID and the object's distinguishing features."

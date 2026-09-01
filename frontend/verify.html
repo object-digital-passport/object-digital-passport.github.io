@@ -2487,6 +2487,7 @@ function render(humanId, rec, creator, passport, proofs, dataStatus, resolvedOnA
             <strong>${esc(t("verify.tier.label"))}: ${shields} ${esc(t("verify.tier." + at.tier))}</strong>
             <span class="vbadge ${at.verified ? "ok" : "warn"}" style="margin-left:6px">${esc(t(at.verified ? "verify.tier.verified" : "verify.tier.declared"))}</span>
             <div style="margin-top:4px">${esc(comps)}</div>
+            ${at.hasSeal ? `<div style="margin-top:4px;color:var(--ink3)">${esc(t("verify.tier.sealNote"))}</div>` : ""}
             <div style="margin-top:4px;color:var(--ink3)">${esc(t("verify.tier.note"))}</div>
           </div>`;
         })()}
