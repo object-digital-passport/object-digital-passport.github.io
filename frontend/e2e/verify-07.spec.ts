@@ -16,6 +16,8 @@ test("0.7 lookup renders registry facts and separates unchecked files", async ({
   await expect(page.locator("#result img")).toHaveCount(0);
   await page.getByRole("button", { name: "Change language to Russian" }).click();
   await expect(page.getByText("Файлы: не проверены")).toBeVisible();
+  await page.getByLabel("Номер паспорта").fill("ODP-2026-09-000000028");
+  await expect(page.locator("#result")).toBeEmpty();
 });
 
 test('edition lookup displays activation without claiming possession', async ({ page }) => {
@@ -171,4 +173,23 @@ test('profile lookup handles invalid IDs, offline endpoints and retry', async ({
   await check.click();
   await expect(page.locator('#profile-result')).toContainText('M-123-456-789-012');
   await expect(page.locator('#profile-result')).not.toContainText('could not be read');
+});
+
+test('editing a profile ID clears the previous profile result', async ({page}) => {
+  await page.route('**/ethers@5.7.2/**', route => route.abort());
+  await page.addInitScript(() => {
+    localStorage.setItem('odp_locale', 'en');
+    (window as any).ethers = {providers:{JsonRpcProvider:class {}}};
+  });
+  await page.route('**/backend/js/odp-v07-reader.js', route => route.fulfill({
+    contentType:'application/javascript',
+    body:`window.ODPV07Reader={open:async()=>({readProfileById:async id=>({profile:{creatorId:id,wallet:'0x1234567890123456789012345678901234567890',timestamp:1700000000},blockNumber:123})})};`,
+  }));
+  await page.goto('/verify-07.html');
+  const input = page.getByLabel('Profile ID');
+  await input.fill('B-123-456-789-012');
+  await page.getByRole('button',{name:'Check profile'}).click();
+  await expect(page.locator('#profile-result')).toContainText('B-123-456-789-012');
+  await input.fill('M-123-456-789-012');
+  await expect(page.locator('#profile-result')).toBeEmpty();
 });
