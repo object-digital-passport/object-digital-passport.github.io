@@ -83,3 +83,40 @@ test('ODP locator is accepted while extra URI data is rejected',async({page})=>{
   await page.getByLabel('Passport ID').fill('odp://ODP-2026-09-000000027?code=secret');await page.getByRole('button',{name:'Check registration'}).click();
   await expect(page.getByText(/Enter a passport ID in the format/)).toBeVisible();
 });
+
+test("scanning an iPhone passport QR checks registration and stops the camera", async ({ page }) => {
+  await page.route("**/ethers@5.7.2/**", route => route.abort());
+  await page.route("**/jsqr@1.4.0/**", route => route.abort());
+  await page.route("**/backend/js/odp-v07-reader.js", route => route.fulfill({
+    contentType: "application/javascript",
+    body: `window.ODPV07Reader = {open: async () => ({readPassport: async id => ({
+      header: {title: id, authorName: "Author", creatorId: "B-123"},
+      classification: {revoked: false, editionModel: 1}, media: {anchorTypesMask: 0},
+      release: {revocationDeadline: 1700000000, printFinalizedAt: 0}, blockNumber: 123
+    })})};`,
+  }));
+  await page.addInitScript(() => {
+    localStorage.setItem("odp_locale", "en");
+    Object.assign(window, {
+      ethers: { providers: { JsonRpcProvider: class {} } },
+      jsQR: () => ({ data: "odp://ODP-2026-09-000000027" }),
+    });
+    Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
+      value: async () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d")!;
+        const stream = canvas.captureStream(15);
+        const track = stream.getVideoTracks()[0];
+        const timer = setInterval(() => ctx.fillRect(0, 0, 2, 2), 50);
+        const stop = track.stop.bind(track);
+        track.stop = () => { clearInterval(timer); stop(); document.body.dataset.cameraStopped = "true"; };
+        return stream;
+      },
+    });
+  });
+  await page.goto("/verify-07.html");
+  await page.getByRole("button", { name: "Scan passport QR code" }).click();
+  await expect(page.getByText("Registration found on the ODP 0.7 registry")).toBeVisible();
+  await expect(page.getByLabel("Passport ID")).toHaveValue("ODP-2026-09-000000027");
+  await expect(page.locator("body")).toHaveAttribute("data-camera-stopped", "true");
+});

@@ -28,11 +28,18 @@
   <nav class="nav" aria-label="ODP"><a href="index.html" data-copy="home">Home</a><a href="verify.html" data-copy="legacy">Other verification tools</a></nav>
   <section class="card" style="margin-top:24px"><div class="card-body">
     <p data-copy="intro">Enter a passport ID to read its registration. No wallet is needed.</p>
+    <button class="btn btn-sec" id="scan-qr" type="button" data-copy="scan">Scan passport QR code</button>
+    <p id="scan-status" role="status"></p>
     <form id="lookup"><label for="passport-id" data-copy="label">Passport ID</label><input id="passport-id" name="id" type="text" autocomplete="off" spellcheck="false" required placeholder="ODP-2026-09-000000001"><label for="unit-index" data-copy="unitLabel">Unit index, if known (starts at 0)</label><input id="unit-index" name="unit" type="number" min="0" max="1048575" step="1" inputmode="numeric"><button class="btn" id="submit" type="submit" data-copy="button">Check registration</button></form>
     <label for="bundle-file" data-copy="bundleLabel">Or select an .odpass file</label><input id="bundle-file" type="file" accept=".odpass,application/zip">
     <p class="fhint" data-copy="scope">File integrity and possession of an edition item are not checked here yet.</p>
     <div id="result" aria-live="polite"></div>
   </div></section>
 </main>
+<dialog id="qr-dialog" aria-labelledby="qr-title">
+  <h2 id="qr-title" data-copy="scan">Scan passport QR code</h2>
+  <video id="qr-video" muted playsinline></video>
+  <form method="dialog"><button class="btn btn-sec" autofocus data-copy="closeScan">Close camera</button></form>
+</dialog>
 </body>
 </html>

@@ -22,13 +22,20 @@ html.odp-home[data-theme="blue"] {
 .odp-home [hidden] { display: none !important; }
 .odp-home #odpThemeSwitch { display: none; }
 .odp-home .page { max-width: 940px; }
-.odp-home .home-logo { display: block; width: min(190px, 46vw); height: auto; margin-bottom: 24px; }
+.odp-home .home-logo { display: block; width: min(160px, 27vw); height: auto; margin-bottom: 24px; }
 .odp-home .header-row { padding-top: 28px; }
 .odp-home .header-row h1 { font-size: clamp(28px, 5vw, 42px); letter-spacing: -0.035em; }
 .odp-home .header-toolbar #language { width: auto; min-width: 52px; min-height: 44px; margin: 0; padding: 10px 14px; }
 .odp-home .nav { border-color: #262626; }
+.odp-home footer { flex-wrap: wrap; row-gap: 6px; }
 .odp-home .card { border-color: #6e6e6e; border-radius: 0; }
 .odp-home .card-head { border-color: #262626; font-style: normal; font-weight: 500; }
+.odp-home input[type="file"] { max-width: 100%; }
+.odp-home #scan-qr { margin-top: 12px; }
+.odp-home #scan-status:empty { display: none; }
+.odp-home #qr-dialog { width: min(440px, calc(100% - 32px)); padding: 16px; color: var(--text); background: var(--bg); border: 1px solid var(--border2); }
+.odp-home #qr-dialog::backdrop { background: rgb(0 0 0 / 80%); }
+.odp-home #qr-video { display: block; width: 100%; max-height: 55dvh; margin: 12px 0; }
 .odp-home .btn { background: #fff; color: #0d0d0d; border: 1px solid #fff; border-radius: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: 0; text-transform: none; font-size: 16px; }
 .odp-home .btn-sec { background: transparent; color: #fff; border: 1px solid #6e6e6e; }
 .odp-home label, .odp-home input, .odp-home select, .odp-home textarea { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
@@ -47,7 +54,7 @@ html.odp-home[data-theme="blue"] {
 @media (max-width: 520px) {
   .odp-home .nav { display: flex; }
   .odp-home .nav a { flex: 1 1 auto; }
-  .odp-home .home-logo { margin-left: auto; margin-right: auto; }
+  .odp-home .home-logo { margin: 0 auto 16px; }
 }
 .odp-home #digitalReview:not([hidden]) { display: grid; gap: 12px; }
 .odp-home #digitalPreviewImage { max-width: min(100%, 360px); max-height: 280px; object-fit: contain; }
