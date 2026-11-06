@@ -11,6 +11,7 @@
   Object.assign(copy.ru, { review:'Проверить перед регистрацией', reviewTitle:'Подтверждение регистрации профиля', back:'Назад', warning:'Тип профиля нельзя изменить: он навсегда привязан к этому аккаунту. ODP не может восстановить, заблокировать или перенести профиль. Потеря доступа к аккаунту прекращает выпуск под этим номером профиля. Регистрация публичная и необратимая.', backup:'Вы сами отвечаете за резервную копию кошелька. Никому не сообщайте секретную фразу.', safeAdvice:'Для организации рассмотрите мультиподписной кошелёк как минимум с двумя владельцами на разных устройствах.' });
   Object.assign(copy.en,{connectSafe:'Connect Safe App',safe_pending:'Safe proposal is awaiting signatures or execution.',safePersonal:'A personal C profile cannot use Safe.'});
   Object.assign(copy.ru,{connectSafe:'Подключить Safe App',safe_pending:'Предложение Safe ожидает подписей или исполнения.',safePersonal:'Личный профиль C нельзя зарегистрировать через Safe.'});
+  copy.en.walletHelp='Use your browser wallet, WalletConnect, or open this page inside Safe to connect Safe App.'; copy.ru.walletHelp='Подключите кошелёк браузера или WalletConnect. Для Safe App откройте страницу внутри Safe.';
   copy.en.connectMobile='Mobile wallet · WalletConnect'; copy.ru.connectMobile='Мобильный кошелёк · WalletConnect';
   let locale; try { locale = localStorage.getItem('odp_locale'); } catch (_) {}
   if (!['en','ru'].includes(locale)) locale = (navigator.language || '').toLowerCase().startsWith('ru') ? 'ru' : 'en';
