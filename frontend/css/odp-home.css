@@ -1,0 +1,54 @@
+/* The opening page follows the iPhone application's monochrome identity. */
+html.odp-home,
+html.odp-home[data-theme="blue"] {
+  color-scheme: dark;
+  --bg: #0d0d0d;
+  --bg2: #0d0d0d;
+  --bg3: #141414;
+  --bg4: #161616;
+  --border: #262626;
+  --border2: #6e6e6e;
+  --text: #fff;
+  --text2: #d0d0d0;
+  --text3: #bcbcbc;
+  --accent: #fff;
+  --accent2: #bcbcbc;
+  --serif: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --page-section-bg: #0d0d0d;
+  --page-section-border: #6e6e6e;
+}
+
+.odp-home body { background: #0d0d0d; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.odp-home [hidden] { display: none !important; }
+.odp-home #odpThemeSwitch { display: none; }
+.odp-home .page { max-width: 940px; }
+.odp-home .home-logo { display: block; width: min(190px, 46vw); height: auto; margin-bottom: 24px; }
+.odp-home .header-row { padding-top: 28px; }
+.odp-home .header-row h1 { font-size: clamp(28px, 5vw, 42px); letter-spacing: -0.035em; }
+.odp-home .header-toolbar #language { width: auto; min-width: 52px; min-height: 44px; margin: 0; padding: 10px 14px; }
+.odp-home .nav { border-color: #262626; }
+.odp-home .card { border-color: #6e6e6e; border-radius: 0; }
+.odp-home .card-head { border-color: #262626; font-style: normal; font-weight: 500; }
+.odp-home .btn { background: #fff; color: #0d0d0d; border: 1px solid #fff; border-radius: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: 0; text-transform: none; font-size: 16px; }
+.odp-home .btn-sec { background: transparent; color: #fff; border: 1px solid #6e6e6e; }
+.odp-home label, .odp-home input, .odp-home select, .odp-home textarea { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.odp-home label { letter-spacing: 0; text-transform: none; }
+.odp-home a:focus-visible, .odp-home button:focus-visible { outline: 3px solid #e0a03c; outline-offset: 3px; }
+.odp-home #lookup:not([hidden]) { display: grid; gap: 12px; margin: 24px 0; }
+.odp-home #lookup input { width: 100%; }
+.odp-home #result { overflow-wrap: anywhere; }
+.odp-home #registration:not([hidden]) { display: grid; gap: 14px; margin: 24px 0; }
+.odp-home #status { overflow-wrap: anywhere; }
+.odp-home #draft:not([hidden]), .odp-home #review:not([hidden]) { display: grid; gap: 12px; margin: 24px 0; }
+.odp-home #draft fieldset { display: grid; gap: 10px; padding: 16px; border: 1px solid #6e6e6e; }
+.odp-home #draft fieldset[hidden] { display: none; }
+.odp-home #summary, .odp-home #record { white-space: pre-wrap; overflow-wrap: anywhere; }
+.odp-home #preview { max-width: min(100%, 360px); max-height: 280px; object-fit: contain; }
+@media (max-width: 520px) {
+  .odp-home .nav { display: flex; }
+  .odp-home .nav a { flex: 1 1 auto; }
+  .odp-home .home-logo { margin-left: auto; margin-right: auto; }
+}
+.odp-home #digitalReview:not([hidden]) { display: grid; gap: 12px; }
+.odp-home #digitalPreviewImage { max-width: min(100%, 360px); max-height: 280px; object-fit: contain; }
+.odp-home #digitalPreviewText { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 18rem; overflow: auto; padding: 12px; border: 1px solid #6e6e6e; }

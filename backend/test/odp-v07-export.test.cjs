@@ -1,0 +1,30 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const canonical = require('../js/odp-v07-canonical.js');
+const jobs = require('../js/odp-v07-job.js');
+const passport = require('../js/odp-v07-passport.js');
+const exporter = require('../js/odp-v07-export.js');
+const zip = require('../js/odp-v07-zip.js');
+const generation = require('../config/odp-0.7/generation.json');
+
+test('export rechecks a minted job and round-trips a complete odpass', async () => {
+  const document = structuredClone(require('./vectors/passport-0.7/physical.json'));
+  const bytes = new TextEncoder().encode('original'), photoHash = 'sha256:' + (await canonical.sha256(bytes)).slice(2);
+  document.anchors.find(a => a.type === 'photo').hash = photoHash;
+  const wallet = '0x'+'1'.repeat(40), profile = { wallet, creatorId:'C-123-456-789-012', typePrefix:'0x43' };
+  const ethers = { utils:{ isAddress:() => true, defaultAbiCoder:{ encode:() => 'data' }, keccak256:() => '0x'+'2'.repeat(64), Interface:class { encodeFunctionData() { return '0x1234'; } } } };
+  const abi = [], job = await jobs.prepare({ document, originals:[{hash:photoHash,bytes}], profile, wallet, abi, ethers });
+  job.state = 'minted'; job.passportId = 'ODP-2026-03-000000001'; job.transactionHash = '0x'+'4'.repeat(64);
+  const receipt = { format:'odp-bundle-receipt-0.7', generationId:generation.generationId, chainId:generation.chainId, registry:generation.registry, passportId:job.passportId, transactionHash:job.transactionHash, blockNumber:'10', blockHash:'0x'+'5'.repeat(64), operationId:job.identity.operationId };
+  const prepared = await passport.preparePassport(document), m = prepared.mint;
+  const record = { header:{...m.core,creator:wallet,objectType:'physical'},media:m,classification:{...m.core,revoked:false,timestamp:123} };
+  let receiptChecks = 0;
+  const reader = { readPassport:async()=>record, verifyReceipt:async()=>{receiptChecks++;return {blockNumber:10};}, readMintOperation:async()=>({state:'committed',passportId:job.passportId}) };
+  const result = await exporter.make({job,receipt,trustedGeneration:generation,reader,abi,ethers});
+  assert.equal(receiptChecks,2); assert.equal(result.passportId,job.passportId);
+  assert.equal((await zip.extract(result.bytes)).length,5);
+  await assert.rejects(exporter.make({job,receipt:{...receipt,operationId:'0x'+'6'.repeat(64)},trustedGeneration:generation,reader,abi,ethers}), /does not match/);
+  await assert.rejects(exporter.make({job:{...job,state:'submitted'},receipt,trustedGeneration:generation,reader,abi,ethers}), /does not match/);
+  reader.verifyReceipt = async () => { throw Error('not finalized'); };
+  await assert.rejects(exporter.make({job,receipt,trustedGeneration:generation,reader,abi,ethers}), /not finalized/);
+});

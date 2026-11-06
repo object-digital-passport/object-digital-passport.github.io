@@ -43,8 +43,53 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - name: Install backend test dependencies
+        working-directory: backend
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify generated browser bundles
+        working-directory: backend
+        run: |
+          npm run build:schemas
+          npm run build:safe
+          git diff --exit-code -- js/odp-v07-schemas.bundle.js js/odp-v07-safe-app.bundle.js
       - name: SPEC 0.7 read layer, against the published vectors
         run: node backend/test/odp-contract-0.7.test.mjs
+      - name: Pinned 0.7 registry reader
+        run: node --test backend/test/odp-v07-reader.test.cjs
+      - name: 0.7 mint operation preparation
+        run: node --test backend/test/odp-v07-mint.test.cjs
+      - name: 0.7 immutable issuance job
+        run: node --test backend/test/odp-v07-job.test.cjs
+      - name: 0.7 draft creation
+        run: node --test backend/test/odp-v07-draft.test.cjs
+      - name: 0.7 issuance deadline
+        run: node --test backend/test/odp-v07-deadline.test.cjs
+      - name: 0.7 Safe proposal identity
+        run: node --test backend/test/odp-v07-safe.test.cjs
+      - name: 0.7 local issuance job storage
+        run: node --test backend/test/odp-v07-job-store.test.cjs
+      - name: 0.7 portable issuance backup
+        run: node --test backend/test/odp-v07-job-backup.test.cjs
+      - name: 0.7 issuance hand-off and recovery
+        run: node --test backend/test/odp-v07-issue.test.cjs
+      - name: 0.7 verified passport export
+        run: node --test backend/test/odp-v07-export.test.cjs
+      - name: 0.7 profile registration preparation
+        run: node --test backend/test/odp-v07-profile.test.cjs
+      - name: 0.7 release operation checks
+        run: node --test backend/test/odp-v07-release.test.cjs
+      - name: 0.7 canonical JSON and strict input
+        run: node --test backend/test/odp-v07-canonical.test.cjs
+      - name: 0.7 extracted bundle payload checks
+        run: node --test backend/test/odp-v07-bundle.test.cjs
+      - name: 0.7 schema vectors
+        run: node --test backend/test/odp-v07-schemas.test.cjs
+      - name: 0.7 passport integrity vectors
+        run: node --test backend/test/odp-v07-passport.test.cjs
+      - name: 0.7 edition address-list vectors
+        run: node --test backend/test/odp-v07-edition.test.cjs
+      - name: 0.7 ZIP envelope checks
+        run: node --test backend/test/odp-v07-zip.test.cjs
       - name: i18n locale selection and English fallback
         run: node frontend/test/odp-i18n.test.mjs
 

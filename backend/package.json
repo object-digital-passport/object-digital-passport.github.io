@@ -5,17 +5,23 @@
   "main": "odp-contract.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:wc": "esbuild js/odp-wallet-wc.entry.js --bundle --format=iife --platform=browser --outfile=js/odp-wallet-wc.bundle.js --legal-comments=none"
+    "build:wc": "esbuild js/odp-wallet-wc.entry.js --bundle --format=iife --platform=browser --outfile=js/odp-wallet-wc.bundle.js --legal-comments=none",
+    "build:schemas": "node tools/build-v07-schemas.cjs",
+    "build:safe": "esbuild js/odp-v07-safe-app.entry.js --bundle --format=iife --platform=browser --outfile=js/odp-v07-safe-app.bundle.js --legal-comments=none"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@walletconnect/ethereum-provider": "^2.23.9"
+    "@walletconnect/ethereum-provider": "^2.23.9",
+    "@safe-global/safe-apps-provider": "0.18.6",
+    "@safe-global/safe-apps-sdk": "9.1.0"
   },
   "devDependencies": {
-    "esbuild": "^0.28.0"
+    "ajv": "8.20.0",
+    "esbuild": "^0.28.0",
+    "fake-indexeddb": "6.2.5"
   },
   "overrides": {
     "axios": "^1.18.0"

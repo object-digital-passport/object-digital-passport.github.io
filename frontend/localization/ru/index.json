@@ -1,15 +1,17 @@
 {
   "index": {
     "meta": {
-      "documentTitle": "ODP v0.6 — эталонный сайт",
+      "documentTitle": "ODP 0.7 — Object Digital Passport",
       "h1": "Object Digital Passport",
-      "sub": "Эталонная реализация (v0.6) — те же файлы, что отдаёт репозиторий"
+      "sub": "Object Digital Passport · предварительная версия 0.7"
     },
     "cardTitle": "Открыть страницу",
     "lead": "Страницы открываются в браузере. Подключайте кошелёк только там, где об этом просят. Нужен интернет, чтобы сайт мог читать публичный реестр в сети Polygon.",
     "btnVerify": "Проверка — кошелёк не нужен",
     "btnCreator": "Зарегистрировать профиль",
     "btnPassport": "Создать паспорт",
+    "btnActions": "Действия с паспортом",
+    "legacy": "Предыдущая версия:",
     "source": "Исходники на GitHub",
     "readme": "README"
   }
