@@ -54,6 +54,7 @@
   }
 
   function currentTheme() {
+    if (global.document.documentElement.classList.contains("odp-home")) return "dark";
     return getSaved() || "blue";
   }
 

@@ -46,6 +46,7 @@ key falls back to English. See [`CONTRIBUTING.md`](../CONTRIBUTING.md#translatio
 | `CONTRIBUTING.md` | `CONTRIBUTING.ru.md` | translated |
 | `CHANGELOG.md` | `CHANGELOG.ru.md` | translated |
 | `docs/TRANSLATIONS.md` | — | none: a file list this script reads; a second copy in Russian would be one more pair to keep in step, which is the problem this file exists to solve |
+| `docs/ODP_07_REVIEW.md` | — | none: temporary technical review evidence and test commands, updated together with the implementation |
 | `.github/*` | — | none: issue and pull-request templates, which GitHub renders in one language |
 | `backend/test/vectors/README.md` | — | none: a note about test fixtures, read only by someone editing them |
 | `frontend/e2e/README.md` | — | none: how to run the smoke tests, read only by someone running them |

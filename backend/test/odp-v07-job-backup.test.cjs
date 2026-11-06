@@ -1,0 +1,30 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const jobs = require('../js/odp-v07-job.js');
+const backup = require('../js/odp-v07-job-backup.js');
+const canonical = require('../js/odp-v07-canonical.js');
+const { IDBFactory } = require('fake-indexeddb');
+const store = require('../js/odp-v07-job-store.js');
+
+test('portable prepared job restores originals and the same identity into a new store', async () => {
+  const document = structuredClone(require('./vectors/passport-0.7/physical.json'));
+  const bytes = new TextEncoder().encode('photo backup'), hash = 'sha256:' + (await canonical.sha256(bytes)).slice(2);
+  document.anchors.find(a => a.type === 'photo').hash = hash;
+  const wallet = '0x'+'1'.repeat(40), profile = { wallet, creatorId:'C-123-456-789-012', typePrefix:'0x43' };
+  const ethers = { utils:{ isAddress:() => true, defaultAbiCoder:{ encode:() => 'data' }, keccak256:() => '0x'+'2'.repeat(64), Interface:class { encodeFunctionData() { return '0x1234'; } } } };
+  const options = { abi:[], ethers }, original = await jobs.prepare({ document, originals:[{hash,bytes}], profile, wallet, ...options });
+  const encoded = await backup.exportJob(original, options), restored = await backup.restore(encoded, options);
+  assert.equal(restored.fingerprint, original.fingerprint); assert.equal(restored.identity.operationId, original.identity.operationId);
+  assert.deepEqual(restored.originals[0].bytes, bytes);
+  const db = await store.open(new IDBFactory());
+  await store.save(db, restored, options); assert.equal((await store.get(db,original.identity.operationId,options)).fingerprint, original.fingerprint); db.close();
+  const damaged = encoded.slice(); damaged[damaged.length - 1] ^= 1;
+  await assert.rejects(backup.restore(damaged, options), /hash mismatch/);
+  await assert.rejects(backup.restore(encoded.slice(0,-1), options), /size/);
+  const submitted = { ...original, state:'submitted', transactionHash:'0x' + 'a'.repeat(64) };
+  const restoredPending = await backup.restore(await backup.exportJob(submitted, options), options);
+  assert.equal(restoredPending.state, 'submitted'); assert.equal(restoredPending.transactionHash, submitted.transactionHash);
+  const newDb = await store.open(new IDBFactory());
+  await store.save(newDb, restoredPending, options);
+  assert.equal((await store.get(newDb, original.identity.operationId, options)).state, 'submitted'); newDb.close();
+});

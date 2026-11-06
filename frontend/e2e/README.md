@@ -1,20 +1,12 @@
-# Static smoke (Playwright)
+# Local browser checks (Playwright)
 
-Loads `verify.html` and `passport.html` over a local static server (`python3 -m http.server` of the repository root). **No wallet** and **no chain** — this only catches broken HTML/JS wiring after refactors.
-
-## Run
+The tests serve a temporary copy of the site locally. Wallet and registry responses in the 0.7 scenarios are simulated; they do not send transactions or read Polygon. The tests cover legacy page loading, 0.7 navigation, profile registration, three issuance forms and their backup, release confirmation, and verification display.
 
 ```bash
-cd e2e
-npm install
+cd frontend/e2e
+npm ci
 npx playwright install firefox
 npm test
 ```
 
-The first `playwright install firefox` downloads the Firefox test browser (~tens of MB).
-
-On first run, Playwright starts `python3 -m http.server 4174` with cwd = repo root.
-
-## CI
-
-Set `CI=1` if you want to fail when port **4174** is already in use (`reuseExistingServer` is off in CI).
+By default the server listens on `127.0.0.1:4174` and tests use Firefox. Set `ODP_TEST_PORT` to use a different port, or set `ODP_TEST_BROWSER=chromium` after installing Chromium. Set `CI=1` to reject an existing server on that port.

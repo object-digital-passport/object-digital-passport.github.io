@@ -62,6 +62,17 @@
   <a href="verify.html" class="active" aria-current="page" data-i18n="nav.verify">Verify</a>
 </div>
 
+<p class="fhint"><a id="odpV07VerifyLink" href="verify-07.html" data-i18n="verify.v07Link">Check an ODP 0.7 passport</a></p>
+<script>
+// Preserve only a public passport locator; do not propagate other query parameters or codes.
+document.getElementById('odpV07VerifyLink').addEventListener('click', function () {
+  const input=document.getElementById('idInput'), params=new URLSearchParams(location.search);
+  const candidate=(input && input.value.trim()) || (params.getAll('id').length===1 ? params.get('id') : '') || '';
+  const match=/^(?:odp:\/\/)?(ODP-\d{4}-(?:0[1-9]|1[0-2])-\d{9})$/i.exec(candidate.trim());
+  this.href=match ? 'verify-07.html?'+new URLSearchParams({id:match[1].toUpperCase()}) : 'verify-07.html';
+});
+</script>
+
 
 <div id="odpStackLabel" class="fhint odp-stack-wrap odp-passport-stack-strip" style="display:none;line-height:1.5" hidden aria-hidden="true"></div>
 
