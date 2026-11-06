@@ -16,6 +16,8 @@
   Object.assign(copy.ru,{activationBlock:"Блок активации",activationBlockUnavailable:"Не удалось подтвердить блок события активации"});
   Object.assign(copy.en, { scan: "Scan passport QR code", closeScan: "Close camera", scanUnavailable: "The QR scanner could not start. Enter the passport ID or select an .odpass file.", scanInvalid: "This QR code does not contain a supported passport ID." });
   Object.assign(copy.ru, { scan: "Сканировать QR-код паспорта", closeScan: "Закрыть камеру", scanUnavailable: "Не удалось запустить сканер. Введите номер паспорта или выберите файл .odpass.", scanInvalid: "В этом QR-коде нет номера паспорта поддерживаемого формата." });
+  Object.assign(copy.en, {profileTitle:"Verify a profile",profileLabel:"Profile ID",profileButton:"Check profile",profileInvalid:"Enter a C, B, P or M profile ID in the format B-123-456-789-012.",profileFound:"Profile found in the ODP 0.7 registry",profileWallet:"Registered wallet",profileDate:"Registered at",profileDetail:"Registration does not establish the identity of the wallet holder."});
+  Object.assign(copy.ru, {profileTitle:"Проверить профиль",profileLabel:"Номер профиля",profileButton:"Проверить профиль",profileInvalid:"Введите номер C, B, P или M в формате B-123-456-789-012.",profileFound:"Профиль найден в реестре ODP 0.7",profileWallet:"Зарегистрированный кошелёк",profileDate:"Дата регистрации",profileDetail:"Регистрация не подтверждает личность владельца кошелька."});
   const form = document.getElementById("lookup"), field = document.getElementById("passport-id"), unit = document.getElementById("unit-index");
   const result = document.getElementById("result"), submit = document.getElementById("submit"), language = document.getElementById("language"), bundleFile = document.getElementById("bundle-file");
   let locale;
@@ -23,6 +25,48 @@
   if (locale !== "en" && locale !== "ru") locale = (navigator.language || "").toLowerCase().startsWith("ru") ? "ru" : "en";
   let state = null, busy = false;
   const text = key => copy[locale][key];
+  const profileForm = document.getElementById("profile-lookup"), profileField = document.getElementById("profile-id"), profileResult = document.getElementById("profile-result");
+  let profileState = null, profileBusy = false;
+  function renderProfile() {
+    profileResult.replaceChildren();
+    if (!profileState) return;
+    const add = value => { const p = document.createElement("p"); p.textContent = value; profileResult.appendChild(p); };
+    if (profileState.key) { add(text(profileState.key)); return; }
+    const profile = profileState.record.profile;
+    add(text("profileFound"));
+    add(profile.creatorId);
+    add(text("profileWallet") + ": " + profile.wallet);
+    add(text("profileDate") + ": " + new Date(Number(profile.timestamp.toString()) * 1000).toLocaleString(locale === "ru" ? "ru-RU" : "en-US"));
+    add(text("block") + ": " + profileState.record.blockNumber);
+    add(text("profileDetail"));
+  }
+  profileForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (profileBusy) return;
+    const id = profileField.value.trim().toUpperCase();
+    if (!/^[CBPM]-(?:[0-9]{3}-){3}[0-9]{3}$/.test(id)) { profileState = {key:"profileInvalid"}; renderProfile(); return; }
+    profileBusy = true;
+    profileForm.querySelector("button").disabled = true;
+    profileState = {key:"checking"}; renderProfile();
+    try {
+      if (!window.ethers || !window.ODPV07Reader) throw new Error("Reader unavailable");
+      const response = await fetch("backend/config/odp-0.7/ObjectDigitalPassport.json");
+      if (!response.ok) throw new Error("ABI unavailable");
+      const abi = await response.json();
+      let record;
+      for (const endpoint of ["https://polygon.drpc.org", "https://polygon-bor-rpc.publicnode.com"]) {
+        try {
+          const provider = new ethers.providers.JsonRpcProvider(endpoint, {name:"polygon",chainId:137});
+          const client = await ODPV07Reader.open(provider, abi, ethers);
+          record = await client.readProfileById(id);
+          break;
+        } catch (_) {}
+      }
+      if (!record) throw new Error("Profile unavailable");
+      profileState = {record};
+    } catch (_) { profileState = {key:"error"}; }
+    finally { profileBusy = false; profileForm.querySelector("button").disabled = false; renderProfile(); }
+  });
   function passportId(value) {
     const match=/^(?:odp:\/\/)?(ODP-[0-9]{4}-(?:0[1-9]|1[0-2])-[0-9]{9})$/i.exec(String(value||'').trim());
     return match ? match[1].toUpperCase() : null;
@@ -128,6 +172,7 @@
   function append(tag, value) { const el = document.createElement(tag); el.textContent = value; result.appendChild(el); }
   function render() {
     scanStatus.textContent = scanMessage ? text(scanMessage) : "";
+    renderProfile();
     document.documentElement.lang = locale;
     document.querySelectorAll("[data-copy]").forEach(el => { el.textContent = text(el.dataset.copy); });
     language.textContent = locale === "ru" ? "EN" : "RU";

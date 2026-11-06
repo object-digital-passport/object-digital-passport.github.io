@@ -35,6 +35,15 @@
     <p class="fhint" data-copy="scope">File integrity and possession of an edition item are not checked here yet.</p>
     <div id="result" aria-live="polite"></div>
   </div></section>
+  <section class="card" style="margin-top:24px"><div class="card-body">
+    <h2 data-copy="profileTitle">Verify a profile</h2>
+    <form id="profile-lookup">
+      <label for="profile-id" data-copy="profileLabel">Profile ID</label>
+      <input id="profile-id" type="text" autocomplete="off" spellcheck="false" required placeholder="B-123-456-789-012">
+      <button class="btn" type="submit" data-copy="profileButton">Check profile</button>
+    </form>
+    <div id="profile-result" aria-live="polite"></div>
+  </div></section>
 </main>
 <dialog id="qr-dialog" aria-labelledby="qr-title">
   <h2 id="qr-title" data-copy="scan">Scan passport QR code</h2>

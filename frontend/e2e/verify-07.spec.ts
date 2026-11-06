@@ -120,3 +120,21 @@ test("scanning an iPhone passport QR checks registration and stops the camera", 
   await expect(page.getByLabel("Passport ID")).toHaveValue("ODP-2026-09-000000027");
   await expect(page.locator("body")).toHaveAttribute("data-camera-stopped", "true");
 });
+
+test('profile lookup checks a B profile and displays the registered wallet', async ({page}) => {
+  await page.route('**/ethers@5.7.2/**', route => route.abort());
+  await page.addInitScript(() => {
+    localStorage.setItem('odp_locale', 'en');
+    (window as any).ethers = {providers:{JsonRpcProvider:class {}}};
+  });
+  await page.route('**/backend/js/odp-v07-reader.js', route => route.fulfill({
+    contentType:'application/javascript',
+    body:`window.ODPV07Reader={open:async()=>({readProfileById:async id=>({profile:{creatorId:id,wallet:'0x1234567890123456789012345678901234567890',timestamp:1700000000},blockNumber:123})})};`,
+  }));
+  await page.goto('/verify-07.html');
+  await page.getByLabel('Profile ID').fill('b-123-456-789-012');
+  await page.getByRole('button',{name:'Check profile'}).click();
+  await expect(page.getByText('Profile found in the ODP 0.7 registry')).toBeVisible();
+  await expect(page.locator('#profile-result')).toContainText('B-123-456-789-012');
+  await expect(page.locator('#profile-result')).toContainText('0x1234567890123456789012345678901234567890');
+});
