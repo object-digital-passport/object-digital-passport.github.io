@@ -213,3 +213,17 @@ test('activation block is returned only for a matching canonical satellite event
   eventPassport=id;f.provider.getBlock=async()=>({number:eventBlock,hash:'0x'+'f'.repeat(64),timestamp:42});
   await assert.rejects(client.readActivationBlock(id,[],1),/changed/);
 });
+
+test('profile lookup rejects a mismatched reverse wallet mapping', async () => {
+  const f = fixture();
+  const id = 'B-123-456-789-012';
+  const wallet = '0x1234567890123456789012345678901234567890';
+  f.ethers.utils.isAddress = value => value === wallet;
+  f.ethers.Contract.prototype.getCreator = async () => ({creatorId:id,wallet,typePrefix:'0x42',timestamp:1});
+  f.ethers.Contract.prototype.getCreatorByWallet = async () => id;
+  const client = await reader.open(f.provider, [], f.ethers);
+  assert.equal((await client.readProfileById(id)).profile.wallet, wallet);
+  f.ethers.Contract.prototype.getCreatorByWallet = async () => 'M-123-456-789-012';
+  await assert.rejects(client.readProfileById(id), /Profile record mismatch/);
+  await assert.rejects(client.readProfileById('B-invalid'), /Invalid profile ID/);
+});

@@ -42,6 +42,8 @@ html.odp-home[data-theme="blue"] {
 .odp-home label { letter-spacing: 0; text-transform: none; }
 .odp-home a:focus-visible, .odp-home button:focus-visible { outline: 3px solid #e0a03c; outline-offset: 3px; }
 .odp-home #lookup:not([hidden]) { display: grid; gap: 12px; margin: 24px 0; }
+.odp-home #profile-lookup { display: grid; gap: 12px; margin: 24px 0; }
+.odp-home #profile-result { overflow-wrap: anywhere; }
 .odp-home #lookup input { width: 100%; }
 .odp-home #result { overflow-wrap: anywhere; }
 .odp-home #registration:not([hidden]) { display: grid; gap: 14px; margin: 24px 0; }

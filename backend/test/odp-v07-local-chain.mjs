@@ -61,6 +61,8 @@ finally{provider.getTransactionReceipt=originalSafeReceipt;}
 for (let i = 0; i < 4; i++) {
   const result = await reader.readProfileByWallet(accounts[i].address);
   assert.equal(result.profile.creatorId[0], ['C','B','P','M'][i]);
+  const byId = await reader.readProfileById(result.profile.creatorId);
+  assert.equal(byId.profile.wallet.toLowerCase(), accounts[i].address.toLowerCase());
 }
 const journal = new Map();
 const storage = { getItem:key => journal.has(key) ? journal.get(key) : null, setItem:(key,value) => journal.set(key,value), removeItem:key => journal.delete(key) };

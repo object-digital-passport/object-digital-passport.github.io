@@ -154,6 +154,19 @@
         if(matches.length!==1)throw Error('Safe rejection execution event not found');
         return {blockNumber:receipt.blockNumber,transactionHash:transactionHash.toLowerCase()};
       },
+      /** Read a profile and its reverse wallet mapping at the same finalized block. */
+      async readProfileById(id) {
+        if (typeof id !== "string" || !/^[CBPM]-(?:[0-9]{3}-){3}[0-9]{3}$/.test(id)) throw new Error("Invalid profile ID");
+        const snapshot = await finalizedBlock(provider), options = { blockTag: snapshot.number };
+        const profile = await contract.getCreator(id, options);
+        const expectedPrefix = "0x" + id.charCodeAt(0).toString(16);
+        if (!profile || profile.creatorId !== id || !ethers.utils.isAddress(profile.wallet) ||
+            String(profile.typePrefix).toLowerCase() !== expectedPrefix ||
+            await contract.getCreatorByWallet(profile.wallet, options) !== id) throw new Error("Profile record mismatch");
+        const canonical = await provider.getBlock(snapshot.number);
+        if (!canonical || !canonical.hash || canonical.hash.toLowerCase() !== snapshot.hash) throw new Error("Finalized block changed");
+        return { profile, blockNumber: snapshot.number, blockHash: snapshot.hash };
+      },
       /** A wallet has at most one profile in this generation. */
       async readProfileByWallet(wallet) {
         if (!ethers.utils.isAddress(wallet)) throw new Error("Invalid wallet address");
