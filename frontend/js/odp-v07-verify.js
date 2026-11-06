@@ -27,6 +27,7 @@
   const text = key => copy[locale][key];
   const profileForm = document.getElementById("profile-lookup"), profileField = document.getElementById("profile-id"), profileResult = document.getElementById("profile-result");
   let profileState = null, profileBusy = false;
+  profileField.addEventListener("input", () => { profileState = null; renderProfile(); });
   function renderProfile() {
     profileResult.replaceChildren();
     if (!profileState) return;
@@ -46,6 +47,7 @@
     const id = profileField.value.trim().toUpperCase();
     if (!/^[CBPM]-(?:[0-9]{3}-){3}[0-9]{3}$/.test(id)) { profileState = {key:"profileInvalid"}; renderProfile(); return; }
     profileBusy = true;
+    profileField.disabled = true;
     profileForm.querySelector("button").disabled = true;
     profileState = {key:"checking"}; renderProfile();
     try {
@@ -65,7 +67,7 @@
       if (!record) throw new Error("Profile unavailable");
       profileState = {record};
     } catch (_) { profileState = {key:"error"}; }
-    finally { profileBusy = false; profileForm.querySelector("button").disabled = false; renderProfile(); }
+    finally { profileBusy = false; profileField.disabled = false; profileForm.querySelector("button").disabled = false; renderProfile(); }
   });
   function passportId(value) {
     const match=/^(?:odp:\/\/)?(ODP-[0-9]{4}-(?:0[1-9]|1[0-2])-[0-9]{9})$/i.exec(String(value||'').trim());
@@ -211,6 +213,7 @@
     append("p", text("detail"));
   }
   language.addEventListener("click", () => { locale = locale === "en" ? "ru" : "en"; try { localStorage.setItem("odp_locale", locale); } catch (_) {} render(); });
+  for (const input of [field, unit]) input.addEventListener("input", () => { state = null; render(); });
   form.addEventListener("submit", async event => {
     event.preventDefault();
     if (busy) return;
@@ -218,7 +221,7 @@
     if (!id) { state = { kind: "invalid" }; render(); return; }
     const unitValue = unit.value.trim();
     if (unitValue && (!/^(0|[1-9][0-9]*)$/.test(unitValue) || Number(unitValue) > 1048575)) { state = { kind: "unitInvalid" }; render(); return; }
-    busy = true; submit.disabled = true; bundleFile.disabled = true; state = { kind: "checking" }; render();
+    busy = true; submit.disabled = true; bundleFile.disabled = true; field.disabled = true; unit.disabled = true; state = { kind: "checking" }; render();
     try {
       if (!window.ethers || !window.ODPV07Reader) throw new Error("Reader unavailable");
       const response = await fetch("backend/config/odp-0.7/ObjectDigitalPassport.json");
@@ -252,7 +255,7 @@
       if (!record) throw error || new Error("Registry unavailable");
       state = { kind: "record", record, edition, activationBlock };
     } catch (_) { state = { kind: "error" }; }
-    finally { busy = false; submit.disabled = false; bundleFile.disabled = false; render(); }
+    finally { busy = false; submit.disabled = false; bundleFile.disabled = false; field.disabled = false; unit.disabled = false; render(); }
   });
   bundleFile.addEventListener("change", async () => {
     const file = bundleFile.files && bundleFile.files[0];
