@@ -138,3 +138,37 @@ test('profile lookup checks a B profile and displays the registered wallet', asy
   await expect(page.locator('#profile-result')).toContainText('B-123-456-789-012');
   await expect(page.locator('#profile-result')).toContainText('0x1234567890123456789012345678901234567890');
 });
+
+test('profile lookup handles invalid IDs, offline endpoints and retry', async ({page}) => {
+  await page.route('**/ethers@5.7.2/**', route => route.abort());
+  await page.addInitScript(() => {
+    localStorage.setItem('odp_locale', 'en');
+    (window as any).ethers = {providers:{JsonRpcProvider:class {}}};
+    (window as any).profileAttempts = 0;
+    (window as any).registryAvailable = false;
+  });
+  await page.route('**/backend/js/odp-v07-reader.js', route => route.fulfill({
+    contentType:'application/javascript',
+    body:`window.ODPV07Reader={open:async()=>({readProfileById:async id=>{
+      window.profileAttempts++;
+      if(!window.registryAvailable) throw Error('offline');
+      return {profile:{creatorId:id,wallet:'0x1234567890123456789012345678901234567890',timestamp:1700000000},blockNumber:123};
+    }})};`,
+  }));
+  await page.goto('/verify-07.html');
+  const input = page.getByLabel('Profile ID');
+  const check = page.getByRole('button',{name:'Check profile'});
+  await input.fill('B-invalid');
+  await check.click();
+  await expect(page.locator('#profile-result')).toContainText('Enter a C, B, P or M profile ID');
+  expect(await page.evaluate(() => (window as any).profileAttempts)).toBe(0);
+  await input.fill('M-123-456-789-012');
+  await check.click();
+  await expect(page.locator('#profile-result')).toContainText('could not be read');
+  expect(await page.evaluate(() => (window as any).profileAttempts)).toBe(2);
+  await expect(check).toBeEnabled();
+  await page.evaluate(() => { (window as any).registryAvailable = true; });
+  await check.click();
+  await expect(page.locator('#profile-result')).toContainText('M-123-456-789-012');
+  await expect(page.locator('#profile-result')).not.toContainText('could not be read');
+});

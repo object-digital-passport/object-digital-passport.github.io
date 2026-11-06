@@ -56,7 +56,7 @@
       let record;
       for (const endpoint of ["https://polygon.drpc.org", "https://polygon-bor-rpc.publicnode.com"]) {
         try {
-          const provider = new ethers.providers.JsonRpcProvider(endpoint, {name:"polygon",chainId:137});
+          const provider = new ethers.providers.JsonRpcProvider({url:endpoint,timeout:10000}, {name:"polygon",chainId:137});
           const client = await ODPV07Reader.open(provider, abi, ethers);
           record = await client.readProfileById(id);
           break;
@@ -227,7 +227,7 @@
       let record, edition, activationBlock, error;
       for (const endpoint of ["https://polygon.drpc.org", "https://polygon-bor-rpc.publicnode.com"]) {
         try {
-          const provider = new ethers.providers.JsonRpcProvider(endpoint, { name: "polygon", chainId: 137 });
+          const provider = new ethers.providers.JsonRpcProvider({url:endpoint,timeout:10000}, { name: "polygon", chainId: 137 });
           const client = await ODPV07Reader.open(provider, abi, ethers);
           record = await client.readPassport(id);
           if ((Number(record.media.anchorTypesMask) & 4096) !== 0 && [2, 3].includes(Number(record.classification.editionModel))) {
@@ -276,7 +276,7 @@
         const editionAbi = await editionResponse.json();
         for (const endpoint of ["https://polygon.drpc.org", "https://polygon-bor-rpc.publicnode.com"]) {
           try {
-            const provider = new ethers.providers.JsonRpcProvider(endpoint, { name: "polygon", chainId: 137 });
+            const provider = new ethers.providers.JsonRpcProvider({url:endpoint,timeout:10000}, { name: "polygon", chainId: 137 });
             const client = await ODPV07Reader.open(provider, abi, ethers);
             const verified = await ODPV07Bundle.verifyEntries(entries, generation, client, ethers, editionAbi);
             state = { kind: "record", record: verified.record, edition: verified.edition, bundleVerified: true, editionAddressListVerified: verified.editionAddressList === "verified" }; break;
