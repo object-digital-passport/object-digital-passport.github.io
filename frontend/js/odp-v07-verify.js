@@ -14,6 +14,8 @@
   Object.assign(copy.ru,{remaining:"Осталось на отзыв на момент этого блока",hoursShort:"ч",minutesShort:"мин",recent:"Недавно выпущен",recentDetail:"Издатель может отозвать этот паспорт до"});
   Object.assign(copy.en,{activationBlock:"Activation block",activationBlockUnavailable:"Activation event block could not be confirmed"});
   Object.assign(copy.ru,{activationBlock:"Блок активации",activationBlockUnavailable:"Не удалось подтвердить блок события активации"});
+  Object.assign(copy.en, { scan: "Scan passport QR code", closeScan: "Close camera", scanUnavailable: "The QR scanner could not start. Enter the passport ID or select an .odpass file.", scanInvalid: "This QR code does not contain a supported passport ID." });
+  Object.assign(copy.ru, { scan: "Сканировать QR-код паспорта", closeScan: "Закрыть камеру", scanUnavailable: "Не удалось запустить сканер. Введите номер паспорта или выберите файл .odpass.", scanInvalid: "В этом QR-коде нет номера паспорта поддерживаемого формата." });
   const form = document.getElementById("lookup"), field = document.getElementById("passport-id"), unit = document.getElementById("unit-index");
   const result = document.getElementById("result"), submit = document.getElementById("submit"), language = document.getElementById("language"), bundleFile = document.getElementById("bundle-file");
   let locale;
@@ -25,8 +27,107 @@
     const match=/^(?:odp:\/\/)?(ODP-[0-9]{4}-(?:0[1-9]|1[0-2])-[0-9]{9})$/i.exec(String(value||'').trim());
     return match ? match[1].toUpperCase() : null;
   }
+  function scannedPassportId(value) {
+    const direct = passportId(value);
+    if (direct) return direct;
+    try {
+      const url = new URL(value);
+      if (url.origin !== "https://object-digital-passport.github.io" || url.username || url.password || url.hash) return null;
+      if (!["/", "/verify.html", "/verify-07.html"].includes(url.pathname)) return null;
+      const entries = [...url.searchParams];
+      return entries.length === 1 && ["odp", "id"].includes(entries[0][0]) ? passportId(entries[0][1]) : null;
+    } catch (_) { return null; }
+  }
+
+  const scanButton = document.getElementById("scan-qr");
+  const scanStatus = document.getElementById("scan-status");
+  const dialog = document.getElementById("qr-dialog");
+  const video = document.getElementById("qr-video");
+  let scanSession, scanMessage;
+  async function loadQrDecoder() {
+    if (typeof window.jsQR === "function") return;
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
+    script.integrity = "sha384-b5Ya4Bq3qCyz39m2ISh+4DxjAIljdeFwK/BsXLuj9gugaNwAcj/ia15fxNZL9Nlx";
+    script.crossOrigin = "anonymous";
+    let timeout;
+    try {
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = reject;
+        timeout = setTimeout(() => reject(new Error("QR decoder timed out")), 15000);
+        document.head.appendChild(script);
+      });
+      if (typeof window.jsQR !== "function") throw new Error("QR decoder unavailable");
+    } finally { clearTimeout(timeout); script.remove(); }
+  }
+  function stopScan() {
+    if (!scanSession) return;
+    cancelAnimationFrame(scanSession.frame);
+    scanSession.stream?.getTracks().forEach(track => track.stop());
+    video.srcObject = null;
+    scanSession = null;
+  }
+  dialog.addEventListener("close", () => { if (!dialog.open) stopScan(); });
+  window.addEventListener("pagehide", stopScan);
+  scanButton.addEventListener("click", async () => {
+    if (busy || dialog.open) return;
+    scanMessage = null;
+    scanStatus.textContent = "";
+    const session = {};
+    scanSession = session;
+    try {
+      dialog.showModal();
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+      if (scanSession !== session || !dialog.open) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+      session.stream = stream;
+      video.srcObject = stream;
+      await video.play();
+      await loadQrDecoder();
+      if (scanSession !== session || !dialog.open) return;
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      if (!context) throw new Error("Canvas unavailable");
+      function frame() {
+        if (scanSession !== session || !dialog.open) return;
+        if (video.readyState >= video.HAVE_CURRENT_DATA && video.videoWidth && video.videoHeight) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          context.drawImage(video, 0, 0);
+          const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+          const code = window.jsQR(pixels.data, canvas.width, canvas.height);
+          if (code?.data) {
+            const id = scannedPassportId(code.data);
+            stopScan();
+            dialog.close();
+            if (id) {
+              field.value = id;
+              unit.value = "";
+              form.requestSubmit();
+            } else {
+              scanMessage = "scanInvalid";
+              scanStatus.textContent = text(scanMessage);
+            }
+            return;
+          }
+        }
+        session.frame = requestAnimationFrame(frame);
+      }
+      session.frame = requestAnimationFrame(frame);
+    } catch (_) {
+      if (scanSession !== session) return;
+      stopScan();
+      if (dialog.open) dialog.close();
+      scanMessage = "scanUnavailable";
+      scanStatus.textContent = text(scanMessage);
+    }
+  });
   function append(tag, value) { const el = document.createElement(tag); el.textContent = value; result.appendChild(el); }
   function render() {
+    scanStatus.textContent = scanMessage ? text(scanMessage) : "";
     document.documentElement.lang = locale;
     document.querySelectorAll("[data-copy]").forEach(el => { el.textContent = text(el.dataset.copy); });
     language.textContent = locale === "ru" ? "EN" : "RU";

@@ -153,17 +153,27 @@ try {
   await assert.rejects(exporter.make({job:recovered,receipt:{...bundleReceipt,transactionHash:hash('not-the-mint')},trustedGeneration,reader,abi,ethers:compat}));
 } finally { provider.getTransactionReceipt = originalGetReceipt; }
 db.close();
-for (const kind of ['physical','digital','mixed']) {
+for (const [role, kind, signer] of [
+  ['C', 'physical', accounts[0]],
+  ['B', 'physical', accounts[1]],
+  ['P', 'digital', accounts[2]],
+  ['M', 'mixed', accounts[3]],
+]) {
+  const wallet = signer.address;
+  const issuer = (await reader.readProfileByWallet(wallet)).profile;
+  assert.equal(issuer.creatorId[0], role);
+  const ethereum = {request: async request => request.method === 'eth_accounts' ? [wallet] : connection.provider.request(request)};
   const latest = await provider.getBlock('latest');
   const built = await draft.build({objectType:kind,title:'Local '+kind,authorName:'Author',shortDescription:'Synthetic test',domain:'art',contentClass:'static',status:'produced_object',aiStatus:'none',timestamp:latest.timestamp,width:'10',height:'20',unit:'CMT',materials:'paper',features:'mark',physicalCategory:'art',photo:new TextEncoder().encode('photo '+kind),digitalFile:new TextEncoder().encode('file '+kind),digitalSubtype:'image',digitalFormat:'png'});
-  const prepared = await jobTools.prepare({...built,profile,wallet:accounts[0].address,...opts});
+  const prepared = await jobTools.prepare({...built,profile:issuer,wallet,...opts});
   const testDb = await jobStore.open(new IDBFactory());
   await jobStore.save(testDb,prepared,opts);
   const backup = await jobBackup.exportJob(prepared,opts);
-  const args = {db:testDb,operationId:prepared.identity.operationId,expectedFingerprint:prepared.fingerprint,backupBytes:backup,reader,ethereum:walletProvider,wallet:accounts[0].address,locks,...opts};
+  const args = {db:testDb,operationId:prepared.identity.operationId,expectedFingerprint:prepared.fingerprint,backupBytes:backup,reader,ethereum,wallet,locks,...opts};
   assert.equal((await issue.send(args)).state,'submitted');
   assert.equal((await issue.send(args)).state,'minted');
   const minted = await jobStore.get(testDb,prepared.identity.operationId,opts);
+  assert.equal((await reader.readPassport(minted.passportId)).header.creatorId, issuer.creatorId);
   const chainReceipt = await provider.getTransactionReceipt(minted.transactionHash);
   const receipt = {format:'odp-bundle-receipt-0.7',generationId:trustedGeneration.generationId,chainId:'137',registry:readerTools.REGISTRY,passportId:minted.passportId,transactionHash:minted.transactionHash,blockNumber:String(chainReceipt.blockNumber),blockHash:chainReceipt.blockHash.toLowerCase(),operationId:minted.identity.operationId};
   const getReceipt = provider.getTransactionReceipt.bind(provider);
@@ -171,5 +181,5 @@ for (const kind of ['physical','digital','mixed']) {
   try { assert.ok((await exporter.make({job:minted,receipt,trustedGeneration,reader,abi,ethers:compat})).bytes.length > 0); }
   finally { provider.getTransactionReceipt = getReceipt; testDb.close(); }
 }
-console.log('Local ABI8 chain: four roles, three draft-to-export paths, edition activation, recovery, revoke and print finalization passed.');
+console.log('Local ABI8 chain: C/B/P/M draft, mint, lookup and export, edition activation, recovery, revoke and print finalization passed.');
 await connection.close();
