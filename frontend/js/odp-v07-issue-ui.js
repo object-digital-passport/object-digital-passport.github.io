@@ -17,6 +17,7 @@
   en.executionDeadline='Mint execution deadline'; en.deadlineNear='Less than 24 hours remain on this device clock; co-signers may miss the deadline.'; en.deadlineExpired='The month has ended on this device clock. A transaction not yet mined cannot execute with these inputs.'; en.unique='Unique object · edition size 1';
   ru.executionDeadline='Крайний срок исполнения выпуска'; ru.deadlineNear='По часам этого устройства осталось менее 24 часов; остальные подписанты могут не успеть.'; ru.deadlineExpired='По часам этого устройства месяц закончился. Невключённая в блок транзакция с этими данными не исполнится.'; ru.unique='Уникальный объект · тираж 1';
   en.connectSafe='Connect Safe App'; ru.connectSafe='Подключить Safe App';
+  en.walletHelp='Use your browser wallet, WalletConnect, or open this page inside Safe to connect Safe App.'; ru.walletHelp='Подключите кошелёк браузера или WalletConnect. Для Safe App откройте страницу внутри Safe.';
   en.connectMobile='Mobile wallet · WalletConnect'; ru.connectMobile='Мобильный кошелёк · WalletConnect';
   const $ = id => document.getElementById(id), form=$('draft'), review=$('review'), status=$('status'), backupInput=$('backupFile'), restoreInput=$('restoreJob'), confirm=$('confirm');
   let locale; try { locale=localStorage.getItem('odp_locale'); } catch (_) {} if (!['en','ru'].includes(locale)) locale=(navigator.language||'').toLowerCase().startsWith('ru')?'ru':'en';

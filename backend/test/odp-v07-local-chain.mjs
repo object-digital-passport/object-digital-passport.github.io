@@ -15,6 +15,8 @@ const jobBackup = require(site + '/backend/js/odp-v07-job-backup.js');
 const draft = require(site + '/backend/js/odp-v07-draft.js');
 const issue = require(site + '/backend/js/odp-v07-issue.js');
 const exporter = require(site + '/backend/js/odp-v07-export.js');
+const zip = require(site + '/backend/js/odp-v07-zip.js');
+const bundle = require(site + '/backend/js/odp-v07-bundle.js');
 const safeTools = require(site + '/backend/js/odp-v07-safe.js');
 const trustedGeneration = require(site + '/backend/config/odp-0.7/generation.json');
 const { IDBFactory } = require(site + '/backend/node_modules/fake-indexeddb');
@@ -154,11 +156,11 @@ try {
 } finally { provider.getTransactionReceipt = originalGetReceipt; }
 db.close();
 for (const [role, kind, signer] of [
-  ['C', 'physical', accounts[0]],
-  ['B', 'physical', accounts[1]],
-  ['P', 'digital', accounts[2]],
-  ['M', 'mixed', accounts[3]],
-]) {
+  ['C', accounts[0]],
+  ['B', accounts[1]],
+  ['P', accounts[2]],
+  ['M', accounts[3]],
+].flatMap(([role, signer]) => ['physical', 'digital', 'mixed'].map(kind => [role, kind, signer]))) {
   const wallet = signer.address;
   const issuer = (await reader.readProfileByWallet(wallet)).profile;
   assert.equal(issuer.creatorId[0], role);
@@ -178,8 +180,19 @@ for (const [role, kind, signer] of [
   const receipt = {format:'odp-bundle-receipt-0.7',generationId:trustedGeneration.generationId,chainId:'137',registry:readerTools.REGISTRY,passportId:minted.passportId,transactionHash:minted.transactionHash,blockNumber:String(chainReceipt.blockNumber),blockHash:chainReceipt.blockHash.toLowerCase(),operationId:minted.identity.operationId};
   const getReceipt = provider.getTransactionReceipt.bind(provider);
   provider.getTransactionReceipt = async hash => { const value = await getReceipt(hash); return value && {transactionHash:value.hash,blockNumber:value.blockNumber,blockHash:value.blockHash,status:value.status,logs:value.logs}; };
-  try { assert.ok((await exporter.make({job:minted,receipt,trustedGeneration,reader,abi,ethers:compat})).bytes.length > 0); }
+  try {
+    const archive = await exporter.make({job:minted,receipt,trustedGeneration,reader,abi,ethers:compat});
+    const entries = await zip.extract(archive.bytes);
+    const verified = await bundle.verifyEntries(entries, trustedGeneration, reader, compat);
+    assert.equal(verified.record.header.creatorId, issuer.creatorId);
+    assert.equal(verified.record.header.objectType, kind);
+    const original = entries.find(entry => entry.name.startsWith('files/'));
+    assert.ok(original);
+    original.bytes[0] ^= 1;
+    const modifiedArchive = zip.create(entries);
+    await assert.rejects(bundle.verifyEntries(await zip.extract(modifiedArchive), trustedGeneration, reader, compat));
+  }
   finally { provider.getTransactionReceipt = getReceipt; testDb.close(); }
 }
-console.log('Local ABI8 chain: C/B/P/M draft, mint, lookup and export, edition activation, recovery, revoke and print finalization passed.');
+console.log('Local ABI8 chain: all 12 C/B/P/M and object-type draft, mint, lookup, export and archive verification paths passed; modified originals were rejected.');
 await connection.close();
