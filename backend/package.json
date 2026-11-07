@@ -21,7 +21,7 @@
   "devDependencies": {
     "ajv": "8.20.0",
     "esbuild": "^0.28.0",
-    "fake-indexeddb": "6.2.5"
+    "fake-indexeddb": "6.2.7"
   },
   "overrides": {
     "axios": "^1.18.0"
