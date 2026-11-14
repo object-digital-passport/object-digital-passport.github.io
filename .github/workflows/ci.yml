@@ -51,7 +51,8 @@ jobs:
         run: |
           npm run build:schemas
           npm run build:safe
-          git diff --exit-code -- js/odp-v07-schemas.bundle.js js/odp-v07-safe-app.bundle.js
+          npm run build:wc
+          git diff --exit-code -- js/odp-v07-schemas.bundle.js js/odp-v07-safe-app.bundle.js js/odp-wallet-wc.bundle.js
       - name: SPEC 0.7 read layer, against the published vectors
         run: node backend/test/odp-contract-0.7.test.mjs
       - name: Pinned 0.7 registry reader
