@@ -217,12 +217,14 @@
         }
         if (events.length !== 1) throw new Error("Mint event not found or ambiguous");
         const e = events[0], h = record.header, c = record.classification, m = record.media;
-        if (e.passportIdText !== h.passportId || e.creatorId !== h.creatorId || e.title !== h.title ||
-            e.authorName !== h.authorName || e.domain !== h.domain || e.objectType !== h.objectType ||
-            String(e.contentClass) !== String(c.contentClass) || String(e.year) !== String(h.year) ||
-            String(e.month) !== String(h.month) || !same(e.dataHash, m.dataHash) || !same(e.anchorsHash, m.anchorsHash) ||
-            String(e.anchorTypesMask) !== String(m.anchorTypesMask) || String(e.timestamp) !== String(c.timestamp) ||
-            !same(e.operationId, claim.operationId)) throw new Error("Mint event differs from the registry record");
+        // ethers v5 parseLog can return an unnamed Result for indexed dynamic strings.
+        // Positions are fixed by the pinned PassportMinted ABI, also with ethers v6.
+        if (e[1] !== h.passportId || e[3] !== h.creatorId || e[4] !== h.title ||
+            e[5] !== h.authorName || e[6] !== h.domain || e[7] !== h.objectType ||
+            String(e[8]) !== String(c.contentClass) || String(e[9]) !== String(h.year) ||
+            String(e[10]) !== String(h.month) || !same(e[11], m.dataHash) || !same(e[12], m.anchorsHash) ||
+            String(e[13]) !== String(m.anchorTypesMask) || String(e[14]) !== String(c.timestamp) ||
+            !same(e[15], claim.operationId)) throw new Error("Mint event differs from the registry record");
         return { blockNumber: height, transactionHash: claim.transactionHash };
       },
     };

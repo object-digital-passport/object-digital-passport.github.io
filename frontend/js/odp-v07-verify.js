@@ -27,7 +27,7 @@
   const text = key => copy[locale][key];
   const profileForm = document.getElementById("profile-lookup"), profileField = document.getElementById("profile-id"), profileResult = document.getElementById("profile-result");
   let profileState = null, profileBusy = false;
-  profileField.addEventListener("input", () => { profileState = null; renderProfile(); });
+  profileField.addEventListener("input", () => { profileState = null; profileField.removeAttribute("aria-invalid"); profileField.removeAttribute("aria-describedby"); renderProfile(); });
   function renderProfile() {
     profileResult.replaceChildren();
     if (!profileState) return;
@@ -45,7 +45,7 @@
     event.preventDefault();
     if (profileBusy) return;
     const id = profileField.value.trim().toUpperCase();
-    if (!/^[CBPM]-(?:[0-9]{3}-){3}[0-9]{3}$/.test(id)) { profileState = {key:"profileInvalid"}; renderProfile(); return; }
+    if (!/^[CBPM]-(?:[0-9]{3}-){3}[0-9]{3}$/.test(id)) { profileState = {key:"profileInvalid"}; renderProfile(); profileField.setAttribute("aria-invalid", "true"); profileField.setAttribute("aria-describedby", "profile-result"); profileField.focus(); return; }
     profileBusy = true;
     profileField.disabled = true;
     profileForm.querySelector("button").disabled = true;
@@ -176,9 +176,10 @@
     scanStatus.textContent = scanMessage ? text(scanMessage) : "";
     renderProfile();
     document.documentElement.lang = locale;
+    document.title = text("title") + " — ODP 0.7";
     document.querySelectorAll("[data-copy]").forEach(el => { el.textContent = text(el.dataset.copy); });
     language.textContent = locale === "ru" ? "EN" : "RU";
-    language.setAttribute("aria-label", text("switch"));
+    language.setAttribute("aria-label", language.textContent + " — " + text("switch"));
     result.replaceChildren();
     if (!state) return;
     if (state.kind === "bundleOffline") { append("p", text("localMatched")); append("p", text("chainUnconfirmed")); append("p", text("detail")); return; }
@@ -213,14 +214,14 @@
     append("p", text("detail"));
   }
   language.addEventListener("click", () => { locale = locale === "en" ? "ru" : "en"; try { localStorage.setItem("odp_locale", locale); } catch (_) {} render(); });
-  for (const input of [field, unit]) input.addEventListener("input", () => { state = null; render(); });
+  for (const input of [field, unit]) input.addEventListener("input", () => { state = null; for (const control of [field, unit]) { control.removeAttribute("aria-invalid"); control.removeAttribute("aria-describedby"); } render(); });
   form.addEventListener("submit", async event => {
     event.preventDefault();
     if (busy) return;
     const id = passportId(field.value);
-    if (!id) { state = { kind: "invalid" }; render(); return; }
+    if (!id) { state = { kind: "invalid" }; render(); field.setAttribute("aria-invalid", "true"); field.setAttribute("aria-describedby", "result"); field.focus(); return; }
     const unitValue = unit.value.trim();
-    if (unitValue && (!/^(0|[1-9][0-9]*)$/.test(unitValue) || Number(unitValue) > 1048575)) { state = { kind: "unitInvalid" }; render(); return; }
+    if (unitValue && (!/^(0|[1-9][0-9]*)$/.test(unitValue) || Number(unitValue) > 1048575)) { state = { kind: "unitInvalid" }; render(); unit.setAttribute("aria-invalid", "true"); unit.setAttribute("aria-describedby", "result"); unit.focus(); return; }
     busy = true; submit.disabled = true; bundleFile.disabled = true; field.disabled = true; unit.disabled = true; state = { kind: "checking" }; render();
     try {
       if (!window.ethers || !window.ODPV07Reader) throw new Error("Reader unavailable");
@@ -260,9 +261,10 @@
   bundleFile.addEventListener("change", async () => {
     const file = bundleFile.files && bundleFile.files[0];
     if (!file || busy) return;
-    busy = true; submit.disabled = true; bundleFile.disabled = true; state = { kind: "bundleChecking" }; render();
+    field.value = ""; unit.value = "";
+    busy = true; submit.disabled = true; bundleFile.disabled = true; field.disabled = true; unit.disabled = true; state = { kind: "bundleChecking" }; render();
     try {
-      if (file.size > 104857600 || !window.ODPV07Zip || !window.ODPV07Bundle) throw new Error("File unavailable");
+      if (!window.ODPV07Zip || !window.ODPV07Bundle || file.size > ODPV07Zip.MAX_ARCHIVE_BYTES) throw new Error("File unavailable");
       const entries = await ODPV07Zip.extract(new Uint8Array(await file.arrayBuffer()));
       const generationResponse = await fetch("backend/config/odp-0.7/generation.json");
       if (!generationResponse.ok) throw new Error("Generation unavailable");
@@ -287,9 +289,9 @@
         }
       } catch (_) {}
     } catch (_) { state = { kind: "bundleInvalid" }; }
-    finally { busy = false; submit.disabled = false; bundleFile.disabled = false; bundleFile.value = ""; render(); }
+    finally { busy = false; submit.disabled = false; bundleFile.disabled = false; field.disabled = false; unit.disabled = false; bundleFile.value = ""; render(); }
   });
-  const query = new URLSearchParams(location.search), id = query.getAll('id').length===1 ? passportId(query.get('id')) : null;
+  const id = ODPV07Locator.queryPassportId(location.search, location.hash);
   if (id) field.value = id;
   render();
 })();

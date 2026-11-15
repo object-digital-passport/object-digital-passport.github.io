@@ -56,6 +56,8 @@ jobs:
         run: node backend/test/odp-contract-0.7.test.mjs
       - name: Pinned 0.7 registry reader
         run: node --test backend/test/odp-v07-reader.test.cjs
+      - name: Public passport link parsing
+        run: node --test frontend/test/odp-v07-locator.test.cjs
       - name: 0.7 mint operation preparation
         run: node --test backend/test/odp-v07-mint.test.cjs
       - name: 0.7 immutable issuance job

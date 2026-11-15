@@ -3842,3 +3842,6 @@ html[data-theme="blue"] .odp-id-card {
     padding: 18px 16px 16px;
   }
 }
+
+/* Maintain legible links in both themes. */
+.fhint a { color: inherit; text-decoration: underline; }

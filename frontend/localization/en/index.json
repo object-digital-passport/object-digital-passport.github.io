@@ -5,14 +5,18 @@
       "h1": "Object Digital Passport",
       "sub": "Object Digital Passport · 0.7 preview"
     },
-    "cardTitle": "Open a page",
-    "lead": "These pages open in your browser. Connect a wallet only where the page asks. You need internet access so the site can read the public registry on Polygon.",
+    "cardTitle": "What would you like to do?",
+    "lead": "A digital passport connects an object to its public record.",
     "btnVerify": "Verify — no wallet needed",
     "btnCreator": "Register profile",
     "btnPassport": "Create a passport",
     "btnActions": "Passport actions",
     "legacy": "Previous version:",
     "source": "Source on GitHub",
-    "readme": "README"
+    "readme": "README",
+    "verifyDescription": "Check a passport or profile.",
+    "passportDescription": "Prepare and register an object.",
+    "profileDescription": "Set up your issuer profile.",
+    "actionsDescription": "Manage an existing passport."
   }
 }
