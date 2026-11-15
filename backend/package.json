@@ -22,7 +22,7 @@
     "ajv": "8.20.0",
     "esbuild": "^0.28.0",
     "ethers": "5.7.2",
-    "fake-indexeddb": "6.2.7"
+    "fake-indexeddb": "6.2.8"
   },
   "overrides": {
     "axios": "^1.18.0"
