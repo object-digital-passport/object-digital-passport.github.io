@@ -5,19 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0d0d0d">
 <meta name="color-scheme" content="dark">
+<script src="js/odp-v07-locator.js"></script>
+<script>
+  const publicPassportId = ODPV07Locator.queryPassportId(location.search, location.hash);
+  if (publicPassportId) location.replace('verify-07.html?id=' + encodeURIComponent(publicPassportId));
+</script>
 <script src="js/odp-i18n-boot.js?v=2"></script>
 <title>ODP 0.7 — Object Digital Passport</title>
 <link rel="stylesheet" href="css/odp.css?v=20260519form">
 <link rel="stylesheet" href="css/odp-home.css">
 <script src="js/odp-theme.js?v=0.3.0"></script>
-<script src="backend/js/odp-contract.js?v=0.5.0"></script>
 <script src="js/odp-i18n.js?v=16"></script>
 </head>
 <body>
 <div class="page">
   <header class="header-row">
     <div class="header-left">
-      <img class="home-logo" src="odp-logo.png" alt="ODP">
+      <img class="home-logo" src="odp-logo.png" width="720" height="463" alt="ODP">
       <h1 data-i18n="index.meta.h1">Object Digital Passport</h1>
       <p class="sub" data-i18n="index.meta.sub">Object Digital Passport · 0.7 preview</p>
     </div>
@@ -26,24 +30,35 @@
       <div id="odpLangSwitch"></div>
     </div>
   </header>
-  <div class="nav">
-    <a href="profile-07.html" data-i18n="nav.creator">Profile</a>
-    <a href="issue-07.html" data-i18n="nav.passport">Passport</a>
-    <a href="verify-07.html" data-i18n="nav.verify">Verify</a>
-  </div>
-  <div class="card" style="margin-top:24px">
-    <div class="card-head" data-i18n="index.cardTitle">Open a page</div>
-    <div class="card-body">
-      <p class="fhint" style="margin-bottom:16px" data-i18n="index.lead">These are static pages; connect a wallet where needed. Polygon PoS RPC is required for chain reads.</p>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <a class="btn" href="verify-07.html" data-i18n="index.btnVerify">Verify — no wallet</a>
-        <a class="btn btn-sec" href="profile-07.html" data-i18n="index.btnCreator">Register profile</a>
-        <a class="btn btn-sec" href="issue-07.html" data-i18n="index.btnPassport">Create a passport</a>
-        <a class="btn btn-sec" href="release-07.html" data-i18n="index.btnActions">Passport actions</a>
-      </div>
-      <p class="fhint" style="margin-top:20px"><span data-i18n="index.legacy">Previous version:</span> <a href="creator.html" data-i18n="nav.creator">Profile</a> · <a href="passport.html" data-i18n="nav.passport">Passport</a> · <a href="verify.html" data-i18n="nav.verify">Verify</a></p>
+  <main class="home-content">
+    <div class="home-intro">
+      <p class="home-eyebrow">ODP · 0.7</p>
+      <h2 data-i18n="index.cardTitle">What would you like to do?</h2>
+      <p data-i18n="index.lead">Choose an action to get started.</p>
     </div>
-  </div>
+    <div class="home-actions">
+      <a class="home-action home-action-primary" href="verify-07.html">
+        <span class="home-action-number" aria-hidden="true">01</span>
+        <span class="home-action-content"><strong data-i18n="index.btnVerify">Verify — no wallet needed</strong><span aria-hidden="true" data-i18n="index.verifyDescription">Check a passport or profile.</span></span>
+        <span class="home-action-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="home-action" href="issue-07.html">
+        <span class="home-action-number" aria-hidden="true">02</span>
+        <span class="home-action-content"><strong data-i18n="index.btnPassport">Create a passport</strong><span aria-hidden="true" data-i18n="index.passportDescription">Prepare and register an object.</span></span>
+        <span class="home-action-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="home-action" href="profile-07.html">
+        <span class="home-action-number" aria-hidden="true">03</span>
+        <span class="home-action-content"><strong data-i18n="index.btnCreator">Register profile</strong><span aria-hidden="true" data-i18n="index.profileDescription">Set up your issuer profile.</span></span>
+        <span class="home-action-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="home-action" href="release-07.html">
+        <span class="home-action-number" aria-hidden="true">04</span>
+        <span class="home-action-content"><strong data-i18n="index.btnActions">Passport actions</strong><span aria-hidden="true" data-i18n="index.actionsDescription">Manage an existing passport.</span></span>
+        <span class="home-action-arrow" aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </main>
 
 <footer>
   <a href="https://github.com/object-digital-passport/specifications" target="_blank" rel="noopener noreferrer" data-i18n="footer.githubRepo">GitHub</a>

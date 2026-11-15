@@ -1,0 +1,41 @@
+{
+  "headerBefore": {
+    "width": 358,
+    "container": 358,
+    "title": 0
+  },
+  "headerAfter": {
+    "x": 78,
+    "y": 24,
+    "width": 232,
+    "height": 25.296875
+  },
+  "afterReview": {
+    "active": "review",
+    "confirmationHidden": false
+  },
+  "afterBack": {
+    "active": "back",
+    "tag": "BUTTON",
+    "confirmationHidden": true
+  },
+  "dialogOpen": {
+    "open": true,
+    "focused": "<button class=\"btn btn-sec\" autofocus=\"\" data-copy=\"closeScan\">Close camera</button>"
+  },
+  "dialogClosed": {
+    "open": false,
+    "active": "scan-qr"
+  },
+  "russianTitle": {
+    "lang": "ru",
+    "title": "ODP 0.7 — Verify",
+    "heading": "Проверить паспорт"
+  },
+  "validation": {
+    "active": "submit",
+    "ariaInvalid": null,
+    "valid": true,
+    "result": "Введите номер в формате ODP-ГГГГ-ММ-000000000."
+  }
+}

@@ -27,6 +27,28 @@ The 0.7 pages are `verify-07.html`, `profile-07.html`, `issue-07.html` and `rele
 
 ## Review limits and follow-up
 
+### Local ethers 5 regression check (8 November 2026)
+
+The site loads ethers 5.7.2, while the isolated-chain harness normally uses ethers 6. After installing backend test dependencies, exercise the site's issuance and archive paths with ethers 5 on the same synthetic chain:
+
+```sh
+ODP_ETHERS_V5_MODULE="$PWD/backend/node_modules/ethers" sh backend/test/run-local-chain.sh
+```
+
+The run covers preparation, issuance, lookup, export and archive verification for the 12 combinations of C/B/P/M profiles and physical/digital/mixed objects. CI also decodes an actual ethers 5 event in the reader unit tests. These checks do not exercise a browser wallet, a real Polygon transaction or the visual layout.
+
+The isolated-chain harness also registers B, P and M profiles through synthetic Safe 1.4.1 wallets (2 of 3), submits physical, digital and mixed-object proposals through a simulated Safe SDK, executes them with synthetic owner signatures and verifies the exported archives. For each combination it restores the pending backup in a new store, confirms the minted passport without another proposal and exports it using the execution transaction hash; the Safe proposal hash is rejected as a receipt. It does not test the live Safe App or Safe transaction service.
+
+The harness advances its synthetic chain into the next UTC month for an additional B/mixed proposal, cancels the expired Safe proposal with the same nonce, verifies its execution, re-prepares the job and completes issuance and archive verification. This is not a real-world Safe cancellation or Polygon transaction.
+
+On macOS, `node backend/test/odp-v07-swift-interop.cjs` compiles the sibling `swift-core` ZIP implementation and checks both directions with synthetic bundle files: Swift ZIP writing followed by the site's local bundle inspection, and site ZIP writing followed by Swift ZIP reading. Set `ODP_SWIFT_CORE` if the sibling checkout is elsewhere. This is a container-format check, not a full iPhone app export or on-chain verification.
+
+`node backend/test/odp-v07-app-fixtures.cjs` checks the sibling iPhone app's synthetic receipt fixtures: three intact archives pass local inspection against their fixture generation, while missing or changed payloads and that fixture generation presented as the site's approved deployment are rejected. Set `ODP_APP_ROOT` if the sibling checkout is elsewhere. These fixtures refer to a synthetic registry and do not demonstrate live registration.
+
+The website accepts archives up to 105 MiB to fit two 50 MiB originals plus metadata. The current iPhone creator import applies a 100 MiB archive limit (`CreatorArchiveBounds`); the website warns during review when originals exceed 99 MiB. This is a conservative warning, not a guarantee that every smaller archive can be imported by the app.
+
+On 8 November 2026 the incremental edition address-list verifier was compared with an independently computed Merkle root for 1,048,576 synthetic addresses in Node on macOS. The run completed successfully; this does not establish performance or memory use on an iPhone. Automated unit tests also cover odd counts, 128-entry boundaries and a duplicate across blocks.
+
 - No public deployment, real wallet connection, real Safe proposal, Polygon transaction, physical NFC or printer test was performed. The Safe integration and WalletConnect paths need a separate authorized live acceptance before release.
 - Safe proposal hashes and actual execution transaction hashes are distinct. The app preserves the former in the local job; an execution hash is needed for receipt verification. The Safe UI must select the same nonce for a cancellation, and a mismatch remains unresolved.
 - An RPC may not expose historical activation logs or support the required historical reads. The verifier reports an unconfirmed activation block in that case; an activation is not ownership or physical authenticity.

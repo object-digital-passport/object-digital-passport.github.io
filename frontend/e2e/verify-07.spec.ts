@@ -55,12 +55,25 @@ test('odpass local check distinguishes valid files from confirmed registration',
   const entries=Object.entries(docs).map(([name,value])=>({name:name+'.json',bytes:new TextEncoder().encode(canonical.canonicalize(value))})); entries.push({name:path,bytes});
   const archive=Buffer.from(zip.create(entries));
   await page.route('**/ethers@5.7.2/**', route => route.abort());
+  let releaseGeneration: (() => void) | undefined;
+  await page.route('**/backend/config/odp-0.7/generation.json', async route => {
+    await new Promise<void>(resolve => { releaseGeneration = resolve; });
+    await route.continue();
+  });
   await page.addInitScript(()=>localStorage.setItem('odp_locale','en'));
   await page.goto('/verify-07.html');
+  const passportId = page.getByLabel('Passport ID'), unitIndex = page.getByLabel('Unit index, if known (starts at 0)');
+  await passportId.fill('ODP-2026-09-000000002');
+  await unitIndex.fill('1');
   await page.getByLabel('Or select an .odpass file').setInputFiles({name:'sample.odpass',mimeType:'application/zip',buffer:archive});
+  await expect.poll(() => typeof releaseGeneration).toBe('function');
+  await expect(passportId).toBeDisabled(); await expect(unitIndex).toBeDisabled();
+  await expect(passportId).toBeEmpty(); await expect(unitIndex).toBeEmpty();
+  releaseGeneration!();
   await expect(page.getByText('Archive files match their manifest. The passport schema and deployment details match.')).toBeVisible();
   await expect(page.getByText(/Registration is not confirmed/)).toBeVisible();
   await expect(page.getByText('The passport content and mint receipt match the ODP 0.7 registry.')).toHaveCount(0);
+  await expect(passportId).toBeEnabled(); await expect(unitIndex).toBeEnabled();
   await page.getByLabel('Or select an .odpass file').setInputFiles({name:'broken.odpass',mimeType:'application/zip',buffer:Buffer.from('not a zip')});
   await expect(page.getByText(/This file could not be checked/)).toBeVisible();
 });
@@ -74,6 +87,21 @@ test('legacy public locator is preserved without forwarding unrelated parameters
   await expect(page).toHaveURL(/verify-07\.html\?id=ODP-2026-09-000000027$/);
   await expect(page.getByLabel('Passport ID')).toHaveValue('ODP-2026-09-000000027');
   await expect(page.locator('#result')).toBeEmpty();
+});
+
+test('a direct public locator opens 0.7 verification without forwarding extras', async ({page}) => {
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1(?::|\/)).*/,route=>route.abort());
+  await page.addInitScript(()=>localStorage.setItem('odp_locale','en'));
+  const id='ODP-2026-09-000000027';
+  await page.goto('/?odp='+id);
+  await expect(page).toHaveURL(/verify-07\.html\?id=ODP-2026-09-000000027$/);
+  await expect(page.getByLabel('Passport ID')).toHaveValue(id);
+  await expect(page.locator('#result')).toBeEmpty();
+  await page.goto('/verify-07.html?odp='+id);
+  await expect(page.getByLabel('Passport ID')).toHaveValue(id);
+  await page.goto('/?odp='+id+'&secret=private');
+  await expect(page).toHaveURL(/\/?\?odp=.*&secret=private$/);
+  await expect(page.getByRole('link',{name:'Verify — no wallet needed'})).toHaveAttribute('href','verify-07.html');
 });
 
 test('ODP locator is accepted while extra URI data is rejected',async({page})=>{
@@ -192,4 +220,18 @@ test('editing a profile ID clears the previous profile result', async ({page}) =
   await expect(page.locator('#profile-result')).toContainText('B-123-456-789-012');
   await input.fill('M-123-456-789-012');
   await expect(page.locator('#profile-result')).toBeEmpty();
+});
+
+test('validation state clears across related fields and title follows language', async ({page}) => {
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1(?::|\/)).*/, route => route.abort());
+  await page.addInitScript(() => localStorage.setItem('odp_locale', 'en'));
+  await page.goto('/verify-07.html');
+  await page.locator('#passport-id').fill('wrong');
+  await page.locator('#submit').click();
+  await expect(page.locator('#passport-id')).toHaveAttribute('aria-invalid', 'true');
+  await page.locator('#unit-index').fill('1');
+  await expect(page.locator('#passport-id')).not.toHaveAttribute('aria-invalid');
+  await expect(page).toHaveTitle('Verify a passport — ODP 0.7');
+  await page.locator('#language').click();
+  await expect(page).toHaveTitle('Проверить паспорт — ODP 0.7');
 });

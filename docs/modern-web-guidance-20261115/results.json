@@ -1,0 +1,1984 @@
+[
+  {
+    "name": "index",
+    "locale": "en",
+    "errors": [],
+    "axe": {
+      "violations": [],
+      "incomplete": [],
+      "passes": 34
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 296,
+          "height": 31.359375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Object Digital Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 358,
+          "height": 32.1875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Object Digital Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 31.359375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Object Digital Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 43,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Object Digital Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 803,
+          "height": 47.03125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Object Digital Passport"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "28px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "28px"
+    }
+  },
+  {
+    "name": "verify-07",
+    "locale": "en",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "help": "Elements must have their visible text as part of their accessible name",
+          "nodes": [
+            {
+              "target": [
+                "#language"
+              ],
+              "html": "<button type=\"button\" id=\"language\" class=\"btn btn-sec\" aria-label=\"Change language to Russian\">RU</button>",
+              "summary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 2
+        }
+      ],
+      "passes": 35
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 0,
+          "height": 75.890625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Verify a passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 0,
+          "height": 75.890625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Verify a passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Verify a passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Verify a passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 728,
+          "height": 36.796875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Verify a passport"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "22px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "22px",
+      "validation": {
+        "ariaInvalid": null,
+        "describedby": null,
+        "nativeValid": true,
+        "active": "submit",
+        "error": "Enter a passport ID in the format ODP-YYYY-MM-000000000."
+      }
+    }
+  },
+  {
+    "name": "profile-07",
+    "locale": "en",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "help": "Elements must have their visible text as part of their accessible name",
+          "nodes": [
+            {
+              "target": [
+                "#language"
+              ],
+              "html": "<button type=\"button\" class=\"btn btn-sec\" id=\"language\" aria-label=\"Change language to Russian\">RU</button>",
+              "summary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 2
+        }
+      ],
+      "passes": 34
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 0,
+          "height": 25.296875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Profile"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 0,
+          "height": 25.296875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Profile"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Profile"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Profile"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 728,
+          "height": 36.796875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Profile"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "22px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "22px"
+    }
+  },
+  {
+    "name": "issue-07",
+    "locale": "en",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "help": "Elements must have their visible text as part of their accessible name",
+          "nodes": [
+            {
+              "target": [
+                "#language"
+              ],
+              "html": "<button id=\"language\" type=\"button\" class=\"btn btn-sec\" aria-label=\"Change language to Russian\">RU</button>",
+              "summary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 2
+        }
+      ],
+      "passes": 37
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 0,
+          "height": 75.890625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Create a passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 0,
+          "height": 75.890625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Create a passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Create a passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Create a passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 728,
+          "height": 36.796875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Create a passport"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "22px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "22px"
+    }
+  },
+  {
+    "name": "release-07",
+    "locale": "en",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "help": "Elements must have their visible text as part of their accessible name",
+          "nodes": [
+            {
+              "target": [
+                "#language"
+              ],
+              "html": "<button type=\"button\" class=\"btn btn-sec\" id=\"language\" aria-label=\"Change language to Russian\">RU</button>",
+              "summary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 2
+        }
+      ],
+      "passes": 34
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 0,
+          "height": 50.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Passport actions"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 0,
+          "height": 50.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Passport actions"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Passport actions"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Passport actions"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 728,
+          "height": 36.796875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Passport actions"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "22px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "22px"
+    }
+  },
+  {
+    "name": "verify",
+    "locale": "en",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                "#odpV07VerifyLink"
+              ],
+              "html": "<a id=\"odpV07VerifyLink\" href=\"verify-07.html\" data-i18n=\"verify.v07Link\">Check an ODP 0.7 passport</a>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.16 (foreground color: #0000ee, background color: #2b4c9b, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "span[data-i18n=\"verify.odpQuick.dropLine2\"]"
+              ],
+              "html": "<span style=\"opacity:0.6\" data-i18n=\"verify.odpQuick.dropLine2\">Processed locally — not uploaded</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.94 (foreground color: #9296a4, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "help": "Heading levels should only increase by one",
+          "nodes": [
+            {
+              "target": [
+                "#odpSiteTrustModalTitle"
+              ],
+              "html": "<h3 id=\"odpSiteTrustModalTitle\" class=\"odp-modal-title\">Site release &amp; trust</h3>",
+              "summary": "Fix any of the following:\n  Heading order invalid"
+            }
+          ]
+        },
+        {
+          "id": "region",
+          "impact": "moderate",
+          "help": "All page content should be contained by landmarks",
+          "nodes": [
+            {
+              "target": [
+                ".nav"
+              ],
+              "html": "<div class=\"nav\">\n  <a href=\"creator.html\" data-i18n=\"nav.creator\">Profile</a>\n  <a href=\"passport.html\" data-i18n=\"nav.passport\">Passport</a>\n  <a href=\"verify.html\" class=\"active\" aria-current=\"page\" data-i18n=\"nav.verify\">Verify</a>\n</div>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".page > .fhint:nth-child(3)"
+              ],
+              "html": "<p class=\"fhint\"><a id=\"odpV07VerifyLink\" href=\"verify-07.html\" data-i18n=\"verify.v07Link\">Check an ODP 0.7 passport</a></p>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                "label[for=\"idInput\"]"
+              ],
+              "html": "<label class=\"search-label\" for=\"idInput\" data-i18n=\"verify.search.label\">Paste an ID or link, or scan a QR code</label>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                "#idInput"
+              ],
+              "html": "<input type=\"text\" id=\"idInput\" data-i18n-placeholder=\"verify.search.placeholder\" placeholder=\"Example: ODP-2026-03-123456789\" autocomplete=\"off\" autocorrect=\"off\" spellcheck=\"false\">",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".odp-quick-verify-wrap"
+              ],
+              "html": "<div class=\"odp-quick-verify-wrap odp-quick-verify-wrap--tight\">",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".search-hint"
+              ],
+              "html": "<p class=\"search-hint\" data-i18n=\"verify.search.hint\">Passport IDs (ODP-…) and profile IDs (C-123-456-789-012, or B-, P-, M-) can be pasted from a label, a site link, or the square QR button.</p>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                "div[data-i18n=\"verify.tools.sectionTitle\"]"
+              ],
+              "html": "<div class=\"section-title\" data-i18n=\"verify.tools.sectionTitle\">Verify tools menu</div>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".verify-tools-region-lead"
+              ],
+              "html": "<p class=\"fhint verify-tools-region-lead\" data-i18n=\"verify.tools.lead\">Choose a tool to open it in this Verify workspace.</p>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 4
+        },
+        {
+          "id": "label-content-name-mismatch",
+          "count": 1
+        }
+      ],
+      "passes": 40
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 296,
+          "height": 32.25,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Verify"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 358,
+          "height": 33.625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Verify"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Verify"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Verify"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 485,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Verify"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "29.25px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "52.8px"
+    }
+  },
+  {
+    "name": "creator",
+    "locale": "en",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                "a[href$=\"profile-07.html\"]"
+              ],
+              "html": "<a href=\"profile-07.html\" data-i18n=\"creator.v07Link\">Register an ODP 0.7 profile</a>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.16 (foreground color: #0000ee, background color: #2b4c9b, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "help": "Heading levels should only increase by one",
+          "nodes": [
+            {
+              "target": [
+                "#odpSiteTrustModalTitle"
+              ],
+              "html": "<h3 id=\"odpSiteTrustModalTitle\" class=\"odp-modal-title\">Site release &amp; trust</h3>",
+              "summary": "Fix any of the following:\n  Heading order invalid"
+            }
+          ]
+        },
+        {
+          "id": "region",
+          "impact": "moderate",
+          "help": "All page content should be contained by landmarks",
+          "nodes": [
+            {
+              "target": [
+                ".nav"
+              ],
+              "html": "<div class=\"nav\">\n  <a href=\"creator.html\" class=\"active\" aria-current=\"page\" data-i18n=\"nav.creator\">Profile</a>\n  <a href=\"passport.html\" data-i18n=\"nav.passport\">Passport</a>\n  <a href=\"verify.html\" data-i18n=\"nav.verify\">Verify</a>\n</div>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".page > .fhint"
+              ],
+              "html": "<p class=\"fhint\"><a href=\"profile-07.html\" data-i18n=\"creator.v07Link\">Register an ODP 0.7 profile</a></p>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                "#app"
+              ],
+              "html": "<div id=\"app\">",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 4
+        },
+        {
+          "id": "label-content-name-mismatch",
+          "count": 1
+        }
+      ],
+      "passes": 38
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 296,
+          "height": 32.25,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Profile"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 358,
+          "height": 33.625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Profile"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Profile"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Profile"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 485,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Profile"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "29.25px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "52.8px"
+    }
+  },
+  {
+    "name": "passport",
+    "locale": "en",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                "a[href$=\"issue-07.html\"]"
+              ],
+              "html": "<a href=\"issue-07.html\" data-i18n=\"passport.v07Link\">Create an ODP 0.7 passport</a>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.16 (foreground color: #0000ee, background color: #2b4c9b, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "help": "Heading levels should only increase by one",
+          "nodes": [
+            {
+              "target": [
+                "#odpSiteTrustModalTitle"
+              ],
+              "html": "<h3 id=\"odpSiteTrustModalTitle\" class=\"odp-modal-title\">Site release &amp; trust</h3>",
+              "summary": "Fix any of the following:\n  Heading order invalid"
+            }
+          ]
+        },
+        {
+          "id": "region",
+          "impact": "moderate",
+          "help": "All page content should be contained by landmarks",
+          "nodes": [
+            {
+              "target": [
+                ".nav"
+              ],
+              "html": "<div class=\"nav\">\n  <a href=\"creator.html\" data-i18n=\"nav.creator\">Profile</a>\n  <a href=\"passport.html\" class=\"active\" aria-current=\"page\" data-i18n=\"nav.passport\">Passport</a>\n  <a href=\"verify.html\" data-i18n=\"nav.verify\">Verify</a>\n</div>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".page > .fhint"
+              ],
+              "html": "<p class=\"fhint\"><a href=\"issue-07.html\" data-i18n=\"passport.v07Link\">Create an ODP 0.7 passport</a></p>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                "#app"
+              ],
+              "html": "<div id=\"app\">",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 4
+        },
+        {
+          "id": "label-content-name-mismatch",
+          "count": 1
+        }
+      ],
+      "passes": 39
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 296,
+          "height": 32.25,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Create Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 358,
+          "height": 33.625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Create Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Create Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Create Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 485,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Create Passport"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "29.25px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "52.8px"
+    }
+  },
+  {
+    "name": "index",
+    "locale": "ru",
+    "errors": [],
+    "axe": {
+      "violations": [],
+      "incomplete": [],
+      "passes": 34
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 296,
+          "height": 31.359375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Object Digital Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 358,
+          "height": 32.1875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Object Digital Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 31.359375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Object Digital Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 43,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Object Digital Passport"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 803,
+          "height": 47.03125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Object Digital Passport"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "28px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "28px"
+    }
+  },
+  {
+    "name": "verify-07",
+    "locale": "ru",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "help": "Elements must have their visible text as part of their accessible name",
+          "nodes": [
+            {
+              "target": [
+                "#language"
+              ],
+              "html": "<button type=\"button\" id=\"language\" class=\"btn btn-sec\" aria-label=\"Switch language to English\">EN</button>",
+              "summary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 2
+        }
+      ],
+      "passes": 35
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 0,
+          "height": 50.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Проверить паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 0,
+          "height": 50.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Проверить паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Проверить паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Проверить паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 728,
+          "height": 36.796875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Проверить паспорт"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "22px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "22px",
+      "validation": {
+        "ariaInvalid": null,
+        "describedby": null,
+        "nativeValid": true,
+        "active": "submit",
+        "error": "Введите номер в формате ODP-ГГГГ-ММ-000000000."
+      }
+    }
+  },
+  {
+    "name": "profile-07",
+    "locale": "ru",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "help": "Elements must have their visible text as part of their accessible name",
+          "nodes": [
+            {
+              "target": [
+                "#language"
+              ],
+              "html": "<button type=\"button\" class=\"btn btn-sec\" id=\"language\" aria-label=\"Switch language to English\">EN</button>",
+              "summary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 2
+        }
+      ],
+      "passes": 34
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 0,
+          "height": 25.296875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Профиль"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 0,
+          "height": 25.296875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Профиль"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Профиль"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Профиль"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 728,
+          "height": 36.796875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Профиль"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "22px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "22px"
+    }
+  },
+  {
+    "name": "issue-07",
+    "locale": "ru",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "help": "Elements must have their visible text as part of their accessible name",
+          "nodes": [
+            {
+              "target": [
+                "#language"
+              ],
+              "html": "<button id=\"language\" type=\"button\" class=\"btn btn-sec\" aria-label=\"Switch language to English\">EN</button>",
+              "summary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 2
+        }
+      ],
+      "passes": 37
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 0,
+          "height": 50.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Создать паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 0,
+          "height": 50.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Создать паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Создать паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Создать паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 728,
+          "height": 36.796875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Создать паспорт"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "22px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "22px"
+    }
+  },
+  {
+    "name": "release-07",
+    "locale": "ru",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "help": "Elements must have their visible text as part of their accessible name",
+          "nodes": [
+            {
+              "target": [
+                "#language"
+              ],
+              "html": "<button type=\"button\" class=\"btn btn-sec\" id=\"language\" aria-label=\"Switch language to English\">EN</button>",
+              "summary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 2
+        }
+      ],
+      "passes": 34
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 0,
+          "height": 75.890625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Действия с паспортом"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 0,
+          "height": 75.890625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Действия с паспортом"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Действия с паспортом"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 27.59375,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Действия с паспортом"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 728,
+          "height": 36.796875,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Действия с паспортом"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "22px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "22px"
+    }
+  },
+  {
+    "name": "verify",
+    "locale": "ru",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                "#odpV07VerifyLink"
+              ],
+              "html": "<a id=\"odpV07VerifyLink\" href=\"verify-07.html\" data-i18n=\"verify.v07Link\">Проверить паспорт ODP 0.7</a>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.16 (foreground color: #0000ee, background color: #2b4c9b, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "span[data-i18n=\"verify.odpQuick.dropLine2\"]"
+              ],
+              "html": "<span style=\"opacity:0.6\" data-i18n=\"verify.odpQuick.dropLine2\">Обработка только локально — файл не отправляется</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.94 (foreground color: #9296a4, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "help": "Heading levels should only increase by one",
+          "nodes": [
+            {
+              "target": [
+                "#odpSiteTrustModalTitle"
+              ],
+              "html": "<h3 id=\"odpSiteTrustModalTitle\" class=\"odp-modal-title\">Версия сайта и доверие</h3>",
+              "summary": "Fix any of the following:\n  Heading order invalid"
+            }
+          ]
+        },
+        {
+          "id": "region",
+          "impact": "moderate",
+          "help": "All page content should be contained by landmarks",
+          "nodes": [
+            {
+              "target": [
+                ".nav"
+              ],
+              "html": "<div class=\"nav\">\n  <a href=\"creator.html\" data-i18n=\"nav.creator\">Профиль</a>\n  <a href=\"passport.html\" data-i18n=\"nav.passport\">Паспорт</a>\n  <a href=\"verify.html\" class=\"active\" aria-current=\"page\" data-i18n=\"nav.verify\">Проверка</a>\n</div>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".page > .fhint:nth-child(3)"
+              ],
+              "html": "<p class=\"fhint\"><a id=\"odpV07VerifyLink\" href=\"verify-07.html\" data-i18n=\"verify.v07Link\">Проверить паспорт ODP 0.7</a></p>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                "label[for=\"idInput\"]"
+              ],
+              "html": "<label class=\"search-label\" for=\"idInput\" data-i18n=\"verify.search.label\">Вставьте ID или ссылку, либо отсканируйте QR</label>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                "#idInput"
+              ],
+              "html": "<input type=\"text\" id=\"idInput\" data-i18n-placeholder=\"verify.search.placeholder\" placeholder=\"Пример: ODP-2026-03-123456789\" autocomplete=\"off\" autocorrect=\"off\" spellcheck=\"false\">",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".odp-quick-verify-wrap"
+              ],
+              "html": "<div class=\"odp-quick-verify-wrap odp-quick-verify-wrap--tight\">",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".search-hint"
+              ],
+              "html": "<p class=\"search-hint\" data-i18n=\"verify.search.hint\">ID паспорта (ODP-…) и ID профиля (C-123-456-789-012, B-, P-, M-) можно вставить с этикетки, со ссылки с сайта или через квадратную кнопку сканирования QR.</p>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                "div[data-i18n=\"verify.tools.sectionTitle\"]"
+              ],
+              "html": "<div class=\"section-title\" data-i18n=\"verify.tools.sectionTitle\">Меню инструментов проверки</div>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".verify-tools-region-lead"
+              ],
+              "html": "<p class=\"fhint verify-tools-region-lead\" data-i18n=\"verify.tools.lead\">Выберите инструмент — он откроется в рабочей области этой страницы Verify.</p>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 5
+        },
+        {
+          "id": "label-content-name-mismatch",
+          "count": 1
+        }
+      ],
+      "passes": 40
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 296,
+          "height": 32.25,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Проверка"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 358,
+          "height": 33.625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Проверка"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Проверка"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Проверка"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 485,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Проверка"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "29.25px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "52.8px"
+    }
+  },
+  {
+    "name": "creator",
+    "locale": "ru",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                "a[href$=\"profile-07.html\"]"
+              ],
+              "html": "<a href=\"profile-07.html\" data-i18n=\"creator.v07Link\">Зарегистрировать профиль ODP 0.7</a>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.16 (foreground color: #0000ee, background color: #2b4c9b, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "help": "Heading levels should only increase by one",
+          "nodes": [
+            {
+              "target": [
+                "#odpSiteTrustModalTitle"
+              ],
+              "html": "<h3 id=\"odpSiteTrustModalTitle\" class=\"odp-modal-title\">Версия сайта и доверие</h3>",
+              "summary": "Fix any of the following:\n  Heading order invalid"
+            }
+          ]
+        },
+        {
+          "id": "region",
+          "impact": "moderate",
+          "help": "All page content should be contained by landmarks",
+          "nodes": [
+            {
+              "target": [
+                ".nav"
+              ],
+              "html": "<div class=\"nav\">\n  <a href=\"creator.html\" class=\"active\" aria-current=\"page\" data-i18n=\"nav.creator\">Профиль</a>\n  <a href=\"passport.html\" data-i18n=\"nav.passport\">Паспорт</a>\n  <a href=\"verify.html\" data-i18n=\"nav.verify\">Проверка</a>\n</div>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".page > .fhint"
+              ],
+              "html": "<p class=\"fhint\"><a href=\"profile-07.html\" data-i18n=\"creator.v07Link\">Зарегистрировать профиль ODP 0.7</a></p>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                "#app"
+              ],
+              "html": "<div id=\"app\">",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 3
+        },
+        {
+          "id": "label-content-name-mismatch",
+          "count": 1
+        }
+      ],
+      "passes": 38
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 296,
+          "height": 32.25,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Профиль"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 358,
+          "height": 33.625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Профиль"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Профиль"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Профиль"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 485,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Профиль"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "29.25px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "52.8px"
+    }
+  },
+  {
+    "name": "passport",
+    "locale": "ru",
+    "errors": [],
+    "axe": {
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                "a[href$=\"issue-07.html\"]"
+              ],
+              "html": "<a href=\"issue-07.html\" data-i18n=\"passport.v07Link\">Создать паспорт ODP 0.7</a>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.16 (foreground color: #0000ee, background color: #2b4c9b, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "help": "Heading levels should only increase by one",
+          "nodes": [
+            {
+              "target": [
+                "#odpSiteTrustModalTitle"
+              ],
+              "html": "<h3 id=\"odpSiteTrustModalTitle\" class=\"odp-modal-title\">Версия сайта и доверие</h3>",
+              "summary": "Fix any of the following:\n  Heading order invalid"
+            }
+          ]
+        },
+        {
+          "id": "region",
+          "impact": "moderate",
+          "help": "All page content should be contained by landmarks",
+          "nodes": [
+            {
+              "target": [
+                ".nav"
+              ],
+              "html": "<div class=\"nav\">\n  <a href=\"creator.html\" data-i18n=\"nav.creator\">Профиль</a>\n  <a href=\"passport.html\" class=\"active\" aria-current=\"page\" data-i18n=\"nav.passport\">Паспорт</a>\n  <a href=\"verify.html\" data-i18n=\"nav.verify\">Проверка</a>\n</div>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                ".page > .fhint"
+              ],
+              "html": "<p class=\"fhint\"><a href=\"issue-07.html\" data-i18n=\"passport.v07Link\">Создать паспорт ODP 0.7</a></p>",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            },
+            {
+              "target": [
+                "#app"
+              ],
+              "html": "<div id=\"app\">",
+              "summary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 5
+        },
+        {
+          "id": "label-content-name-mismatch",
+          "count": 1
+        }
+      ],
+      "passes": 39
+    },
+    "layout": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "h1": {
+          "width": 296,
+          "height": 32.25,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Создать паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "h1": {
+          "width": 358,
+          "height": 33.625,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Создать паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 521,
+        "scrollWidth": 521,
+        "clientWidth": 521,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Создать паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "h1": {
+          "width": 352,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Создать паспорт"
+        },
+        "outside": []
+      },
+      {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "h1": {
+          "width": 485,
+          "height": 40.3125,
+          "display": "block",
+          "visibility": "visible",
+          "text": "Создать паспорт"
+        },
+        "outside": []
+      }
+    ],
+    "textScale": {
+      "before": "29.25px",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "h1Font": "52.8px"
+    }
+  }
+]

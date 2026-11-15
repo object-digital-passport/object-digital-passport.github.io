@@ -102096,7 +102096,7 @@ ${params.statement}
               name: "Object Digital Passport",
               description: "ODP \u2014 create and verify digital object passports",
               url: origin || "https://",
-              icons: origin ? [`${origin}/favicon.ico`] : []
+              icons: origin ? [`${origin}/odp-logo.png`] : []
             }
           }
         };
@@ -102167,7 +102167,7 @@ ${params.statement}
             name: "Object Digital Passport",
             description: "ODP \u2014 create and verify digital object passports",
             url: origin || "https://",
-            icons: origin ? [`${origin}/favicon.ico`] : []
+            icons: origin ? [`${origin}/odp-logo.png`] : []
           }
         });
         await wcSingleton.connect();

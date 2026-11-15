@@ -137,7 +137,9 @@ test('receipt must match a finalized canonical block and the exact mint event', 
   const h = { passportId: id, creator, creatorId: 'C-1', title: 'A', authorName: 'B', domain: 'art', objectType: 'physical', year: 2026, month: 9 };
   const c = { contentClass: 1, timestamp: 123 }, m = { dataHash: hash, anchorsHash: hash, anchorTypesMask: 0 };
   const claim = { format: 'odp-bundle-receipt-0.7', generationId: 'odp-0.7-redesign-8-polygon-20260925', chainId: '137', registry: reader.REGISTRY, passportId: id, transactionHash: hash, blockNumber: '10', blockHash, operationId: op };
-  const args = { ...h, ...c, ...m, passportIdText: id, operationId: op };
+  // ethers v5 parseLog returns positional-only values for this event.
+  const args = [null, id, creator, h.creatorId, h.title, h.authorName, h.domain, h.objectType,
+    c.contentClass, h.year, h.month, m.dataHash, m.anchorsHash, m.anchorTypesMask, c.timestamp, op];
   f.ethers.utils.id = () => 'id-topic'; f.ethers.utils.hexZeroPad = () => 'creator-topic';
   const Original = f.ethers.Contract;
   f.ethers.Contract = class extends Original {
@@ -152,13 +154,42 @@ test('receipt must match a finalized canonical block and the exact mint event', 
   f.provider.getBlock = async tag => tag === 100 ? { number: 100, hash: snapshotHash, timestamp: 1000 } : { number: 10, hash: blockHash };
   const client = await reader.open(f.provider, [], f.ethers);
   assert.equal((await client.verifyReceipt(claim)).blockNumber, 10);
-  args.title = 'Changed';
+  args[4] = 'Changed';
   await assert.rejects(client.verifyReceipt(claim), /differs/);
-  args.title = 'A';
+  args[4] = 'A';
   let finalizedCalls = 0;
   f.provider.send = async () => ++finalizedCalls === 1 ? { number: '0x64', hash: snapshotHash } : { number: '0x09', hash: snapshotHash };
   await assert.rejects(client.verifyReceipt(claim), /finalized/);
   await assert.rejects(client.verifyReceipt({ ...claim, registry: creator }), /Invalid receipt claim/);
+});
+
+test('ethers 5.7.2 parses a real PassportMinted log for receipt verification', async () => {
+  const ethers = require('ethers'), f = fixture();
+  assert.equal(ethers.version, 'ethers/5.7.2');
+  const id = 'ODP-2026-09-000000027', hash = '0x' + 'a'.repeat(64);
+  const blockHash = '0x' + 'b'.repeat(64), op = '0x' + 'c'.repeat(64), creator = '0x' + '1'.repeat(40);
+  const h = { passportId:id, contractVersion:7, creator, creatorId:'C-1', title:'A', authorName:'B', domain:'art', objectType:'physical', year:2026, month:9 };
+  const c = { contentClass:1, timestamp:123 }, m = { dataHash:hash, anchorsHash:hash, anchorTypesMask:15 };
+  const iface = new ethers.utils.Interface(registryABI), event = iface.getEvent('PassportMinted');
+  function log(title) {
+    return { address:reader.REGISTRY, ...iface.encodeEventLog(event, [id,id,creator,h.creatorId,title,h.authorName,h.domain,h.objectType,c.contentClass,h.year,h.month,m.dataHash,m.anchorsHash,m.anchorTypesMask,c.timestamp,op]) };
+  }
+  let eventLog = log(h.title);
+  const Original = f.ethers.Contract;
+  f.ethers = { utils:{ ...ethers.utils, keccak256:() => reader.RUNTIME_HASH }, Contract:class extends Original {
+    constructor() { super(); this.interface = iface; }
+    async getPassportHeader() { return h; }
+    async getPassportClassification() { return c; }
+    async getPassportMedia() { return m; }
+  } };
+  f.provider.getTransaction = async () => ({ hash, blockHash, blockNumber:10 });
+  f.provider.getTransactionReceipt = async () => ({ transactionHash:hash, blockHash, blockNumber:10, status:1, logs:[eventLog] });
+  f.provider.getBlock = async n => n === 100 ? { number:100, hash:'0x'+'d'.repeat(64), timestamp:1000 } : { number:10, hash:blockHash };
+  const claim = { format:'odp-bundle-receipt-0.7', generationId:generation.generationId, chainId:'137', registry:reader.REGISTRY, passportId:id, transactionHash:hash, blockNumber:'10', blockHash, operationId:op };
+  const client = await reader.open(f.provider, registryABI, f.ethers);
+  assert.equal((await client.verifyReceipt(claim)).blockNumber, 10);
+  eventLog = log('Different title');
+  await assert.rejects(client.verifyReceipt(claim), /differs/);
 });
 
 test('failed mint recovery accepts only the matching finalized direct EOA transaction', async () => {

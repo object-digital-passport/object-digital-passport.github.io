@@ -30,6 +30,10 @@ assert.equal(ethers.keccak256(artifact.deployedBytecode), readerTools.RUNTIME_HA
 await provider.send('hardhat_setCode', [readerTools.REGISTRY, artifact.deployedBytecode]);
 const compat = { Contract: ethers.Contract, utils: { isAddress: ethers.isAddress, keccak256: ethers.keccak256, id: ethers.id,
   hexZeroPad: ethers.zeroPadValue, defaultAbiCoder: ethers.AbiCoder.defaultAbiCoder(), Interface: ethers.Interface } };
+// Optional: exercise the same ethers version as the browser, against the same local chain.
+const ethers5 = process.env.ODP_ETHERS_V5_MODULE ? require(process.env.ODP_ETHERS_V5_MODULE) : null;
+if (ethers5 && ethers5.version !== 'ethers/5.7.2') throw new Error('Expected ethers 5.7.2');
+const reader5 = ethers5 ? await readerTools.open(new ethers5.providers.Web3Provider(connection.provider), abi, ethers5) : null;
 const accounts = await ethers.getSigners();
 // Compare the site's Safe proposal identity with canonical Safe v1.4.1 on the isolated chain.
 const safeFixture = require(process.env.ODP_SAFE_FIXTURE), zeroAddress=ethers.ZeroAddress;
@@ -67,6 +71,115 @@ for (let i = 0; i < 4; i++) {
 const journal = new Map();
 const storage = { getItem:key => journal.has(key) ? journal.get(key) : null, setItem:(key,value) => journal.set(key,value), removeItem:key => journal.delete(key) };
 const locks = { request:async (_key,_options,fn) => fn({}) };
+// Run the site's Safe proposal path against a real 2-of-3 synthetic Safe on this chain.
+async function verifySafeIssuance(role, kind, safeInstance, expireFirst = false) {
+const safeWallet = await safeInstance.getAddress(), safeReader = reader5 || reader;
+const safeEthers = ethers5 || { ...compat, utils:{...compat.utils,_TypedDataEncoder:safeCompat.utils._TypedDataEncoder} };
+const safeEthereum = {request:async request => {
+  if (request.method === 'eth_accounts') return [safeWallet];
+  if (request.method === 'eth_sendTransaction') throw Error('Unexpected direct Safe transaction');
+  return connection.provider.request(request);
+}};
+let capturedSafeTx = null, safeProposals = 0;
+const sdk = {
+  safe:{getInfo:async()=>({safeAddress:safeWallet,chainId:137,isReadOnly:false,version:'1.4.1',nonce:Number(await safeInstance.nonce())})},
+  txs:{send:async ({txs,params}) => {
+    safeProposals++;
+    assert.equal(txs.length,1); assert.equal(params.safeTxGas,0);
+    capturedSafeTx={to:txs[0].to,value:'0',data:txs[0].data,operation:0,safeTxGas:'0',baseGas:'0',gasPrice:'0',gasToken:zeroAddress,refundReceiver:zeroAddress,nonce:String(await safeInstance.nonce())};
+    const safeTxHash=await safeInstance.getTransactionHash(...safeArgs({tx:capturedSafeTx}));
+    return {safeTxHash};
+  }}
+};
+async function executeCapturedSafeTx() {
+  assert.ok(capturedSafeTx);
+  const signatures=ethers.concat(await Promise.all(safeSigners.map(s=>s.signTypedData({chainId:137,verifyingContract:safeWallet},safeTypes,capturedSafeTx))));
+  const receipt=await (await safeInstance.connect(accounts[1]).execTransaction(...safeArgs({tx:capturedSafeTx}).slice(0,9),signatures)).wait();
+  const events=receipt.logs.map(log=>{try{return safeInstance.interface.parseLog(log);}catch{return null;}});
+  assert.ok(events.some(event=>event?.name==='ExecutionSuccess'));
+  capturedSafeTx=null;
+  return receipt;
+}
+assert.equal((await profileTools.registerSafe({role,wallet:safeWallet,ethereum:safeEthereum,reader:safeReader,storage,locks,abi,ethers:safeEthers,sdk})).state,'safe_pending');
+await executeCapturedSafeTx();
+const safeProfile=(await safeReader.readProfileByWallet(safeWallet)).profile;
+assert.equal(safeProfile.creatorId[0],role);
+const safeBlock=await provider.getBlock('latest');
+const safeDraft=await draft.build({objectType:kind,title:'Safe '+kind+' object',authorName:'Author',shortDescription:'Synthetic Safe test',domain:'art',contentClass:'static',status:'produced_object',aiStatus:'none',timestamp:safeBlock.timestamp,width:'10',height:'20',unit:'CMT',materials:'paper',features:'mark',physicalCategory:'art',photo:new TextEncoder().encode('Safe photo'),digitalFile:new TextEncoder().encode('Safe original'),digitalSubtype:'image',digitalFormat:'png'});
+const safeOpts={abi,ethers:safeEthers};
+let safeJob=await jobTools.prepare({...safeDraft,profile:safeProfile,wallet:safeWallet,...safeOpts});
+const safeDb=await jobStore.open(new IDBFactory());
+await jobStore.save(safeDb,safeJob,safeOpts);
+let safeBackup=await jobBackup.exportJob(safeJob,safeOpts);
+let safeIssueArgs={db:safeDb,operationId:safeJob.identity.operationId,expectedFingerprint:safeJob.fingerprint,backupBytes:safeBackup,reader:safeReader,ethereum:safeEthereum,wallet:safeWallet,locks,...safeOpts};
+assert.equal((await issue.sendSafe({...safeIssueArgs,sdk})).state,'safe_pending');
+assert.equal((await issue.send(safeIssueArgs)).state,'safe_pending');
+if (expireFirst) {
+  const oldFingerprint=safeJob.fingerprint;
+  const deadline=Date.UTC(safeDraft.document.year,safeDraft.document.month,1)/1000;
+  await provider.send('evm_setNextBlockTimestamp',[deadline]);
+  await provider.send('evm_mine',[]);
+  assert.equal((await issue.send(safeIssueArgs)).state,'safe_expired');
+  assert.equal((await issue.rejectExpiredSafe({...safeIssueArgs,sdk})).state,'safe_rejection_pending');
+  const rejectionReceipt=await executeCapturedSafeTx();
+  const getReceipt=provider.getTransactionReceipt.bind(provider);
+  provider.getTransactionReceipt=async hash=>{const r=await getReceipt(hash);return r&&{transactionHash:r.hash,blockNumber:r.blockNumber,blockHash:r.blockHash,status:r.status,logs:r.logs};};
+  try {
+    assert.equal((await issue.reprepareAfterSafeRejection({...safeIssueArgs,sdk,transactionHash:rejectionReceipt.hash.toLowerCase()})).state,'prepared');
+  } finally { provider.getTransactionReceipt=getReceipt; }
+  safeJob=await jobStore.get(safeDb,safeJob.identity.operationId,safeOpts);
+  assert.notEqual(safeJob.fingerprint,oldFingerprint);
+  safeBackup=await jobBackup.exportJob(safeJob,safeOpts);
+  safeIssueArgs={...safeIssueArgs,expectedFingerprint:safeJob.fingerprint,backupBytes:safeBackup};
+  assert.equal((await issue.sendSafe({...safeIssueArgs,sdk})).state,'safe_pending');
+}
+const pendingSafeJob=await jobStore.get(safeDb,safeJob.identity.operationId,safeOpts);
+const pendingSafeBackup=await jobBackup.exportJob(pendingSafeJob,safeOpts);
+const safeMintReceipt=await executeCapturedSafeTx();
+const safeMinted=await issue.send(safeIssueArgs);
+assert.equal(safeMinted.state,'minted');
+const savedSafeJob=await jobStore.get(safeDb,safeJob.identity.operationId,safeOpts);
+const safeBundleReceipt={format:'odp-bundle-receipt-0.7',generationId:trustedGeneration.generationId,chainId:'137',registry:readerTools.REGISTRY,passportId:safeMinted.passportId,transactionHash:safeMintReceipt.hash.toLowerCase(),blockNumber:String(safeMintReceipt.blockNumber),blockHash:safeMintReceipt.blockHash.toLowerCase(),operationId:safeJob.identity.operationId};
+const recoveryDb=await jobStore.open(new IDBFactory());
+const restoredSafe=await jobBackup.restore(pendingSafeBackup,safeOpts);
+assert.equal((await jobStore.importBackup(recoveryDb,restoredSafe,safeOpts)).state,'safe_pending');
+const recoveredSafe=await issue.send({...safeIssueArgs,db:recoveryDb});
+assert.equal(recoveredSafe.state,'minted');
+assert.equal(recoveredSafe.passportId,safeMinted.passportId);
+assert.equal(safeProposals,expireFirst?4:2); // Recovery does not send another proposal.
+const recoveredSafeJob=await jobStore.get(recoveryDb,safeJob.identity.operationId,safeOpts);
+assert.equal(recoveredSafeJob.transactionHash,undefined);
+const savedGetReceipt=provider.getTransactionReceipt.bind(provider);
+provider.getTransactionReceipt=async hash=>{const r=await savedGetReceipt(hash);return r&&{transactionHash:r.hash,blockNumber:r.blockNumber,blockHash:r.blockHash,status:r.status,logs:r.logs};};
+try {
+  const safeArchive=await exporter.make({job:savedSafeJob,receipt:safeBundleReceipt,trustedGeneration,reader:safeReader,...safeOpts});
+  const verified=await bundle.verifyEntries(await zip.extract(safeArchive.bytes),trustedGeneration,safeReader,safeEthers);
+  assert.equal(verified.record.header.creatorId,safeProfile.creatorId);
+  assert.equal(verified.record.header.creator.toLowerCase(),safeWallet.toLowerCase());
+  assert.equal(verified.record.header.objectType,kind);
+  const restoredArchive=await exporter.make({job:recoveredSafeJob,receipt:safeBundleReceipt,trustedGeneration,reader:safeReader,...safeOpts});
+  assert.equal((await bundle.verifyEntries(await zip.extract(restoredArchive.bytes),trustedGeneration,safeReader,safeEthers)).record.header.passportId,safeMinted.passportId);
+  await assert.rejects(exporter.make({job:recoveredSafeJob,receipt:{...safeBundleReceipt,transactionHash:pendingSafeJob.safeProposal.safeTxHash},trustedGeneration,reader:safeReader,...safeOpts}));
+} finally {provider.getTransactionReceipt=savedGetReceipt;safeDb.close();recoveryDb.close();}
+}
+let safeSalt = 0;
+for (const role of ['B','P','M']) for (const kind of ['physical','digital','mixed']) {
+  let instance=safeInstance;
+  if (safeSalt > 0) {
+    const creation=await (await safeFactory.createProxyWithNonce(await singleton.getAddress(),initializer,safeSalt)).wait();
+    const created=creation.logs.map(log=>{try{return safeFactory.interface.parseLog(log);}catch{return null;}}).find(log=>log?.name==='ProxyCreation');
+    assert.ok(created);
+    instance=new ethers.Contract(created.args.proxy,safeFixture.Safe.abi,provider);
+  }
+  safeSalt++;
+  await verifySafeIssuance(role,kind,instance);
+}
+console.log('Local Safe 1.4.1: all 9 B/P/M and object-type profiles, proposals, multisig executions and archive verifications passed.');
+const expiryCreation=await (await safeFactory.createProxyWithNonce(await singleton.getAddress(),initializer,safeSalt)).wait();
+const expirySafe=expiryCreation.logs.map(log=>{try{return safeFactory.interface.parseLog(log);}catch{return null;}}).find(log=>log?.name==='ProxyCreation');
+assert.ok(expirySafe);
+await verifySafeIssuance('B','mixed',new ethers.Contract(expirySafe.args.proxy,safeFixture.Safe.abi,provider),true);
+console.log('Local Safe 1.4.1: expired monthly proposal cancelled, re-prepared and issued successfully.');
 const ethereum = { request:async request => request.method === 'eth_accounts' ? [accounts[4].address] : connection.provider.request(request) };
 const coordinatorResult = await profileTools.register({ role:'C', wallet:accounts[4].address, ethereum, reader, storage, locks, abi, ethers:compat });
 assert.equal(coordinatorResult.state, 'submitted');
@@ -164,25 +277,69 @@ for (const [role, kind, signer] of [
   ['M', accounts[3]],
 ].flatMap(([role, signer]) => ['physical', 'digital', 'mixed'].map(kind => [role, kind, signer]))) {
   const wallet = signer.address;
-  const issuer = (await reader.readProfileByWallet(wallet)).profile;
+  const flowReader = reader5 || reader, flowEthers = ethers5 || compat, flowOpts = { abi, ethers: flowEthers };
+  const issuer = (await flowReader.readProfileByWallet(wallet)).profile;
   assert.equal(issuer.creatorId[0], role);
-  const ethereum = {request: async request => request.method === 'eth_accounts' ? [wallet] : connection.provider.request(request)};
+  let sends = 0;
+  const ethereum = {request: async request => {
+    if (request.method === 'eth_accounts') return [wallet];
+    if (request.method === 'eth_sendTransaction') sends++;
+    return connection.provider.request(request);
+  }};
   const latest = await provider.getBlock('latest');
-  const built = await draft.build({objectType:kind,title:'Local '+kind,authorName:'Author',shortDescription:'Synthetic test',domain:'art',contentClass:'static',status:'produced_object',aiStatus:'none',timestamp:latest.timestamp,width:'10',height:'20',unit:'CMT',materials:'paper',features:'mark',physicalCategory:'art',photo:new TextEncoder().encode('photo '+kind),digitalFile:new TextEncoder().encode('file '+kind),digitalSubtype:'image',digitalFormat:'png'});
-  const prepared = await jobTools.prepare({...built,profile:issuer,wallet,...opts});
+  const photo = new TextEncoder().encode('photo '+kind);
+  const sameOriginal = role === 'C' && kind === 'mixed';
+  const digitalFile = sameOriginal ? photo : new TextEncoder().encode('file '+kind);
+  const built = await draft.build({objectType:kind,title:'Local '+kind,authorName:'Author',shortDescription:'Synthetic test',domain:'art',contentClass:'static',status:'produced_object',aiStatus:'none',timestamp:latest.timestamp,width:'10',height:'20',unit:'CMT',materials:'paper',features:'mark',physicalCategory:'art',photo,digitalFile,digitalSubtype:'image',digitalFormat:'png'});
+  if (sameOriginal) {
+    assert.equal(built.originals.length, 1);
+    assert.equal(built.document.anchors.find(a => a.type === 'photo').hash, built.document.digital.fileHash);
+  }
+  const prepared = await jobTools.prepare({...built,profile:issuer,wallet,...flowOpts});
   const testDb = await jobStore.open(new IDBFactory());
-  await jobStore.save(testDb,prepared,opts);
-  const backup = await jobBackup.exportJob(prepared,opts);
-  const args = {db:testDb,operationId:prepared.identity.operationId,expectedFingerprint:prepared.fingerprint,backupBytes:backup,reader,ethereum,wallet,locks,...opts};
+  await jobStore.save(testDb,prepared,flowOpts);
+  const backup = await jobBackup.exportJob(prepared,flowOpts);
+  const args = {db:testDb,operationId:prepared.identity.operationId,expectedFingerprint:prepared.fingerprint,backupBytes:backup,reader:flowReader,ethereum,wallet,locks,...flowOpts};
   assert.equal((await issue.send(args)).state,'submitted');
+  // An older backup must not erase a locally recorded submission or send it again.
+  const restored = await jobBackup.restore(backup,flowOpts);
+  const afterRestore = await jobStore.importBackup(testDb,restored,flowOpts);
+  assert.equal(afterRestore.state,'submitted');
+  assert.match(afterRestore.transactionHash,/^0x[0-9a-f]{64}$/);
   assert.equal((await issue.send(args)).state,'minted');
-  const minted = await jobStore.get(testDb,prepared.identity.operationId,opts);
-  assert.equal((await reader.readPassport(minted.passportId)).header.creatorId, issuer.creatorId);
+  assert.equal(sends,1);
+  const minted = await jobStore.get(testDb,prepared.identity.operationId,flowOpts);
+  assert.equal((await flowReader.readPassport(minted.passportId)).header.creatorId, issuer.creatorId);
+  let recoveredJob = null;
+  if (role === 'M' && kind === 'mixed') {
+    // On a new device the old backup is guarded until the finalized operation is found.
+    const newDb = await jobStore.open(new IDBFactory());
+    try {
+      assert.equal((await jobStore.importBackup(newDb,restored,flowOpts)).state,'handoff');
+      const recovered = await issue.send({...args,db:newDb});
+      assert.equal(recovered.state,'minted');
+      assert.equal(recovered.passportId,minted.passportId);
+      assert.equal(sends,1);
+      recoveredJob = await jobStore.get(newDb,prepared.identity.operationId,flowOpts);
+      assert.equal(recoveredJob.transactionHash,undefined);
+    } finally { newDb.close(); }
+  }
   const chainReceipt = await provider.getTransactionReceipt(minted.transactionHash);
   const receipt = {format:'odp-bundle-receipt-0.7',generationId:trustedGeneration.generationId,chainId:'137',registry:readerTools.REGISTRY,passportId:minted.passportId,transactionHash:minted.transactionHash,blockNumber:String(chainReceipt.blockNumber),blockHash:chainReceipt.blockHash.toLowerCase(),operationId:minted.identity.operationId};
   const getReceipt = provider.getTransactionReceipt.bind(provider);
   provider.getTransactionReceipt = async hash => { const value = await getReceipt(hash); return value && {transactionHash:value.hash,blockNumber:value.blockNumber,blockHash:value.blockHash,status:value.status,logs:value.logs}; };
   try {
+    if (recoveredJob) {
+      const recoveredArchive = await exporter.make({job:recoveredJob,receipt,trustedGeneration,reader:flowReader,abi,ethers:flowEthers});
+      const recoveredVerification = await bundle.verifyEntries(await zip.extract(recoveredArchive.bytes),trustedGeneration,flowReader,flowEthers);
+      assert.equal(recoveredVerification.record.header.passportId,minted.passportId);
+    }
+    if (reader5) {
+      const archive5 = await exporter.make({job:minted,receipt,trustedGeneration,reader:reader5,abi,ethers:ethers5});
+      const verified5 = await bundle.verifyEntries(await zip.extract(archive5.bytes), trustedGeneration, reader5, ethers5);
+      assert.equal(verified5.record.header.creatorId, issuer.creatorId);
+      assert.equal(verified5.record.header.objectType, kind);
+    }
     const archive = await exporter.make({job:minted,receipt,trustedGeneration,reader,abi,ethers:compat});
     const entries = await zip.extract(archive.bytes);
     const verified = await bundle.verifyEntries(entries, trustedGeneration, reader, compat);
@@ -196,5 +353,6 @@ for (const [role, kind, signer] of [
   }
   finally { provider.getTransactionReceipt = getReceipt; testDb.close(); }
 }
+if (reader5) console.log('ethers 5.7.2: all 12 C/B/P/M and object-type prepare, mint, lookup, export and archive verification paths passed.');
 console.log('Local ABI8 chain: all 12 C/B/P/M and object-type draft, mint, lookup, export and archive verification paths passed; modified originals were rejected.');
 await connection.close();
