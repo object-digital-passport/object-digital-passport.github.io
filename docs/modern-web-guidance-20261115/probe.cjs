@@ -1,0 +1,31 @@
+const {chromium}=require(process.cwd()+'/frontend/e2e/node_modules/playwright');
+const fs=require('fs');
+(async()=>{
+const b=await chromium.launch();const c=await b.newContext({viewport:{width:390,height:844}});
+await c.route(/^https?:\/\/(?!127\.0\.0\.1(?::|\/)).*/,r=>r.abort());
+await c.addInitScript(()=>{
+ localStorage.setItem('odp_locale','en');
+ const wallet='0x'+'1'.repeat(40);
+ window.ethers={utils:{isAddress:()=>true},providers:{Web3Provider:class{}}};
+ window.ethereum={on(){},request:async({method})=>{if(['eth_requestAccounts','eth_accounts'].includes(method))return [wallet];if(method==='eth_chainId')return '0x89';throw Error('unexpected')}};
+ navigator.mediaDevices.getUserMedia=async()=>new Promise(()=>{});
+});
+await c.route('**/backend/js/odp-v07-reader.js',r=>r.fulfill({contentType:'application/javascript',body:'window.ODPV07Reader={open:async()=>({readProfileByWallet:async()=>({profile:null})})};'}));
+const p=await c.newPage(),result={};
+await p.goto('http://127.0.0.1:4185/profile-07.html');
+result.headerBefore=await p.locator('.header-toolbar').evaluate(e=>({width:e.getBoundingClientRect().width,container:e.parentElement.getBoundingClientRect().width,title:e.parentElement.querySelector('h1').getBoundingClientRect().width}));
+await p.addStyleTag({content:'.odp-home .page:has(> .nav) .header-toolbar {width:auto;flex-shrink:0}'});
+result.headerAfter=await p.locator('h1').boundingBox();
+await p.locator('#connect').click();await p.locator('#registration').waitFor({state:'visible'});
+await p.locator('#review').focus();await p.keyboard.press('Enter');
+result.afterReview=await p.evaluate(()=>({active:document.activeElement.id,confirmationHidden:document.querySelector('#confirmation').hidden}));
+await p.locator('#back').focus();await p.keyboard.press('Enter');
+result.afterBack=await p.evaluate(()=>({active:document.activeElement.id,tag:document.activeElement.tagName,confirmationHidden:document.querySelector('#confirmation').hidden}));
+await p.goto('http://127.0.0.1:4185/verify-07.html');await p.locator('#scan-qr').focus();await p.keyboard.press('Enter');
+result.dialogOpen=await p.evaluate(()=>({open:document.querySelector('dialog').open,focused:document.activeElement.outerHTML}));
+await p.keyboard.press('Escape');result.dialogClosed=await p.evaluate(()=>({open:document.querySelector('dialog').open,active:document.activeElement.id}));
+await p.locator('#language').click();result.russianTitle=await p.evaluate(()=>({lang:document.documentElement.lang,title:document.title,heading:document.querySelector('h1').textContent}));
+await p.locator('#passport-id').fill('wrong');await p.locator('#submit').focus();await p.keyboard.press('Enter');
+result.validation=await p.evaluate(()=>({active:document.activeElement.id,ariaInvalid:document.querySelector('#passport-id').getAttribute('aria-invalid'),valid:document.querySelector('#passport-id').validity.valid,result:document.querySelector('#result').textContent}));
+console.log(JSON.stringify(result,null,2));fs.writeFileSync('/tmp/odp-mwg-audit/probe.json',JSON.stringify(result,null,2));await b.close();
+})().catch(e=>{console.error(e);process.exit(1)});

@@ -27,9 +27,39 @@ html.odp-home[data-theme="blue"] {
 .odp-home .header-row h1 { font-size: clamp(28px, 5vw, 42px); letter-spacing: -0.035em; }
 .odp-home .header-toolbar #language { width: auto; min-width: 52px; min-height: 44px; margin: 0; padding: 10px 14px; }
 .odp-home .nav { border-color: #262626; }
+.odp-home .nav a { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; letter-spacing: 0; text-transform: none; }
+.odp-home .nav a { min-height: 46px; border-radius: 0; }
+.odp-home .home-content { padding-top: 16px; }
+.odp-home .home-intro { max-width: 620px; margin-bottom: 36px; }
+.odp-home .home-eyebrow { color: #aaa; font-size: 12px; letter-spacing: .12em; margin-bottom: 14px; }
+.odp-home .home-intro h2 { margin: 0 0 12px; font-size: clamp(28px, 4vw, 40px); font-weight: 500; letter-spacing: -.035em; line-height: 1.15; }
+.odp-home .home-intro > p:last-child { color: var(--text2); font-size: 16px; line-height: 1.55; }
+.odp-home .home-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: #414141; border: 1px solid #414141; }
+.odp-home .home-action { display: flex; align-items: flex-start; gap: 20px; min-height: 148px; padding: 24px; color: #fff; background: #141414; text-decoration: none; }
+.odp-home .home-action:hover { background: #222; }
+.odp-home .home-action-primary { background: #fff; color: #0d0d0d; }
+.odp-home .home-action-primary:hover { background: #ededed; }
+.odp-home .home-action-number { font-size: 12px; line-height: 1.5; opacity: .6; }
+.odp-home .home-action-content { display: grid; gap: 10px; flex: 1; min-width: 0; }
+.odp-home .home-action-content strong { font-size: 19px; font-weight: 500; line-height: 1.3; }
+.odp-home .home-action-content > span { font-size: 14px; line-height: 1.45; opacity: .72; }
+.odp-home .home-action-arrow { font-size: 23px; line-height: 1; }
+.odp-home .home-legacy { margin-top: 28px; color: var(--text2); font-size: 13px; line-height: 1.6; }
+.odp-home .home-legacy a { color: inherit; }
 .odp-home footer { flex-wrap: wrap; row-gap: 6px; }
 .odp-home .card { border-color: #6e6e6e; border-radius: 0; }
+.odp-home .card { background: #141414; }
+.odp-home .card-body { padding: 28px; }
+.odp-home .card-body > p[data-copy="intro"] { max-width: 62ch; color: #e5e5e5; line-height: 1.6; }
+.odp-home .card-body > #connect,
+.odp-home .card-body > #connectMobile,
+.odp-home .card-body > #connectSafe { max-width: 440px; }
+.odp-home .card-body > #connectMobile,
+.odp-home .card-body > #connectSafe { margin-top: 10px; }
 .odp-home .card-head { border-color: #262626; font-style: normal; font-weight: 500; }
+.odp-home .card-body > p[data-copy="intro"] { margin-bottom: 16px; }
+.odp-home .card-body > p[data-copy="walletHelp"] { margin-top: 14px; }
+.odp-home .card-body > label[for="restoreJob"] { display: block; margin-top: 18px; }
 .odp-home input[type="file"] { max-width: 100%; }
 .odp-home #scan-qr { margin-top: 12px; }
 .odp-home #scan-status:empty { display: none; }
@@ -40,6 +70,11 @@ html.odp-home[data-theme="blue"] {
 .odp-home .btn-sec { background: transparent; color: #fff; border: 1px solid #6e6e6e; }
 .odp-home label, .odp-home input, .odp-home select, .odp-home textarea { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .odp-home label { letter-spacing: 0; text-transform: none; }
+.odp-home input:not([type="checkbox"]):not([type="file"]),
+.odp-home select,
+.odp-home textarea { background: #0d0d0d; border-color: #565656; color: #fff; border-radius: 0; }
+.odp-home input:focus-visible, .odp-home select:focus-visible, .odp-home textarea:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.odp-home input[type="file"]::file-selector-button { padding: 10px 14px; margin-right: 10px; color: #fff; background: transparent; border: 1px solid #777; font: inherit; cursor: pointer; }
 .odp-home a:focus-visible, .odp-home button:focus-visible { outline: 3px solid #e0a03c; outline-offset: 3px; }
 .odp-home #lookup:not([hidden]) { display: grid; gap: 12px; margin: 24px 0; }
 .odp-home #profile-lookup { display: grid; gap: 12px; margin: 24px 0; }
@@ -48,6 +83,7 @@ html.odp-home[data-theme="blue"] {
 .odp-home #result { overflow-wrap: anywhere; }
 .odp-home #registration:not([hidden]) { display: grid; gap: 14px; margin: 24px 0; }
 .odp-home #status { overflow-wrap: anywhere; }
+.odp-home #status:not(:empty) { margin-top: 16px; }
 .odp-home #draft:not([hidden]), .odp-home #review:not([hidden]) { display: grid; gap: 12px; margin: 24px 0; }
 .odp-home #draft fieldset { display: grid; gap: 10px; padding: 16px; border: 1px solid #6e6e6e; }
 .odp-home #draft fieldset[hidden] { display: none; }
@@ -57,7 +93,38 @@ html.odp-home[data-theme="blue"] {
   .odp-home .nav { display: flex; }
   .odp-home .nav a { flex: 1 1 auto; }
   .odp-home .home-logo { margin: 0 auto 16px; }
+  .odp-home .home-content { padding-top: 0; }
+  .odp-home .home-intro { margin-bottom: 24px; }
+  .odp-home .home-actions { grid-template-columns: 1fr; }
+  .odp-home .home-action { min-height: 108px; padding: 20px; gap: 16px; }
+  .odp-home .home-action-content strong { font-size: 17px; }
+  .odp-home .card-body { padding: 22px 20px; }
+  .odp-home .nav { gap: 8px; }
+  .odp-home .nav a { min-width: 0; padding: 12px 8px; text-align: center; }
 }
 .odp-home #digitalReview:not([hidden]) { display: grid; gap: 12px; }
 .odp-home #digitalPreviewImage { max-width: min(100%, 360px); max-height: 280px; object-fit: contain; }
 .odp-home #digitalPreviewText { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 18rem; overflow: auto; padding: 12px; border: 1px solid #6e6e6e; }
+
+/* Compact navigation and a readable work area on the passport pages. */
+.odp-home .page:has(> .nav) { max-width: 940px; }
+.odp-home .page:has(> .nav) .header-row { padding: 24px 0; align-items: center; }
+.odp-home .page:has(> .nav) .header-left { display: grid; grid-template-columns: 76px minmax(0, 1fr); column-gap: 20px; align-items: center; text-align: left; }
+.odp-home .page:has(> .nav) .header-left > a { grid-row: 1 / span 2; }
+.odp-home .page:has(> .nav) .home-logo { width: 76px; margin: 0; }
+.odp-home .page:has(> .nav) .header-row h1 { grid-column: 2; margin: 0; font-size: clamp(24px, 3vw, 32px); line-height: 1.15; }
+.odp-home .page:has(> .nav) .header-left .sub { grid-column: 2; margin: 5px 0 0; }
+.odp-home .page:has(> .nav) .nav { justify-content: flex-start; gap: 8px; }
+.odp-home .page:has(> .nav) > .card { max-width: 760px; }
+@media (max-width: 520px) {
+  .odp-home .page:has(> .nav) .header-row { display: flex; flex-direction: row; gap: 12px; }
+  .odp-home .page:has(> .nav) .header-left { grid-template-columns: 50px minmax(0, 1fr); column-gap: 12px; flex: 1; min-width: 0; }
+  .odp-home .page:has(> .nav) .home-logo { width: 50px; }
+  .odp-home .page:has(> .nav) .header-row h1 { font-size: 22px; }
+  .odp-home .page:has(> .nav) .nav { flex-wrap: wrap; }
+  .odp-home .page:has(> .nav) .nav a { flex: 1 1 42%; }
+}
+
+@media (max-width: 520px) {
+  .odp-home .page:has(> .nav) .header-toolbar { width: auto; flex-shrink: 0; }
+}

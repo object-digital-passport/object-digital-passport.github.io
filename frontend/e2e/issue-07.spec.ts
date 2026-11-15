@@ -8,7 +8,9 @@ for (const kind of ['physical','digital','mixed']) {
       localStorage.setItem('odp_locale','en');
       const wallet='0x'+'1'.repeat(40);
       (window as any).ethers={utils:{isAddress:()=>true,defaultAbiCoder:{encode:()=> '0x1234'},keccak256:()=> '0x'+'2'.repeat(64),Interface:class {encodeFunctionData(){return '0x1234';} decodeFunctionData(){return [];}}},providers:{Web3Provider:class {}}};
-      (window as any).ethereum={on(){},request:async ({method}:{method:string})=>{if(method==='eth_requestAccounts'||method==='eth_accounts')return [wallet];if(method==='eth_chainId')return '0x89';if(method==='eth_getBlockByNumber')return {timestamp:'0x'+Math.floor(Date.now()/1000).toString(16)};if(method==='eth_getCode')return '0x';if(method==='eth_estimateGas')return '0x1234';if(method==='eth_sendTransaction')return '0x'+'a'.repeat(64);if(method==='eth_getTransactionCount')return '0x1';throw new Error('unexpected wallet request');}};
+      const handlers:Record<string,Function>={};
+      (window as any).ethereum={on(event:string,fn:Function){handlers[event]=fn;},request:async ({method}:{method:string})=>{if(method==='eth_requestAccounts'||method==='eth_accounts')return [wallet];if(method==='eth_chainId')return '0x89';if(method==='eth_getBlockByNumber')return {timestamp:'0x'+Math.floor(Date.now()/1000).toString(16)};if(method==='eth_getCode')return '0x';if(method==='eth_estimateGas')return '0x1234';if(method==='eth_sendTransaction'){if((window as any).delayMint)return await new Promise(resolve=>(window as any).finishMint=resolve);return '0x'+'a'.repeat(64);}if(method==='eth_getTransactionCount')return '0x1';throw new Error('unexpected wallet request');}};
+      (window as any).disconnectTestWallet=()=>handlers.disconnect();
     });
     await page.goto('/issue-07.html');
     await page.getByRole('button',{name:'Connect wallet'}).click();
@@ -46,6 +48,8 @@ for (const kind of ['physical','digital','mixed']) {
     }
     if(kind!=='digital')await expect.poll(()=>page.locator('#preview').evaluate((img:HTMLImageElement)=>img.naturalWidth)).toBe(1);
     await expect(page.locator('#summary')).toContainText('An object');
+    await expect(page.locator('#summary')).toContainText('Prepared at:');
+    await expect(page.locator('#summary')).toContainText('The registry records the actual issuance time separately');
     await expect(page.locator('#summary')).toContainText('Mint execution deadline');
     await expect(page.locator('#summary')).toContainText('Unique object · edition size 1');
     if(kind!=='digital')await expect(page.locator('#summary')).toContainText('a mark');
@@ -94,6 +98,16 @@ for (const kind of ['physical','digital','mixed']) {
       await page.getByRole('button',{name:'Check failed transaction and prepare retry'}).click();
       await expect(page.getByText(/The failed transaction was verified/)).toBeVisible();
       await expect(page.getByRole('button',{name:'Issue permanently'})).toBeDisabled();
+    }
+    if(kind==='mixed'){
+      await page.evaluate(() => { (window as any).delayMint=true; });
+      await page.getByRole('button',{name:'Issue permanently'}).click();
+      await expect.poll(() => page.evaluate(() => typeof (window as any).finishMint)).toBe('function');
+      await page.evaluate(() => { (window as any).disconnectTestWallet(); (window as any).finishMint('0x'+'a'.repeat(64)); });
+      await expect(page.locator('#status')).toContainText('Wallet changed.');
+      await expect(page.locator('#review')).toBeHidden();
+      await expect(page.getByRole('button',{name:'Connect wallet'})).toBeEnabled();
+      await expect(page.locator('#status')).toContainText('Wallet changed.');
     }
   });
 }

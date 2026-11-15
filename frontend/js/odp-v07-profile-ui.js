@@ -13,21 +13,23 @@
   Object.assign(copy.ru,{connectSafe:'Подключить Safe App',safe_pending:'Предложение Safe ожидает подписей или исполнения.',safePersonal:'Личный профиль C нельзя зарегистрировать через Safe.'});
   copy.en.walletHelp='Use your browser wallet, WalletConnect, or open this page inside Safe to connect Safe App.'; copy.ru.walletHelp='Подключите кошелёк браузера или WalletConnect. Для Safe App откройте страницу внутри Safe.';
   copy.en.connectMobile='Mobile wallet · WalletConnect'; copy.ru.connectMobile='Мобильный кошелёк · WalletConnect';
+  copy.en.locksUnavailable='This browser cannot safely register a profile. Open the HTTPS site in an updated browser and try again.';
+  copy.ru.locksUnavailable='Этот браузер не может безопасно зарегистрировать профиль. Откройте сайт по HTTPS в обновлённом браузере и попробуйте снова.';
   let locale; try { locale = localStorage.getItem('odp_locale'); } catch (_) {}
   if (!['en','ru'].includes(locale)) locale = (navigator.language || '').toLowerCase().startsWith('ru') ? 'ru' : 'en';
-  let state = { key: 'intro' }, current = null, reviewedRole = null, busy = false;
+  let state = { key: null }, current = null, reviewedRole = null, busy = false;
   function render() {
-    document.documentElement.lang = locale;
+    document.documentElement.lang = locale; document.title = copy[locale].title + " — ODP 0.7";
     document.querySelectorAll('[data-copy]').forEach(el => { el.textContent = copy[locale][el.dataset.copy]; });
-    language.textContent = locale === 'en' ? 'RU' : 'EN'; language.setAttribute('aria-label', copy[locale].switch);
+    language.textContent = locale === 'en' ? 'RU' : 'EN'; language.setAttribute('aria-label', language.textContent + ' — ' + copy[locale].switch);
     status.textContent = (copy[locale][state.key] || '') + (state.value || '');
     connect.disabled = busy; document.getElementById('connectMobile').disabled = busy; document.getElementById('connectSafe').disabled = busy; form.querySelectorAll('button').forEach(button => { button.disabled = busy; });
   }
   language.addEventListener('click', () => { locale = locale === 'en' ? 'ru' : 'en'; try { localStorage.setItem('odp_locale', locale); } catch (_) {} render(); });
   function closeReview() { confirmation.hidden = true; reviewedRole = null; confirm.checked = false; }
   function invalidate() { current = null; form.hidden = true; closeReview(); state = { key: 'changed' }; render(); }
-  review.addEventListener('click', () => { if (!current || busy) return; if(current.sdk && role.value==='C'){state={key:'safePersonal'};render();return;} reviewedRole = role.value; selection.textContent = role.options[role.selectedIndex].textContent + ' · ' + current.wallet; document.getElementById('safeAdvice').hidden = reviewedRole === 'C'; confirmation.hidden = false; confirm.checked = false; });
-  back.addEventListener('click', closeReview);
+  review.addEventListener('click', () => { if (!current || busy) return; if(current.sdk && role.value==='C'){state={key:'safePersonal'};render();return;} reviewedRole = role.value; selection.textContent = role.options[role.selectedIndex].textContent + ' · ' + current.wallet; document.getElementById('safeAdvice').hidden = reviewedRole === 'C'; confirmation.hidden = false; confirm.checked = false; confirmation.querySelector('h2').focus(); });
+  back.addEventListener('click', () => { closeReview(); review.focus(); });
   role.addEventListener('change', closeReview);
   async function connectWith(kind) {
     if (busy) return; busy = true; current = null; form.hidden = true; closeReview(); state = { key: 'connecting' }; render();
@@ -53,6 +55,7 @@
   document.getElementById('connectSafe').addEventListener('click',()=>void connectWith('safe'));
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (busy || !current || !confirm.checked || confirmation.hidden || reviewedRole !== role.value) return;
+    if (!ODPV07Wallet.supportsWrites()) { state = { key:'locksUnavailable' }; render(); return; }
     busy = true; state = { key:'connecting' }; render();
     try {
       const args={ role:role.value, wallet:current.wallet, ethereum:current.eth, reader:current.reader, abi:current.abi, ethers, storage:localStorage, locks:navigator.locks };

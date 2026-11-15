@@ -21,5 +21,8 @@
     if (!provider || typeof provider.on !== 'function') return;
     for (const event of ['accountsChanged','chainChanged','disconnect']) provider.on(event,()=>onChange(provider));
   }
-  root.ODPV07Wallet=Object.freeze({connect,watch});
+  function supportsWrites() {
+    return !!(root.navigator && root.navigator.locks && typeof root.navigator.locks.request === 'function');
+  }
+  root.ODPV07Wallet=Object.freeze({connect,watch,supportsWrites});
 })(window);

@@ -32,7 +32,7 @@ function wcInitOpts(opts) {
         name: "Object Digital Passport",
         description: "ODP — create and verify digital object passports",
         url: origin || "https://",
-        icons: origin ? [`${origin}/favicon.ico`] : [],
+        icons: origin ? [`${origin}/odp-logo.png`] : [],
       },
     },
   };
@@ -121,7 +121,7 @@ async function odpWalletConnectConnect(opts) {
       name: "Object Digital Passport",
       description: "ODP — create and verify digital object passports",
       url: origin || "https://",
-      icons: origin ? [`${origin}/favicon.ico`] : [],
+      icons: origin ? [`${origin}/odp-logo.png`] : [],
     },
   });
 

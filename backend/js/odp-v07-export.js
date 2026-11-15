@@ -24,7 +24,8 @@
     ];
     await bundle.verifyEntries(entries, trustedGeneration, reader, ethers);
     const bytes = zip.create(entries);
-    await bundle.verifyEntries(await zip.extract(bytes), trustedGeneration, reader, ethers);
+    // bytes is private to this invocation until verification completes.
+    await bundle.verifyEntries(await zip.extractOwned(bytes), trustedGeneration, reader, ethers);
     return { bytes, passportId:job.passportId, sha256:await canonical.sha256(bytes) };
   }
   return Object.freeze({ make });

@@ -32,6 +32,18 @@ test('rejects encrypted entries, altered local names and decompression bombs', (
   const bomb = Buffer.from(original); bomb.writeUInt16LE(8, directory + 10); bomb.writeUInt32LE(1, directory + 20); bomb.writeUInt32LE(101, directory + 24);
   assert.throws(() => zip.inspect(bomb), /Unsupported/);
 });
+test('rejects oversized metadata and too many entries before extraction', () => {
+  const raw = archive(roots), directory = raw.readUInt32LE(raw.length - 6);
+  // A forged compressed metadata entry with an excessive expanded size.
+  raw.writeUInt16LE(8, directory + 10);
+  raw.writeUInt32LE(11000, directory + 20);
+  raw.writeUInt32LE(1048577, directory + 24);
+  assert.throws(() => zip.inspect(raw), /metadata too large/);
+  const tooMany = [...roots, ...Array.from({length:253}, (_,i) => 'files/' + i.toString(16).padStart(64,'0'))];
+  assert.throws(() => zip.inspect(archive(tooMany)), /Incomplete ZIP directory/);
+  const entries = roots.map(name => ({name,bytes:new Uint8Array(name === 'passport.json' ? 1048577 : 1)}));
+  assert.throws(() => zip.create(entries), /Invalid ZIP entry/);
+});
 
 function compressedArchive() {
   const locals = [], central = []; let offset = 0;
@@ -66,4 +78,33 @@ test('writer round-trips original bytes and rejects duplicates', async () => {
   const bytes = zip.create(data), restored = await zip.extract(bytes);
   assert.deepEqual(restored, data);
   assert.throws(() => zip.create([...data,data[0]]), /Invalid ZIP entry/);
+});
+test('writer archives a snapshot independent of later source changes', async () => {
+  const original = new Uint8Array([1,2,3]);
+  const entries = roots.map(name => ({name,bytes:new Uint8Array([1])}));
+  entries.push({name:'files/'+'a'.repeat(64),bytes:original});
+  const archived = zip.create(entries);
+  original[0] = 9;
+  const restored = await zip.extract(archived);
+  assert.deepEqual(restored.at(-1).bytes,new Uint8Array([1,2,3]));
+});
+test('owned archive views avoid copies while normal extraction stays independent', async () => {
+  const entries = roots.map(name => ({name,bytes:new Uint8Array([1,2,3])}));
+  const archived = zip.create(entries);
+  const owned = await zip.extractOwned(archived), copied = await zip.extract(archived);
+  assert.equal(owned[0].bytes.buffer,archived.buffer);
+  assert.notEqual(copied[0].bytes.buffer,archived.buffer);
+  owned[0].bytes[0] = 9;
+  assert.equal(copied[0].bytes[0],1);
+  await assert.rejects(zip.extractOwned(archived), /CRC/);
+  await assert.rejects(zip.extractOwned(compressedArchive()), /must be stored/);
+});
+test('two maximum-sized originals fit with ZIP metadata', () => {
+  const bytes = new Uint8Array(50 * 1048576);
+  const entries = roots.map(name => ({ name, bytes:new Uint8Array([1]) }));
+  entries.push({ name:'files/'+'a'.repeat(64), bytes }, { name:'files/'+'b'.repeat(64), bytes });
+  const archive = zip.create(entries);
+  assert.ok(archive.length > 100 * 1048576);
+  assert.ok(archive.length <= zip.MAX_ARCHIVE_BYTES);
+  assert.equal(zip.inspect(archive).length, 6);
 });
