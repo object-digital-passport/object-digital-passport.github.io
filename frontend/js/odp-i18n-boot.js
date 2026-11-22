@@ -1,34 +1,97 @@
-/**
- * Runs in <head> before <body> paint. Must mirror STORAGE_KEY + rules in odp-i18n.js (odpResolveLocale).
- * Hides body via html.odp-i18n-pending until odpInitI18n finishes (see odp.css + odp-i18n.js reveal).
- */
-(function (g) {
+/** Resolve the locale before the first paint and own the only startup deadline. */
+(function (global) {
   "use strict";
+
   var STORAGE_KEY = "odp_locale";
-  /* Failsafe: reveal page if odp-i18n.js does not complete; keep in sync with related CSS/JS timing. */
-  var FAILSAFE_REVEAL_TIMEOUT_MS = 2800;
-  function resolve() {
+  var BASE_LOCALE = "en";
+  var ODP_LOCALES = [
+    { code: "en", emoji: "🇬🇧", abbr: "EN", label: "English", readmeUrl: "https://github.com/object-digital-passport/specifications/blob/main/README.md" },
+    { code: "ru", emoji: "🇷🇺", abbr: "RU", label: "Русский", readmeUrl: "https://github.com/object-digital-passport/specifications/blob/main/README.ru.md" },
+  ];
+
+  function resolve(supported) {
+    var codes = supported || ODP_LOCALES.map(function (entry) { return entry.code; });
     try {
-      var s = g.localStorage && g.localStorage.getItem(STORAGE_KEY);
-      if (s === "en" || s === "ru") return s;
-    } catch (e0) {}
-    var nav = (g.navigator && g.navigator.language) || "en";
-    nav = String(nav).toLowerCase();
-    if (nav.startsWith("ru")) return "ru";
-    return "en";
+      var saved = global.localStorage.getItem(STORAGE_KEY);
+      if (codes.includes(saved)) return saved;
+    } catch (_) {}
+    var browser = (global.navigator.language || BASE_LOCALE).toLowerCase().split("-")[0];
+    return codes.includes(browser) ? browser : BASE_LOCALE;
   }
-  if (g.document && g.document.documentElement && resolve() === "ru") {
-    g.document.documentElement.classList.add("odp-i18n-pending");
-  }
-  /* If odp-i18n.js never runs or fetch hangs, do not leave body hidden forever */
-  g.setTimeout(function () {
+
+  function save(locale) {
     try {
-      var h = g.document && g.document.documentElement;
-      if (!h || !h.classList) return;
-      if (h.classList.contains("odp-i18n-pending")) {
-        h.classList.remove("odp-i18n-pending");
-        h.classList.add("odp-i18n-ready");
-      }
-    } catch (e1) {}
-  }, FAILSAFE_REVEAL_TIMEOUT_MS);
+      global.localStorage.setItem(STORAGE_KEY, locale);
+    } catch (_) {}
+  }
+
+  var html = global.document.documentElement;
+  var preferred = resolve();
+  var expired = false;
+  var timer;
+  if (preferred !== BASE_LOCALE) html.classList.add("odp-i18n-pending");
+
+  function reveal() {
+    global.clearTimeout(timer);
+    html.classList.remove("odp-i18n-pending");
+  }
+
+  var deadline = new Promise(function (finish) {
+    timer = global.setTimeout(function () {
+      expired = true;
+      reveal();
+      finish();
+    }, 2800);
+  });
+
+  function initial(supported) {
+    if (expired || (supported && !supported.includes(preferred))) return BASE_LOCALE;
+    return preferred;
+  }
+
+  // ODP 0.7 has its dictionaries in the page script, so it can translate the
+  // static interface before deferred wallet and registry dependencies run.
+  function mountPage(copy, initializeWorkflow) {
+    var locale = initial(Object.keys(copy));
+    var button = global.document.getElementById("language");
+
+    function translate(key) {
+      return copy[locale][key] || copy.en[key];
+    }
+
+    function render() {
+      html.lang = locale;
+      global.document.title = translate("title") + " — ODP 0.7";
+      global.document.querySelectorAll("[data-copy]").forEach(function (element) {
+        var value = translate(element.dataset.copy);
+        if (value !== undefined) element.textContent = value;
+      });
+      button.textContent = locale === BASE_LOCALE ? "RU" : "EN";
+      button.setAttribute("aria-label", button.textContent + " — " + translate("switch"));
+    }
+
+    button.addEventListener("click", function () {
+      locale = locale === BASE_LOCALE ? "ru" : BASE_LOCALE;
+      save(locale);
+      render();
+    });
+    render();
+    button.hidden = false;
+    reveal();
+    var cards = global.document.querySelectorAll("main > .card");
+    cards.forEach(function (card) { card.inert = true; });
+    global.document.addEventListener("DOMContentLoaded", function () {
+      initializeWorkflow({ translate: translate, getLocale: function () { return locale; } });
+      cards.forEach(function (card) { card.inert = false; });
+    }, { once: true });
+  }
+
+  global.ODPLocale = {
+    entries: ODP_LOCALES,
+    initial: initial,
+    save: save,
+    reveal: reveal,
+    deadline: deadline,
+    mountPage: mountPage
+  };
 })(typeof window !== "undefined" ? window : globalThis);

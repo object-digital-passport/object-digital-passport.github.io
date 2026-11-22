@@ -1172,14 +1172,10 @@
     return odpFormatStackSummaryHtml(generation);
   }
 
-  function odpCloseSiteTrustModal() {
-    var el = global.document && global.document.getElementById("odpSiteTrustModalBackdrop");
-    if (!el) return;
-    el.hidden = true;
-    el.setAttribute("aria-hidden", "true");
+  function odpRememberSiteTrustDisclosure() {
     try {
       global.sessionStorage.setItem("odp_site_trust_disclosure_ok", "1");
-    } catch (e0) {}
+    } catch (_) {}
   }
 
   function odpRefreshSiteTrustModalChrome() {
@@ -1196,28 +1192,26 @@
   function odpOpenSiteTrustModal() {
     var doc = global.document;
     if (!doc || !doc.body) return;
-    var backdrop = doc.getElementById("odpSiteTrustModalBackdrop");
-    if (!backdrop) {
-      backdrop = doc.createElement("div");
-      backdrop.id = "odpSiteTrustModalBackdrop";
-      backdrop.className = "odp-modal-backdrop";
-      backdrop.setAttribute("role", "presentation");
-      backdrop.innerHTML =
-        '<div class="odp-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="odpSiteTrustModalTitle">' +
-        '<h3 id="odpSiteTrustModalTitle" class="odp-modal-title"></h3>' +
-        '<div id="odpSiteTrustModalBody" class="odp-modal-body"></div>' +
-        '<div class="odp-modal-actions"><button type="button" class="btn" id="odpSiteTrustModalOk"></button></div></div>';
-      doc.body.appendChild(backdrop);
-      doc.getElementById("odpSiteTrustModalOk").onclick = function () {
-        odpCloseSiteTrustModal();
-      };
-      backdrop.addEventListener("click", function (ev) {
-        if (ev.target === backdrop) odpCloseSiteTrustModal();
+    var dialog = doc.getElementById("odpSiteTrustModal");
+    if (!dialog) {
+      dialog = doc.createElement("dialog");
+      dialog.id = "odpSiteTrustModal";
+      dialog.className = "odp-modal-dialog";
+      dialog.setAttribute("aria-labelledby", "odpSiteTrustModalTitle");
+      dialog.innerHTML =
+        '<div class="odp-modal-content">' +
+        '<h2 id="odpSiteTrustModalTitle" class="odp-modal-title" tabindex="-1" autofocus></h2>' +
+        '<div id="odpSiteTrustModalBody" class="odp-modal-body" role="region" aria-labelledby="odpSiteTrustModalTitle" tabindex="0"></div>' +
+        '<form method="dialog" class="odp-modal-actions">' +
+        '<button type="submit" class="btn" id="odpSiteTrustModalOk"></button></form></div>';
+      dialog.addEventListener("close", odpRememberSiteTrustDisclosure);
+      dialog.addEventListener("click", function (event) {
+        if (event.target === dialog) dialog.close();
       });
+      doc.body.appendChild(dialog);
     }
     odpRefreshSiteTrustModalChrome();
-    backdrop.hidden = false;
-    backdrop.setAttribute("aria-hidden", "false");
+    if (!dialog.open) dialog.showModal();
   }
 
   function odpMaybeAutoShowSiteTrustModal() {

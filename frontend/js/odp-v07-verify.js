@@ -1,4 +1,4 @@
-(function () {
+(function (initializeWorkflow) {
   "use strict";
   const copy = {
     en: { title: "Verify a passport", subtitle: "ODP 0.7 · Polygon", home: "Home", legacy: "Other verification tools", intro: "Enter a passport ID or odp:// locator to read its registration. No wallet, password or recovery phrase is needed.", label: "Passport ID", button: "Check registration", scope: "Files and individual edition items are not checked here yet.", checking: "Reading the registry…", invalid: "Enter a passport ID in the format ODP-YYYY-MM-000000000.", error: "The registration could not be read. Check the ID and connection, then try again.", registered: "Registration found on the ODP 0.7 registry", revoked: "This passport has been withdrawn.", active: "This passport is not withdrawn.", printed: "Confirmed for print", deadline: "Withdrawal deadline", issuer: "Profile", author: "Author name declared by issuer", object: "Object", block: "Finalized block", files: "Files: not checked", item: "Individual edition item: not checked", detail: "Registration records what the issuer submitted. It does not establish the identity of the issuer or the authenticity of the object.", switch: "Change language to Russian" },
@@ -18,13 +18,14 @@
   Object.assign(copy.ru, { scan: "Сканировать QR-код паспорта", closeScan: "Закрыть камеру", scanUnavailable: "Не удалось запустить сканер. Введите номер паспорта или выберите файл .odpass.", scanInvalid: "В этом QR-коде нет номера паспорта поддерживаемого формата." });
   Object.assign(copy.en, {profileTitle:"Verify a profile",profileLabel:"Profile ID",profileButton:"Check profile",profileInvalid:"Enter a C, B, P or M profile ID in the format B-123-456-789-012.",profileFound:"Profile found in the ODP 0.7 registry",profileWallet:"Registered wallet",profileDate:"Registered at",profileDetail:"Registration does not establish the identity of the wallet holder."});
   Object.assign(copy.ru, {profileTitle:"Проверить профиль",profileLabel:"Номер профиля",profileButton:"Проверить профиль",profileInvalid:"Введите номер C, B, P или M в формате B-123-456-789-012.",profileFound:"Профиль найден в реестре ODP 0.7",profileWallet:"Зарегистрированный кошелёк",profileDate:"Дата регистрации",profileDetail:"Регистрация не подтверждает личность владельца кошелька."});
+
+  window.ODPLocale?.mountPage(copy, initializeWorkflow);
+})(function (i18n) {
+  'use strict';
+  const { translate: text, getLocale } = i18n;
   const form = document.getElementById("lookup"), field = document.getElementById("passport-id"), unit = document.getElementById("unit-index");
   const result = document.getElementById("result"), submit = document.getElementById("submit"), language = document.getElementById("language"), bundleFile = document.getElementById("bundle-file");
-  let locale;
-  try { locale = localStorage.getItem("odp_locale"); } catch (_) {}
-  if (locale !== "en" && locale !== "ru") locale = (navigator.language || "").toLowerCase().startsWith("ru") ? "ru" : "en";
   let state = null, busy = false;
-  const text = key => copy[locale][key];
   const profileForm = document.getElementById("profile-lookup"), profileField = document.getElementById("profile-id"), profileResult = document.getElementById("profile-result");
   let profileState = null, profileBusy = false;
   profileField.addEventListener("input", () => { profileState = null; profileField.removeAttribute("aria-invalid"); profileField.removeAttribute("aria-describedby"); renderProfile(); });
@@ -37,7 +38,7 @@
     add(text("profileFound"));
     add(profile.creatorId);
     add(text("profileWallet") + ": " + profile.wallet);
-    add(text("profileDate") + ": " + new Date(Number(profile.timestamp.toString()) * 1000).toLocaleString(locale === "ru" ? "ru-RU" : "en-US"));
+    add(text("profileDate") + ": " + new Date(Number(profile.timestamp.toString()) * 1000).toLocaleString(getLocale() === "ru" ? "ru-RU" : "en-US"));
     add(text("block") + ": " + profileState.record.blockNumber);
     add(text("profileDetail"));
   }
@@ -175,16 +176,11 @@
   function render() {
     scanStatus.textContent = scanMessage ? text(scanMessage) : "";
     renderProfile();
-    document.documentElement.lang = locale;
-    document.title = text("title") + " — ODP 0.7";
-    document.querySelectorAll("[data-copy]").forEach(el => { el.textContent = text(el.dataset.copy); });
-    language.textContent = locale === "ru" ? "EN" : "RU";
-    language.setAttribute("aria-label", language.textContent + " — " + text("switch"));
     result.replaceChildren();
     if (!state) return;
     if (state.kind === "bundleOffline") { append("p", text("localMatched")); append("p", text("chainUnconfirmed")); append("p", text("detail")); return; }
     if (state.kind !== "record") { append("p", text(state.kind)); return; }
-    const r = state.record, date = value => new Date(Number(value.toString()) * 1000).toLocaleString(locale === "ru" ? "ru-RU" : "en-US");
+    const r = state.record, date = value => new Date(Number(value.toString()) * 1000).toLocaleString(getLocale() === "ru" ? "ru-RU" : "en-US");
     append("h2", text("registered"));
     append("p", r.classification.revoked ? text("revoked") : text("active"));
     append("p", text("object") + ": " + r.header.title);
@@ -213,7 +209,7 @@
     }
     append("p", text("detail"));
   }
-  language.addEventListener("click", () => { locale = locale === "en" ? "ru" : "en"; try { localStorage.setItem("odp_locale", locale); } catch (_) {} render(); });
+  language.addEventListener("click", render);
   for (const input of [field, unit]) input.addEventListener("input", () => { state = null; for (const control of [field, unit]) { control.removeAttribute("aria-invalid"); control.removeAttribute("aria-describedby"); } render(); });
   form.addEventListener("submit", async event => {
     event.preventDefault();
@@ -294,4 +290,4 @@
   const id = ODPV07Locator.queryPassportId(location.search, location.hash);
   if (id) field.value = id;
   render();
-})();
+});

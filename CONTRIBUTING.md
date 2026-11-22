@@ -60,8 +60,8 @@ translation is therefore usable, which makes it a reasonable first pull request.
 
 **Adding a language is a folder and one line.** Create
 `frontend/localization/<code>/` with `common.json` and one file per page, then add an entry to
-`ODP_LOCALES` at the top of `frontend/js/odp-i18n.js` — code, flag, abbreviation, label, and the
-README URL for that language. Nothing else in that file knows a language by name.
+`ODP_LOCALES` at the top of `frontend/js/odp-i18n-boot.js` — code, flag, abbreviation, label, and the
+README URL for that language. The JSON loader uses that list.
 
 You do not have to translate everything first. A missing key, an empty string, and a missing
 *file* all fall back to the English text, so a language can land one page at a time.

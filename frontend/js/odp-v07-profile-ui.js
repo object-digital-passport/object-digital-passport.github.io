@@ -1,12 +1,9 @@
-(function () {
+(function (initializeWorkflow) {
   'use strict';
   const copy = {
     en: { title:'Profile',home:'Home',verify:'Verify',intro:'Connect your own wallet to check or register a profile.',connect:'Connect wallet',role:'Profile type',roleC:'C — individual creator',roleB:'B — brand',roleP:'P — expert or institution',roleM:'M — museum',warning:'Registration is public and irreversible. The wallet will show the network fee. Keep your wallet recovery phrase private.',confirm:'I understand and want to register this profile.',register:'Register profile',connecting:'Checking wallet and registry…',ready:'Wallet ready. Choose a profile type.',registered:'Registered profile: ',unresolved:'A previous registration may still be pending. Check again later; a new request will not be sent.',submitted:'Request sent. Check again after confirmation. Transaction: ',rejected:'Request rejected in the wallet.',error:'Could not check the wallet or registry. Use one account on Polygon and try again.',changed:'Wallet changed. Connect again.',switch:'Change language to Russian' },
     ru: { title:'Профиль',home:'Главная',verify:'Проверить',intro:'Подключите свой кошелёк, чтобы проверить или зарегистрировать профиль.',connect:'Подключить кошелёк',role:'Тип профиля',roleC:'C — индивидуальный автор',roleB:'B — бренд',roleP:'P — эксперт или организация',roleM:'M — музей',warning:'Регистрация публичная и необратимая. Комиссию сети покажет кошелёк. Не сообщайте никому секретную фразу восстановления.',confirm:'Я понимаю условия и хочу зарегистрировать профиль.',register:'Зарегистрировать профиль',connecting:'Проверяем кошелёк и реестр…',ready:'Кошелёк готов. Выберите тип профиля.',registered:'Зарегистрированный профиль: ',unresolved:'Предыдущая регистрация может ещё выполняться. Проверьте позже: повторный запрос не будет отправлен.',submitted:'Запрос отправлен. Проверьте результат после подтверждения. Транзакция: ',rejected:'Запрос отклонён в кошельке.',error:'Не удалось проверить кошелёк или реестр. Выберите один аккаунт в сети Polygon и попробуйте снова.',changed:'Кошелёк изменился. Подключите его снова.',switch:'Switch language to English' },
   };
-  const connect = document.getElementById('connect'), form = document.getElementById('registration'), status = document.getElementById('status');
-  const role = document.getElementById('role'), confirm = document.getElementById('confirm'), language = document.getElementById('language');
-  const confirmation = document.getElementById('confirmation'), review = document.getElementById('review'), back = document.getElementById('back'), selection = document.getElementById('selection');
   Object.assign(copy.en, { review:'Review registration', reviewTitle:'Confirm profile registration', back:'Back', warning:'The profile type is permanent and bound to this account forever. ODP cannot recover, block or move it. If you lose account access, you can no longer issue under this profile. Registration is public and irreversible.', backup:'You are responsible for your wallet backup. Never share your recovery phrase.', safeAdvice:'For an organisation, consider a multisignature wallet with at least two owners on separate devices.' });
   Object.assign(copy.ru, { review:'Проверить перед регистрацией', reviewTitle:'Подтверждение регистрации профиля', back:'Назад', warning:'Тип профиля нельзя изменить: он навсегда привязан к этому аккаунту. ODP не может восстановить, заблокировать или перенести профиль. Потеря доступа к аккаунту прекращает выпуск под этим номером профиля. Регистрация публичная и необратимая.', backup:'Вы сами отвечаете за резервную копию кошелька. Никому не сообщайте секретную фразу.', safeAdvice:'Для организации рассмотрите мультиподписной кошелёк как минимум с двумя владельцами на разных устройствах.' });
   Object.assign(copy.en,{connectSafe:'Connect Safe App',safe_pending:'Safe proposal is awaiting signatures or execution.',safePersonal:'A personal C profile cannot use Safe.'});
@@ -15,17 +12,21 @@
   copy.en.connectMobile='Mobile wallet · WalletConnect'; copy.ru.connectMobile='Мобильный кошелёк · WalletConnect';
   copy.en.locksUnavailable='This browser cannot safely register a profile. Open the HTTPS site in an updated browser and try again.';
   copy.ru.locksUnavailable='Этот браузер не может безопасно зарегистрировать профиль. Откройте сайт по HTTPS в обновлённом браузере и попробуйте снова.';
-  let locale; try { locale = localStorage.getItem('odp_locale'); } catch (_) {}
-  if (!['en','ru'].includes(locale)) locale = (navigator.language || '').toLowerCase().startsWith('ru') ? 'ru' : 'en';
+
+  window.ODPLocale?.mountPage(copy, initializeWorkflow);
+})(function (i18n) {
+  'use strict';
+  const { translate: t } = i18n;
+  const connect = document.getElementById('connect'), form = document.getElementById('registration'), status = document.getElementById('status');
+  const role = document.getElementById('role'), confirm = document.getElementById('confirm'), language = document.getElementById('language');
+  const confirmation = document.getElementById('confirmation'), review = document.getElementById('review'), back = document.getElementById('back'), selection = document.getElementById('selection');
   let state = { key: null }, current = null, reviewedRole = null, busy = false;
   function render() {
-    document.documentElement.lang = locale; document.title = copy[locale].title + " — ODP 0.7";
-    document.querySelectorAll('[data-copy]').forEach(el => { el.textContent = copy[locale][el.dataset.copy]; });
-    language.textContent = locale === 'en' ? 'RU' : 'EN'; language.setAttribute('aria-label', language.textContent + ' — ' + copy[locale].switch);
-    status.textContent = (copy[locale][state.key] || '') + (state.value || '');
+    if (!confirmation.hidden) selection.textContent = role.options[role.selectedIndex].textContent;
+    status.textContent = (t(state.key) || '') + (state.value || '');
     connect.disabled = busy; document.getElementById('connectMobile').disabled = busy; document.getElementById('connectSafe').disabled = busy; form.querySelectorAll('button').forEach(button => { button.disabled = busy; });
   }
-  language.addEventListener('click', () => { locale = locale === 'en' ? 'ru' : 'en'; try { localStorage.setItem('odp_locale', locale); } catch (_) {} render(); });
+  language.addEventListener('click', render);
   function closeReview() { confirmation.hidden = true; reviewedRole = null; confirm.checked = false; }
   function invalidate() { current = null; form.hidden = true; closeReview(); state = { key: 'changed' }; render(); }
   review.addEventListener('click', () => { if (!current || busy) return; if(current.sdk && role.value==='C'){state={key:'safePersonal'};render();return;} reviewedRole = role.value; selection.textContent = role.options[role.selectedIndex].textContent + ' · ' + current.wallet; document.getElementById('safeAdvice').hidden = reviewedRole === 'C'; confirmation.hidden = false; confirm.checked = false; confirmation.querySelector('h2').focus(); });
@@ -67,4 +68,4 @@
     finally { busy = false; closeReview(); render(); }
   });
   render();
-})();
+});
