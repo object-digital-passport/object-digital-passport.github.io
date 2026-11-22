@@ -32,7 +32,7 @@
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" integrity="sha384-Htz1SE4Sl5aitpvFgr2j0sfsGUIuSXI6t8hEyrlQ93zflEF3a29bH2AvkUROUw7J" crossorigin="anonymous"></script>
 <script src="backend/js/odp-contract.js?v=20261122"></script>
 <script src="js/odp-date-format.js?v=1"></script>
-<script>window.ODP_I18N_VERSION="20260523";</script>
+<script>window.ODP_I18N_VERSION="20261122wc";</script>
 <script src="js/odp-i18n.js?v=18"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" integrity="sha384-b5Ya4Bq3qCyz39m2ISh+4DxjAIljdeFwK/BsXLuj9gugaNwAcj/ia15fxNZL9Nlx" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
@@ -136,9 +136,6 @@ document.getElementById('odpV07VerifyLink').addEventListener('click', function (
 
 <div class="verify-tools-region" id="verify-section-tools">
   <div class="section-title" data-i18n="verify.tools.sectionTitle">Verify tools menu</div>
-  <p class="fhint verify-tools-region-lead" data-i18n="verify.tools.lead">
-    Choose a tool to open it in this Verify workspace.
-  </p>
 
 <section class="card verify-tool-card" id="verifyToolsMenu">
   <div class="verify-tool-card-pad">
@@ -166,8 +163,7 @@ document.getElementById('odpV07VerifyLink').addEventListener('click', function (
   <section class="card verify-tool-card">
     <div class="verify-tool-card-pad">
       <div class="verify-tool-wallet-row" style="flex-wrap:wrap;gap:8px;align-items:center">
-        <button type="button" class="btn btn-sec" id="docAttestConnectBtn" onclick="connectDocAttestWallet()" data-i18n="verify.docAttest.connectBtn">Connect wallet</button>
-        <button type="button" class="btn btn-sec" id="docAttestConnectWcBtn" onclick="connectDocAttestWalletWalletConnect()" data-i18n="verify.docAttest.connectWcBtn">WalletConnect</button>
+        <button type="button" class="btn btn-sec" id="docAttestConnectWcBtn" onclick="connectDocAttestWalletWalletConnect()" data-i18n="verify.docAttest.connectWcBtn">Connect with WalletConnect</button>
         <span id="docAttestWallet" class="mono verify-tool-wallet-addr"></span>
       </div>
       <label class="search-label verify-tool-field-label" for="docAttestFile" data-i18n="verify.docAttest.fileLabel">File</label>
@@ -191,7 +187,7 @@ document.getElementById('odpV07VerifyLink').addEventListener('click', function (
         <div class="section-title verify-tool-inset-title" data-i18n="verify.docAttest.txPreviewTitle">Will be sent to blockchain</div>
         <div id="docAttestPreview" class="mono verify-tool-preview-mono"></div>
       </div>
-      <button type="button" class="btn" id="docAttestBtn" onclick="attestDocumentFromVerify()" data-i18n="verify.docAttest.submitBtn">Submit attestation</button>
+      <button type="button" class="btn" id="docAttestBtn" disabled onclick="attestDocumentFromVerify()" data-i18n="verify.docAttest.submitBtn">Submit attestation</button>
       <div id="docAttestResult" class="verify-tool-result"></div>
     </div>
   </section>
@@ -698,27 +694,7 @@ async function init() {
     document.getElementById("idInput").value = id;
     await verify();
   }
-  await initVerifyWalletBar();
   activateVerifyTool("", false, false);
-}
-
-function injectedEthereum() {
-  const w = window.ethereum;
-  if (!w) return null;
-  if (w.providers && w.providers.length) {
-    return w.providers.find((p) => p.isMetaMask) || w.providers[0];
-  }
-  return w;
-}
-
-async function revokeSiteWalletPermission(eth) {
-  if (!eth) return false;
-  try {
-    await eth.request({ method: "wallet_revokePermissions", params: [{ eth_accounts: {} }] });
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 async function resolveCreatorIdByWallet(address) {
@@ -748,13 +724,8 @@ function setVerifyWalletBar(address) {
 
 function setDocAttestWalletLabel(address) {
   const lab = document.getElementById("docAttestWallet");
-  const btn = document.getElementById("docAttestConnectBtn");
   const btnWc = document.getElementById("docAttestConnectWcBtn");
   if (lab) lab.textContent = address ? ("Connected: " + address) : "";
-  if (btn) {
-    btn.hidden = !!address;
-    btn.disabled = !!address;
-  }
   if (btnWc) {
     btnWc.hidden = !!address;
     btnWc.disabled = !!address;
@@ -807,7 +778,15 @@ function currentDocAttestDocumentUri() {
   return uriIn && uriIn.value ? String(uriIn.value).trim() : "";
 }
 
+let docAttestSubmitting = false;
+function updateDocAttestSubmit() {
+  const button = document.getElementById("docAttestBtn");
+  const file = document.getElementById("docAttestFile");
+  button.disabled = docAttestSubmitting || !docAttestContract || !file.files.length;
+}
+
 function syncDocAttestPreviews() {
+  updateDocAttestSubmit();
   const hashEl = document.getElementById("docAttestHash");
   const walletLab = document.getElementById("docAttestWallet");
   const h = (hashEl && hashEl.textContent ? hashEl.textContent : "").replace(/^SHA-256:\s*/i, "").trim();
@@ -816,42 +795,12 @@ function syncDocAttestPreviews() {
   renderDocAttestPreview(h, addr, currentDocAttestDocumentUri());
 }
 
-async function initVerifyWalletBar() {
-  const eth = injectedEthereum();
-  if (!eth) return;
-  let skip = false;
-  try { skip = sessionStorage.getItem(ODP_SKIP_WALLET_AUTOCONNECT) === "1"; } catch {}
-  if (skip) return;
-  let acc = [];
-  try {
-    acc = await eth.request({ method: "eth_accounts" });
-  } catch {}
-  const connected = Array.isArray(acc) && acc[0] ? String(acc[0]) : "";
-  verifyWalletCreatorId = connected ? await resolveCreatorIdByWallet(connected) : "";
-  setVerifyWalletBar(connected);
-  setDocAttestWalletLabel(connected);
-  if (connected) {
-    try {
-      docAttestWeb3Provider = new ethers.providers.Web3Provider(eth, "any");
-      docAttestSigner = docAttestWeb3Provider.getSigner();
-      docAttestContract = new ethers.Contract(odpDocAttestWriteAddress(), DOC_ATTEST_WRITE_ABI, docAttestSigner);
-    } catch {}
-  }
-  syncDocAttestPreviews();
-  syncVerifyPaffAuditVisibility();
-}
-
 async function disconnectVerifyWallet() {
-  if (typeof odpWalletConnectIsActive === "function" && odpWalletConnectIsActive()) {
-    if (typeof odpWalletConnectDisconnect === "function") await odpWalletConnectDisconnect();
-  } else {
-    const eth = injectedEthereum();
-    if (eth) await revokeSiteWalletPermission(eth);
-  }
-  try { sessionStorage.setItem(ODP_SKIP_WALLET_AUTOCONNECT, "1"); } catch {}
   docAttestWeb3Provider = null;
   docAttestSigner = null;
   docAttestContract = null;
+  if (typeof odpWalletConnectDisconnect === "function") await odpWalletConnectDisconnect();
+  try { sessionStorage.setItem(ODP_SKIP_WALLET_AUTOCONNECT, "1"); } catch {}
   verifyWalletCreatorId = "";
   setDocAttestWalletLabel("");
   const uriIn = document.getElementById("docAttestDocumentUri");
@@ -3371,7 +3320,8 @@ async function sha256FileToBytes32HexVerify(file) {
 async function connectDocAttestWalletWithEip1193(eth) {
   const out = document.getElementById("docAttestResult");
   docAttestWeb3Provider = new ethers.providers.Web3Provider(eth, "any");
-  await docAttestWeb3Provider.send("eth_requestAccounts", []);
+  const account = await odpRequireSingleEthereumAccount(eth);
+  if (!account.ok) throw new Error(account.message);
   const net = await docAttestWeb3Provider.getNetwork();
   if (Number(net.chainId) !== Number(NET.chainId)) {
     const hex = "0x" + Number(NET.chainId).toString(16);
@@ -3379,6 +3329,14 @@ async function connectDocAttestWalletWithEip1193(eth) {
   }
   docAttestSigner = docAttestWeb3Provider.getSigner();
   const addr = await docAttestSigner.getAddress();
+  for (const event of ["accountsChanged", "chainChanged", "disconnect"]) {
+    eth.on(event, () => {
+      if (docAttestWeb3Provider?.provider === eth) {
+        // Clear the signer before a later button can send with an outdated account.
+        void disconnectVerifyWallet();
+      }
+    });
+  }
   docAttestContract = new ethers.Contract(odpDocAttestWriteAddress(), DOC_ATTEST_WRITE_ABI, docAttestSigner);
   verifyWalletCreatorId = await resolveCreatorIdByWallet(addr);
   try { sessionStorage.removeItem(ODP_SKIP_WALLET_AUTOCONNECT); } catch {}
@@ -3389,28 +3347,23 @@ async function connectDocAttestWalletWithEip1193(eth) {
   syncVerifyPaffAuditVisibility();
 }
 
-async function connectDocAttestWallet() {
-  const out = document.getElementById("docAttestResult");
-  if (!window.ethereum) {
-    if (out) out.innerHTML = `<div class="err-box">${esc(t("verify.docAttest.noInjected"))}</div>`;
-    return;
-  }
-  try {
-    await connectDocAttestWalletWithEip1193(window.ethereum);
-  } catch (e) {
-    if (out) out.innerHTML = `<div class="err-box">${esc(e && (e.reason || e.message) ? String(e.reason || e.message) : String(e))}</div>`;
-  }
-}
-
 async function connectDocAttestWalletWalletConnect() {
   const out = document.getElementById("docAttestResult");
+  const button = document.getElementById("docAttestConnectWcBtn");
+  if (button.disabled) return;
+  button.disabled = true;
   try {
     await odpMergeRegistryConfigAsync(NET);
     await odpEnsureWalletConnectBundle();
     const eth = await odpWalletConnectConnect({ chainId: NET.chainId, rpcUrl: NET.rpc });
     await connectDocAttestWalletWithEip1193(eth);
-  } catch (e) {
-    if (out) out.innerHTML = `<div class="err-box">${esc(e && (e.reason || e.message) ? String(e.reason || e.message) : String(e))}</div>`;
+  } catch (_) {
+    docAttestWeb3Provider = null;
+    docAttestSigner = null;
+    docAttestContract = null;
+    if (out) out.innerHTML = `<div class="err-box">${esc(t("verify.docAttest.wcError"))}</div>`;
+  } finally {
+    if (!button.hidden) button.disabled = false;
   }
 }
 
@@ -3437,23 +3390,19 @@ async function attestDocumentFromVerify() {
     out.innerHTML = `<div class="err-box">${esc(t("verify.docAttest.uriTooLong"))}</div>`;
     return;
   }
-  if (!docAttestSigner || !docAttestContract) {
-    await connectDocAttestWallet();
-    if (!docAttestSigner || !docAttestContract) return;
-  }
+  if (!docAttestSigner || !docAttestContract || docAttestSubmitting) return;
+  const writeContract = docAttestContract;
+  docAttestSubmitting = true;
+  updateDocAttestSubmit();
   out.innerHTML = `<div class="loading"><div class="spin"></div><span>${esc(t("verify.docAttest.hashing"))}</span></div>`;
   let hash;
   try {
     hash = await sha256FileToBytes32HexVerify(f);
     if (hashEl) hashEl.textContent = "SHA-256: " + hash;
     syncDocAttestPreviews();
-  } catch (e) {
-    out.innerHTML = `<div class="err-box">${esc(e.message || String(e))}</div>`;
-    return;
-  }
-  out.innerHTML = `<div class="loading"><div class="spin"></div><span>${esc(t("verify.docAttest.confirmWallet"))}</span></div>`;
-  try {
-    const tx = await docAttestContract.attestExternalDocument(hash, uri);
+    if (writeContract !== docAttestContract || fileEl.files[0] !== f) return;
+    out.innerHTML = `<div class="loading"><div class="spin"></div><span>${esc(t("verify.docAttest.confirmWallet"))}</span></div>`;
+    const tx = await writeContract.attestExternalDocument(hash, uri);
     out.innerHTML = `<div class="info neutral">${esc(t("verify.docAttest.txSent"))} <code class="mono">${esc(tx.hash)}</code></div>`;
     await tx.wait();
     const desc = uri
@@ -3462,6 +3411,9 @@ async function attestDocumentFromVerify() {
     out.innerHTML = `<div class="status-bar authentic"><div class="status-icon">✓</div><div class="status-text"><div class="status-label">${esc(t("verify.docAttest.successTitle"))}</div><div class="status-desc">${esc(desc)}</div></div></div>`;
   } catch (e) {
     out.innerHTML = `<div class="err-box">${esc(e && (e.reason || e.message) ? String(e.reason || e.message) : String(e))}</div>`;
+  } finally {
+    docAttestSubmitting = false;
+    updateDocAttestSubmit();
   }
 }
 
@@ -3937,20 +3889,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         syncDocAttestPreviews();
       } catch {
         if (hashEl) hashEl.textContent = "";
+      } finally {
+        updateDocAttestSubmit();
       }
-    });
-  }
-  const eth = injectedEthereum();
-  if (eth && typeof eth.on === "function") {
-    eth.on("accountsChanged", (accounts) => {
-      const addr = Array.isArray(accounts) && accounts[0] ? String(accounts[0]) : "";
-      Promise.resolve(resolveCreatorIdByWallet(addr)).then((cid) => {
-        verifyWalletCreatorId = cid || "";
-        setVerifyWalletBar(addr);
-        setDocAttestWalletLabel(addr);
-        syncDocAttestPreviews();
-        syncVerifyPaffAuditVisibility();
-      });
     });
   }
   const docVerifyFileEl = document.getElementById("docVerifyFile");

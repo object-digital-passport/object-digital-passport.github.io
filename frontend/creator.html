@@ -12,12 +12,13 @@
 <script src="backend/config/odp-wc-config.js?v=1"></script>
 <script src="backend/js/odp-wallet-wc-loader.js?v=1"></script>
 <title>ODP v0.6 — Register profile</title>
-<link rel="stylesheet" href="css/odp.css?v=20261122">
+<link rel="stylesheet" href="css/odp.css?v=20261122wc">
 <script src="js/odp-theme.js?v=0.3.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" integrity="sha384-Htz1SE4Sl5aitpvFgr2j0sfsGUIuSXI6t8hEyrlQ93zflEF3a29bH2AvkUROUw7J" crossorigin="anonymous"></script>
 <script src="backend/js/odp-contract.js?v=20261122"></script>
 <script src="js/odp-date-format.js?v=1"></script>
 <script src="backend/js/odp-passport-v03-ops.js?v=0.5.0"></script>
+<script>window.ODP_I18N_VERSION="20261122wc";</script>
 <script src="js/odp-i18n.js?v=18"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
@@ -285,7 +286,7 @@ function renderConnect() {
 
     ${creatorStackStripHtml()}
 
-    <div class="card">
+    <div class="card wallet-connect-card">
       <div class="card-head">${esc(t("creator.connect.cardTitle"))}</div>
       <div class="card-body">
         ${errBanner}
@@ -294,16 +295,8 @@ function renderConnect() {
         </p>
 
         <div class="wallet-options-grid" style="grid-template-columns:1fr;max-width:420px;margin:0 auto;gap:12px">
-          <div class="wallet-opt" id="odpConnectWalletBtn" onclick="connectWallet()">
-            <div class="wallet-opt-icon">🔗</div>
-            <div class="wallet-opt-name">${esc(t("creator.connect.btnName"))}</div>
-            <div class="wallet-opt-desc">${esc(t("creator.connect.btnDesc"))}</div>
-          </div>
-          <div class="wallet-opt" id="odpConnectWalletWcBtn" onclick="connectWalletWithWalletConnect()">
-            <div class="wallet-opt-icon">📱</div>
-            <div class="wallet-opt-name">${esc(t("creator.connect.wcName"))}</div>
-            <div class="wallet-opt-desc">${esc(t("creator.connect.wcDesc"))}</div>
-          </div>
+          <button type="button" class="btn" id="odpConnectWalletWcBtn" onclick="connectWalletWithWalletConnect()" aria-describedby="odpConnectWalletWcHelp">${esc(t("creator.connect.wcName"))}</button>
+          <p class="fhint" id="odpConnectWalletWcHelp">${esc(t("creator.connect.wcDesc"))}</p>
         </div>
 
         <div id="connectErr"></div>
@@ -1157,9 +1150,6 @@ function showRegister() {
 async function disconnect() {
   if (typeof odpWalletConnectIsActive === "function" && odpWalletConnectIsActive()) {
     if (typeof odpWalletConnectDisconnect === "function") await odpWalletConnectDisconnect();
-  } else {
-    const eth = injectedEthereum();
-    if (eth) await revokeSiteWalletPermission(eth);
   }
   try { sessionStorage.setItem(ODP_SKIP_WALLET_AUTOCONNECT, "1"); } catch {}
   wallet = null; provider = null; signer = null; contract = null; creatorId = null;
@@ -1174,132 +1164,14 @@ function registerButtonLabel() {
 
 // ── Wallet connection ─────────────────────────────────────────────────────────
 
-function injectedEthereum() {
-  const w = window.ethereum;
-  if (!w) return null;
-  if (w.providers && w.providers.length)
-    return w.providers.find((p) => p.isMetaMask) || w.providers[0];
-  return w;
-}
-
-/** MetaMask / modern EIP-1193: revoke site access so the next Connect shows a wallet prompt. */
-async function revokeSiteWalletPermission(eth) {
-  if (!eth) return false;
-  try {
-    await eth.request({ method: "wallet_revokePermissions", params: [{ eth_accounts: {} }] });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/** MetaMask mobile: `metamask.app.link/dapp/{host…}` with `https://` stripped (same as metamask-deeplinks generator; do not encode the full URL). */
-function openInMetaMaskAppUrl() {
-  try {
-    const u = new URL(location.href);
-    if (u.protocol !== "https:" && u.protocol !== "http:") return "";
-    const rest = u.href.replace(/^https?:\/\//i, "");
-    const out = "https://metamask.app.link/dapp/" + rest;
-    return out;
-  } catch {
-    return "";
-  }
-}
-
 /** Ask MetaMask to use Polygon (NET.chainId) before any contract calls. */
 async function ensureWalletChain(eth, cfg) {
   if (typeof odpEnsureWalletChain === "function") return odpEnsureWalletChain(eth, cfg);
 }
 
-function noWalletHtml() {
-  const fileProto = location.protocol === "file:";
-  const mmApp = openInMetaMaskAppUrl();
-  const mobileHint =
-    !fileProto && mmApp
-      ? `<div style="margin:14px 0 10px">
-          <a class="btn" href="${esc(mmApp)}" rel="noopener" style="display:inline-block;text-decoration:none">${esc(t("creator.noWallet.mmOpen"))}</a>
-          <p class="fhint" style="margin:10px 0 0;font-size:11px">${esc(t("creator.noWallet.mmHint"))}</p>
-        </div>`
-      : "";
-  const wcConfigured =
-    typeof ODP_WALLETCONNECT_PROJECT_ID !== "undefined" && String(ODP_WALLETCONNECT_PROJECT_ID).trim().length > 0;
-  const wcBlock = wcConfigured
-    ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
-        <p style="font-size:12px;color:var(--text2);margin:0 0 10px">${esc(t("creator.noWallet.wcLead"))}</p>
-        <button type="button" class="btn" onclick="connectWalletWithWalletConnect()">${esc(t("creator.connect.wcName"))}</button>
-      </div>`
-    : "";
-  return `<div class="info error" style="line-height:1.6">
-    ${esc(t("creator.noWallet.line1"))}
-    <a href="https://metamask.io" target="_blank" rel="noopener" style="color:var(--accent)">${esc(t("creator.noWallet.metaMask"))}</a>
-    ${esc(t("creator.noWallet.line2"))}
-    ${mobileHint}
-    ${fileProto ? `<br><br>${esc(t("creator.noWallet.fileProto"))}` : !mmApp ? `<br><br>${esc(t("creator.noWallet.httpsHint"))}` : ""}
-    ${wcBlock}
-  </div>`;
-}
-
 function odpSetConnectButtonsBusyCreator(busy) {
-  const btnInj = document.getElementById("odpConnectWalletBtn");
-  const btnWc = document.getElementById("odpConnectWalletWcBtn");
-  [btnInj, btnWc].forEach((btn) => {
-    if (!btn) return;
-    if (busy) {
-      btn.style.opacity = "0.65";
-      btn.style.pointerEvents = "none";
-    } else {
-      btn.style.opacity = "";
-      btn.style.pointerEvents = "";
-    }
-  });
-}
-
-async function connectWallet() {
-  const eth = injectedEthereum();
-  const errEl = document.getElementById("connectErr");
-  if (odpConnectInFlight) {
-    if (errEl)
-      errEl.innerHTML =
-        `<div class="info error">${esc(t("creator.errors.connectInProgress"))}</div>`;
-    return;
-  }
-  if (!eth) {
-    errEl.innerHTML = noWalletHtml();
-    return;
-  }
-  odpConnectInFlight = true;
-  odpSetConnectButtonsBusyCreator(true);
-  try {
-    // eth_requestAccounts must be the first wallet RPC in this handler so the browser
-    // keeps user activation (MetaMask popup opens without forcing a manual extension click).
-    await eth.request({ method: "eth_requestAccounts" });
-    const single = await odpRequireSingleEthereumAccount(eth);
-    if (!single.ok) {
-      errEl.innerHTML = `<div class="info error">${esc(single.message)}</div>`;
-      return;
-    }
-    await odpMergeRegistryConfigAsync(NET);
-    await ensureWalletChain(eth, NET);
-    await ensureWalletChain(eth, NET);
-    const Elib = odpEthersLib();
-    if (!Elib || !Elib.providers) {
-      errEl.innerHTML =
-        `<div class="info error">${esc("ethers v5 failed to load (CDN blocked?). Check network / ad blocker.")}</div>`;
-      return;
-    }
-    await _finish(new Elib.providers.Web3Provider(eth));
-  } catch (e) {
-    const msg = String((e && e.message) || e);
-    if (/already pending|request of type.*pending/i.test(msg)) {
-      errEl.innerHTML =
-        `<div class="info error">${esc(t("creator.errors.walletPending"))}</div>`;
-    } else {
-      errEl.innerHTML = `<div class="info error">${esc(msg)}</div>`;
-    }
-  } finally {
-    odpConnectInFlight = false;
-    odpSetConnectButtonsBusyCreator(false);
-  }
+  const button = document.getElementById("odpConnectWalletWcBtn");
+  if (button) button.disabled = busy;
 }
 
 async function connectWalletWithWalletConnect() {
@@ -1310,10 +1182,10 @@ async function connectWalletWithWalletConnect() {
         `<div class="info error">${esc(t("creator.errors.connectInProgress"))}</div>`;
     return;
   }
-  await odpMergeRegistryConfigAsync(NET);
   odpConnectInFlight = true;
   odpSetConnectButtonsBusyCreator(true);
   try {
+    await odpMergeRegistryConfigAsync(NET);
     await odpEnsureWalletConnectBundle();
     const eth = await odpWalletConnectConnect({ chainId: NET.chainId, rpcUrl: NET.rpc });
     await ensureWalletChain(eth, NET);
@@ -1322,7 +1194,6 @@ async function connectWalletWithWalletConnect() {
       errEl.innerHTML = `<div class="info error">${esc(single.message)}</div>`;
       return;
     }
-    await ensureWalletChain(eth, NET);
     if (typeof odpInstallSingleAccountGuard === "function") {
       odpInstallSingleAccountGuard(eth, {
         onMultiple: async function () {
@@ -1348,7 +1219,7 @@ async function connectWalletWithWalletConnect() {
       errEl.innerHTML =
         `<div class="info error">${esc(t("creator.errors.walletPending"))}</div>`;
     } else {
-      errEl.innerHTML = `<div class="info error">${esc(msg)}</div>`;
+      errEl.innerHTML = `<div class="info error">${esc(t("creator.connect.wcError"))}</div>`;
     }
   } finally {
     odpConnectInFlight = false;
@@ -1364,7 +1235,7 @@ async function _finish(web3p) {
     odpWalletConnectIsActive() &&
     typeof odpWalletConnectGetEip1193 === "function"
       ? odpWalletConnectGetEip1193()
-      : injectedEthereum();
+      : null;
   const single = await odpRequireSingleEthereumAccount(eth);
   if (!single.ok) {
     const ce = document.getElementById("connectErr");
@@ -1466,70 +1337,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const skipAuto = (() => {
     try { return sessionStorage.getItem(ODP_SKIP_WALLET_AUTOCONNECT) === "1"; } catch { return false; }
   })();
-  const eth = injectedEthereum();
-  let accounts = [];
-  if (eth) {
-    odpInstallSingleAccountGuard(eth, {
-      onMultiple: async function () {
-        var r = await odpRequireSingleEthereumAccount(eth);
-        walletConnectError = r.message || t("creator.multiAccount");
-        await disconnect();
-      },
-      onEmpty: async function () {
-        await disconnect();
-      },
-    });
-    accounts = await eth.request({ method: "eth_accounts" }).catch(() => []);
-  }
-  if (!skipAuto && accounts.length > 0) {
-    if (accounts.length > 1) {
-      var br = await odpRequireSingleEthereumAccount(eth);
-      walletConnectError = br.message;
-    } else {
-      odpConnectInFlight = true;
-      try {
-        const net = NET;
-        const isLocal = /^(localhost|127\.0\.0\.1)$/i.test(location.hostname || "");
-        await odpMergeRegistryConfigAsync(NET);
-        if (!odpHasValidRegistryAddress(NET)) {
-          provider = null;
-          signer = null;
-          contract = null;
-          wallet = null;
-          odpContractGeneration = null;
-          ABI = null;
-          walletConnectError = odpRegistryMisconfiguredBannerHtml(isLocal);
-          walletConnectErrorNeutral = true;
-        } else {
-          await ensureWalletChain(eth, net);
-          const Eauto = odpEthersLib();
-          if (!Eauto || !Eauto.providers) throw new Error("ethers v5 failed to load");
-          provider = new Eauto.providers.Web3Provider(eth);
-          signer = provider.getSigner();
-          wallet = await signer.getAddress();
-          const fin = await odpFinalizeWalletContract(net, signer, POLYGON_RPC_FALLBACKS, "creator");
-          if (fin.legacyUnsupported) {
-            provider = null;
-            signer = null;
-            contract = null;
-            wallet = null;
-            odpContractGeneration = null;
-            ABI = null;
-          } else {
-            odpContractGeneration = fin.generation;
-            ABI = fin.abi;
-            contract = fin.contract;
-            const existing = await contract.getCreatorByWallet(wallet);
-            if (existing) creatorId = existing;
-            secOk = true;
-          }
-        }
-      } catch {}
-      finally {
-        odpConnectInFlight = false;
-      }
-    }
-  } else if (!skipAuto && accounts.length === 0) {
+  if (!skipAuto) {
     try {
       await odpEnsureWalletConnectBundle();
       if (typeof odpWalletConnectTryRestoreSession === "function") {

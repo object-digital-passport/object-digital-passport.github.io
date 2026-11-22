@@ -462,6 +462,7 @@ h1 {
   color: var(--text);
 }
 
+.wallet-connect-card { animation: none; }
 .card-body { padding: 24px 28px; }
 
 /* Creator type grid */

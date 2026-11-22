@@ -98,17 +98,17 @@
       "documentLink": "Документ ↗"
     },
     "tools": {
-      "sectionTitle": "Меню инструментов проверки",
+      "sectionTitle": "Другие инструменты проверки",
       "lead": "Выберите инструмент — он откроется в рабочей области этой страницы Verify.",
-      "backBtn": "← Назад к Verify",
+      "backBtn": "← К списку инструментов",
       "proofSign": "Доказательство: подпись выпускающей стороны",
       "proofVerify": "Доказательство: проверка подписи",
-      "docAttest": "Закрепить документ (мой файл)",
-      "docCheck": "Проверка хэша документа",
-      "offlineCheck": "Проверить offline payload"
+      "docAttest": "Записать хеш документа",
+      "docCheck": "Проверить хеш документа",
+      "offlineCheck": "Проверить офлайн-данные паспорта"
     },
     "offlineTool": {
-      "sectionTitle": "Проверка offline payload",
+      "sectionTitle": "Проверка офлайн-данных паспорта",
       "lead": "Загрузите компактный odpOffline payload из файла или вставьте Base64, затем сравните его raw-байты с текущим on-chain NDPP anchor паспорта. Для URL-first NDEF carrier Verify link остаётся только входной записью; хэшируется вторичная payload record.",
       "passportIdLabel": "Passport ID",
       "passportIdPlaceholder": "ODP-2026-03-123456789",
@@ -117,7 +117,7 @@
       "fileDropLine2": "Raw CBOR или NDEF carrier — обработка локально",
       "base64Label": "Или вставьте Base64 payload",
       "base64Placeholder": "Base64 raw CBOR payload",
-      "submitBtn": "Проверить offline payload",
+      "submitBtn": "Проверить офлайн-данные паспорта",
       "needNet": "RPC ещё не готов.",
       "needPassportId": "Введите корректный Passport ID (ODP-…).",
       "needPayload": "Сначала выберите файл payload или вставьте Base64.",
@@ -334,10 +334,11 @@
       "disconnect": "Отключить"
     },
     "docAttest": {
-      "sectionTitle": "Закрепить хэш моего документа в сети",
-      "lead": "Подключите кошелёк, выберите файл и отправьте attestExternalDocument. Это докажет, что ваш кошелёк закрепил этот хэш.",
+      "sectionTitle": "Записать хеш документа в реестр",
+      "lead": "Выберите файл и подтвердите отправку в кошельке. В реестр попадёт хеш файла и адрес кошелька.",
       "connectBtn": "Подключить кошелёк",
-      "connectWcBtn": "Телефон (WalletConnect)",
+      "connectWcBtn": "Подключить через WalletConnect",
+      "wcError": "Не удалось подключиться. Откройте WalletConnect снова и выберите один аккаунт в сети Polygon.",
       "noInjected": "Нет расширения кошелька. Используйте «Телефон (WalletConnect)» или установите MetaMask.",
       "fileLabel": "Файл",
       "fileDropLine1": "Выберите файл",

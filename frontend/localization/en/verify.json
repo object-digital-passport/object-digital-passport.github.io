@@ -98,17 +98,17 @@
       "documentLink": "Document ↗"
     },
     "tools": {
-      "sectionTitle": "Verify tools menu",
+      "sectionTitle": "More verification tools",
       "lead": "Choose a tool to open it in this Verify workspace.",
       "backBtn": "← Back to Verify",
       "proofSign": "Issuer proof: sign",
       "proofVerify": "Issuer proof: verify",
-      "docAttest": "Document attest (I own this doc)",
-      "docCheck": "Document hash check",
-      "offlineCheck": "Offline payload check"
+      "docAttest": "Record a document hash",
+      "docCheck": "Check a document hash",
+      "offlineCheck": "Check offline passport data"
     },
     "offlineTool": {
-      "sectionTitle": "Offline payload check",
+      "sectionTitle": "Check offline passport data",
       "lead": "Load a compact odpOffline payload from a file or paste Base64, then compare its raw payload bytes with the passport's current on-chain NDPP anchor. For URL-first NDEF carriers, the Verify link is only the entry record; the secondary payload record is what gets hashed.",
       "passportIdLabel": "Passport ID",
       "passportIdPlaceholder": "ODP-2026-03-123456789",
@@ -334,10 +334,11 @@
       "disconnect": "Disconnect"
     },
     "docAttest": {
-      "sectionTitle": "Anchor my document hash on-chain",
+      "sectionTitle": "Record a document hash",
       "lead": "Connect your wallet, choose a file, and submit attestExternalDocument. This proves your wallet anchored this hash.",
       "connectBtn": "Connect wallet",
-      "connectWcBtn": "Mobile (WalletConnect)",
+      "connectWcBtn": "Connect with WalletConnect",
+      "wcError": "Could not connect. Open WalletConnect again and select one account on Polygon.",
       "noInjected": "No browser extension wallet. Use “Mobile (WalletConnect)” or install MetaMask.",
       "fileLabel": "File",
       "fileDropLine1": "Choose file",
@@ -363,7 +364,7 @@
       "successTitle": "Attestation recorded",
       "successDesc": "Hash {hash} is now anchored by your wallet.",
       "successDescWithUri": "Hash {hash} is anchored; documentUri {uri} was stored on-chain.",
-      "submitBtn": "Submit attestation",
+      "submitBtn": "Send document hash",
       "docAnchorMissing": "This deployment is not set up for “anchor my document” yet. Whoever runs the site needs to add the document-anchor address to the network settings (see project README)."
     },
     "doc": {

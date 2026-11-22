@@ -12,10 +12,9 @@
       "lead2": "You need a profile first —",
       "registerHere": "register here",
       "lead3": "if you don't have one.",
-      "btnName": "Connect wallet",
-      "btnDesc": "Browser extension (MetaMask, Rabby, …)",
-      "wcName": "Mobile wallet (WalletConnect)",
-      "wcDesc": "Tangem, MetaMask mobile, Rainbow — scan QR or approve in the app"
+      "wcName": "Connect with WalletConnect",
+      "wcDesc": "Choose your wallet in WalletConnect and approve the connection.",
+      "wcError": "Could not connect. Open WalletConnect again and select one account on Polygon."
     },
     "walletBar": {
       "disconnect": "Disconnect"

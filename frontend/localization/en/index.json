@@ -17,6 +17,6 @@
     "verifyDescription": "Check a passport or profile.",
     "passportDescription": "Prepare and register an object.",
     "profileDescription": "Set up your issuer profile.",
-    "actionsDescription": "Manage an existing passport."
+    "actionsDescription": "Withdraw a passport or confirm it for print."
   }
 }
