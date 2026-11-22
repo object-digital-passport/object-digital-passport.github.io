@@ -8,17 +8,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<script src="js/odp-i18n-boot.js?v=2"></script>
+<script src="js/odp-i18n-boot.js?v=3"></script>
 <script src="backend/config/odp-wc-config.js?v=1"></script>
 <script src="backend/js/odp-wallet-wc-loader.js?v=1"></script>
 <title>ODP v0.6 — Create Passport</title>
-<link rel="stylesheet" href="css/odp.css?v=20260519form">
+<link rel="stylesheet" href="css/odp.css?v=20261122">
 <script src="js/odp-theme.js?v=0.3.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" integrity="sha384-Htz1SE4Sl5aitpvFgr2j0sfsGUIuSXI6t8hEyrlQ93zflEF3a29bH2AvkUROUw7J" crossorigin="anonymous"></script>
-<script src="backend/js/odp-contract.js?v=0.5.0"></script>
+<script src="backend/js/odp-contract.js?v=20261122"></script>
 <script src="js/odp-date-format.js?v=1"></script>
 <script>window.ODP_I18N_VERSION="20260522";</script>
-<script src="js/odp-i18n.js?v=16"></script>
+<script src="js/odp-i18n.js?v=18"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
 <script src="js/odp-id-card.js?v=10"></script>
@@ -43,17 +43,20 @@
   </div>
 </header>
 
-<div class="nav">
+<nav class="nav">
   <a href="creator.html" data-i18n="nav.creator">Profile</a>
   <a href="passport.html" class="active" aria-current="page" data-i18n="nav.passport">Passport</a>
   <a href="verify.html" data-i18n="nav.verify">Verify</a>
-</div>
+</nav>
 
+<main id="main-content">
 <p class="fhint"><a href="issue-07.html" data-i18n="passport.v07Link">Create an ODP 0.7 passport</a></p>
 
 <div id="app">
   <div class="info n" data-i18n="passport.appLoading">Connecting wallet…</div>
 </div>
+
+</main>
 
 <footer>
   <a href="https://github.com/object-digital-passport/specifications" target="_blank" rel="noopener noreferrer" data-i18n="footer.githubRepo">GitHub</a>
@@ -4954,13 +4957,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await connect();
   } catch (err) {
     console.error("[ODP] passport init failed:", err);
-    try {
-      if (typeof odpRevealI18nUi === "function") odpRevealI18nUi();
-    } catch (_) {}
-    try {
-      document.documentElement.classList.remove("odp-i18n-pending");
-      document.documentElement.classList.add("odp-i18n-ready");
-    } catch (_) {}
+    window.ODPLocale?.reveal();
     const appEl = document.getElementById("app");
     if (appEl) {
       const msg = err && err.message ? String(err.message) : String(err);

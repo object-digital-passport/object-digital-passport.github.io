@@ -3,7 +3,7 @@
  *
  * Adding a language:
  *   1. create frontend/localization/<code>/ with common.json and one file per page,
- *   2. add one entry to ODP_LOCALES below.
+ *   2. add one entry to ODP_LOCALES in odp-i18n-boot.js.
  * Nothing else in this file knows a language by name. English is the base set: the selected
  * locale is merged over it, so a missing key — or a missing file — falls back to English rather
  * than rendering blank, which is what makes a partial translation usable.
@@ -13,12 +13,18 @@
 (function (global) {
   "use strict";
 
-  var STORAGE_KEY = "odp_locale";
   var BASE_LOCALE = "en";
-  var ODP_LOCALES = [
-    { code: "en", emoji: "🇬🇧", abbr: "EN", label: "English", readmeUrl: "https://github.com/object-digital-passport/specifications/blob/main/README.md" },
-    { code: "ru", emoji: "🇷🇺", abbr: "RU", label: "Русский", readmeUrl: "https://github.com/object-digital-passport/specifications/blob/main/README.ru.md" },
-  ];
+  var startup = global.ODPLocale;
+  var ODP_LOCALES = startup.entries;
+  var englishDefaults = {
+    lang: { switchLabel: "Language" },
+    theme: {
+      switchAria: "Switch color theme",
+      switchTitle: "Current theme: {name}",
+      nameBlue: "Light (blue)",
+      nameDark: "Dark"
+    }
+  };
 
   function odpLocaleEntry(code) {
     for (var i = 0; i < ODP_LOCALES.length; i++) {
@@ -51,50 +57,6 @@
     }
     return out;
   }
-
-  /** Prefer last explicit choice (localStorage), then browser language. */
-  function odpResolveLocale() {
-    try {
-      var s = global.localStorage && global.localStorage.getItem(STORAGE_KEY);
-      if (s && odpLocaleEntry(s)) return s;
-    } catch (e0) {}
-    var nav = (global.navigator && global.navigator.language) || BASE_LOCALE;
-    nav = String(nav).toLowerCase();
-    for (var i = 0; i < ODP_LOCALES.length; i++) {
-      if (nav.split("-")[0] === ODP_LOCALES[i].code) return ODP_LOCALES[i].code;
-    }
-    return BASE_LOCALE;
-  }
-
-  /** Clears flash-guard from odp-i18n-boot.js (RU) or no-ops if not pending. */
-  function revealI18nUi() {
-    try {
-      var el = global.document && global.document.documentElement;
-      if (!el) return;
-      el.classList.remove("odp-i18n-pending");
-      el.classList.add("odp-i18n-ready");
-    } catch (eR) {}
-  }
-
-  global.odpRevealI18nUi = revealI18nUi;
-
-  /** Safari / in-app browser: restore from MetaMask can leave i18n wedged; always unhide chrome. */
-  try {
-    if (global.addEventListener) {
-      global.addEventListener(
-        "pageshow",
-        function () {
-          revealI18nUi();
-        },
-        false
-      );
-      global.addEventListener("visibilitychange", function () {
-        try {
-          if (global.document && !global.document.hidden) revealI18nUi();
-        } catch (eV) {}
-      });
-    }
-  } catch (eEv) {}
 
   function t(key) {
     var parts = String(key).split(".");
@@ -135,9 +97,7 @@
   }
 
   function odpSetLocale(code) {
-    try {
-      if (global.localStorage) global.localStorage.setItem(STORAGE_KEY, code);
-    } catch (e1) {}
+    startup.save(code);
     global.location.reload();
   }
 
@@ -208,167 +168,79 @@
    */
   function odpInitI18n(opts) {
     opts = opts || {};
-    var page = opts.page || "index";
-    _locale = odpResolveLocale();
-    if (_locale !== BASE_LOCALE && global.document && global.document.documentElement) {
-      global.document.documentElement.classList.add("odp-i18n-pending");
-    }
+    var requested = startup.initial();
+    var names = ["common", opts.page || "index"].concat(opts.mergePages || []);
+    var base = new URL("localization/", global.location.href);
+    var version = global.ODP_I18N_VERSION || "20260523";
+    var englishFiles = new Map();
+    var controller = new AbortController();
 
-    if (typeof global.location === "undefined" || !global.location.href) {
-      _merged = {};
-      global.odpT = t;
-      global.odpGetLocale = function () {
-        return _locale;
-      };
-      global.odpRegistryBannerHtml = odpRegistryBannerHtml;
-      revealI18nUi();
-      return Promise.resolve();
-    }
-
-    var i18nPath = "localization/";
-    var base = new URL(i18nPath, global.location.href);
-    var firstCommonUrl = new URL("en/common.json", base).toString();
-    var i18nRevealSafety = global.setTimeout(function () {
-      revealI18nUi();
-    }, 4000);
-
-    function getI18nVersion() {
-      if (global && typeof global.ODP_I18N_VERSION === "string" && global.ODP_I18N_VERSION) {
-        return global.ODP_I18N_VERSION;
-      }
-      return "20260523";
-    }
-
-    function versionedI18nUrl(url) {
-      var u = new URL(url, global.location && global.location.href ? global.location.href : undefined);
-      u.searchParams.set("v", getI18nVersion());
-      return u.toString();
-    }
-
-    return global
-      .fetch(versionedI18nUrl(firstCommonUrl), { cache: "default" })
-      .then(function (r) {
-        if (!r.ok) throw new Error("i18n fetch failed: " + r.status);
-        return r.json();
-      })
-      .then(function (enCommon) {
-        return global
-          .fetch(versionedI18nUrl(new URL("en/" + page + ".json", base).toString()), { cache: "default" })
-          .then(function (r) {
-            if (!r.ok) throw new Error("i18n page fetch failed: " + r.status);
-            return r.json();
-          })
-          .then(function (enPage) {
-            var acc = deepMerge(enCommon, enPage);
-            var mergeNames = opts.mergePages || [];
-            var ei = 0;
-            function mergeNextEn(a) {
-              if (ei >= mergeNames.length) return Promise.resolve(a);
-              var name = mergeNames[ei++];
-              return global
-                .fetch(versionedI18nUrl(new URL("en/" + name + ".json", base).toString()), { cache: "default" })
-                .then(function (r) {
-                  if (!r.ok) throw new Error("i18n merge en/" + name + " failed: " + r.status);
-                  return r.json();
-                })
-                .then(function (j) {
-                  return mergeNextEn(deepMerge(a, j));
-                });
-            }
-            return mergeNextEn(acc);
-          });
-      })
-      .then(function (enAll) {
-        if (_locale === "en") {
-          _merged = enAll;
-          return Promise.resolve();
-        }
-        // Every file of the selected locale is optional. A 404 or a parse error yields an empty
-        // object, so the English set below shows through — the same fallback a missing key gets,
-        // extended to a missing file. Without it, one absent page file would blank the whole UI
-        // for anyone adding a language incrementally.
-        function localeFile(name) {
-          return global
-            .fetch(versionedI18nUrl(new URL(_locale + "/" + name + ".json", base).toString()), { cache: "default" })
-            .then(function (r) {
-              if (!r.ok) throw new Error(_locale + "/" + name + ".json: " + r.status);
-              return r.json();
-            })
-            .catch(function (err) {
-              console.warn("[ODP i18n] falling back to English for " + _locale + "/" + name + ".json", err);
-              return {};
-            });
-        }
-
-        var names = ["common", page].concat(opts.mergePages || []);
-        var i = 0;
-        function mergeNextLocale(acc) {
-          if (i >= names.length) return Promise.resolve(acc);
-          return localeFile(names[i++]).then(function (j) {
-            return mergeNextLocale(deepMerge(acc, j));
-          });
-        }
-        return mergeNextLocale({}).then(function (locAll) {
-          _merged = deepMerge(enAll, locAll);
-        });
-      })
-      .then(function () {
-        global.document.documentElement.lang = _locale;
-        global.odpT = t;
-        global.odpGetLocale = function () {
-          return _locale;
-        };
-        global.odpRegistryBannerHtml = odpRegistryBannerHtml;
-        global.odpApplyDataI18n = odpApplyDataI18n;
-        global.odpRenderLangSwitch = odpRenderLangSwitch;
-        global.odpSetLocale = odpSetLocale;
-        global.odpRegistryMisconfiguredBannerHtml = function (isLocal) {
-          return odpRegistryBannerHtml(isLocal);
-        };
-        if (opts.pageTitleKey) {
-          try {
-            global.document.title = t(opts.pageTitleKey);
-          } catch (e2) {}
-        }
-        odpRenderLangSwitch("odpLangSwitch");
-        if (typeof global.odpRenderThemeSwitch === "function") global.odpRenderThemeSwitch("odpThemeSwitch");
-        odpApplyDataI18n(global.document.body);
-        odpApplyReadmeLinks(global.document.body);
-      })
-      .catch(function (err) {
-        console.warn("[ODP i18n] init failed — language switch uses fallback labels", err);
-        _merged = {
-          lang: { switchLabel: "Language" },
-          theme: {
-            switchAria: "Switch color theme",
-            switchTitle: "Current theme: {name}",
-            nameBlue: "Light (blue)",
-            nameDark: "Dark",
-          },
-        };
-        global.odpT = t;
-        global.odpGetLocale = function () {
-          return _locale;
-        };
-        global.odpApplyDataI18n = odpApplyDataI18n;
-        global.odpRenderLangSwitch = odpRenderLangSwitch;
-        global.odpSetLocale = odpSetLocale;
-        try {
-          if (global.document && global.document.documentElement) {
-            global.document.documentElement.lang = _locale;
+    function load(locale, name) {
+      var url = new URL(locale + "/" + name + ".json", base);
+      url.searchParams.set("v", version);
+      return global.fetch(url.toString(), { signal: controller.signal })
+        .then(function (response) {
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.json();
+        })
+        .then(function (file) {
+          if (!file || typeof file !== "object" || Array.isArray(file)) throw new Error("Invalid dictionary");
+          return file;
+        })
+        .catch(function (error) {
+          if (!controller.signal.aborted) {
+            console.warn("[ODP i18n] Could not load " + locale + "/" + name + ".json", error);
           }
-        } catch (eLang) {}
-        try {
-          odpRenderLangSwitch("odpLangSwitch");
-          if (typeof global.odpRenderThemeSwitch === "function") global.odpRenderThemeSwitch("odpThemeSwitch");
-        } catch (eSw) {}
-      })
-      .finally(function () {
-        try {
-          global.clearTimeout(i18nRevealSafety);
-        } catch (eCt) {}
-        revealI18nUi();
-      });
+          return null;
+        });
+    }
+
+    function mergeFiles(files, initial) {
+      return files.reduce(function (result, file) {
+        return deepMerge(result, file);
+      }, initial);
+    }
+
+    var loading = Promise.all([
+      Promise.all(names.map(function (name, index) {
+        return load(BASE_LOCALE, name).then(function (file) {
+          englishFiles.set(index, file);
+        });
+      })),
+      Promise.all(requested === BASE_LOCALE ? [] : names.map(function (name) {
+        return load(requested, name);
+      }))
+    ]).then(function (files) { return files[1]; });
+    var timeout = startup.deadline.then(function () { return []; });
+
+    return Promise.race([loading, timeout]).then(function (translated) {
+      _locale = translated.some(function (file) {
+        return file && Object.keys(file).length > 0;
+      }) ? requested : BASE_LOCALE;
+      // Merge by declaration order even though the independent files load in parallel.
+      var en = mergeFiles(names.map(function (_, index) { return englishFiles.get(index); }), englishDefaults);
+      _merged = mergeFiles(translated, en);
+
+      global.document.documentElement.lang = _locale;
+      global.odpT = t;
+      global.odpGetLocale = function () { return _locale; };
+      global.odpRegistryBannerHtml = odpRegistryBannerHtml;
+      global.odpApplyDataI18n = odpApplyDataI18n;
+      global.odpRenderLangSwitch = odpRenderLangSwitch;
+      global.odpSetLocale = odpSetLocale;
+      global.odpRegistryMisconfiguredBannerHtml = odpRegistryBannerHtml;
+      if (opts.pageTitleKey) {
+        var title = t(opts.pageTitleKey);
+        if (title !== opts.pageTitleKey) global.document.title = title;
+      }
+      odpApplyDataI18n(global.document.body);
+      odpApplyReadmeLinks(global.document.body);
+      odpRenderLangSwitch("odpLangSwitch");
+      if (typeof global.odpRenderThemeSwitch === "function") global.odpRenderThemeSwitch("odpThemeSwitch");
+    }).finally(function () {
+      controller.abort();
+      startup.reveal();
+    });
   }
 
   global.odpInitI18n = odpInitI18n;
@@ -376,7 +248,7 @@
     return k;
   };
   global.odpGetLocale = function () {
-    return odpResolveLocale();
+    return startup.initial();
   };
   global.ODP_I18N_LOCALES = ODP_LOCALES;
 })(typeof window !== "undefined" ? window : globalThis);

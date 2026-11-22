@@ -11,6 +11,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert';
 
+const boot = readFileSync('frontend/js/odp-i18n-boot.js', 'utf8');
 const src = readFileSync('frontend/js/odp-i18n.js', 'utf8');
 
 function load({ stored, navLang, files }) {
@@ -28,7 +29,7 @@ function load({ stored, navLang, files }) {
       title: '',
       createElement: () => ({ style:{}, classList:{add(){}}, appendChild(){}, setAttribute(){}, addEventListener(){} }),
     },
-    console, URL, Promise, setTimeout, clearTimeout,
+    console, URL, Promise, AbortController, setTimeout, clearTimeout,
     fetch: async (url) => {
       const m = String(url).match(/([a-z-]+)\/([a-z]+)\.json/);
       const key = m ? `${m[1]}/${m[2]}.json` : String(url);
@@ -38,6 +39,7 @@ function load({ stored, navLang, files }) {
   };
   g.window = g; g.globalThis = g;
   vm.createContext(g);
+  vm.runInContext(boot, g);
   vm.runInContext(src, g);
   return g;
 }
@@ -45,14 +47,17 @@ function load({ stored, navLang, files }) {
 // 1. Unknown stored locale is ignored; browser language selects a known one.
 let g = load({ stored: 'de', navLang: 'ru-RU' });
 assert.equal(g.odpGetLocale(), 'ru', 'browser ru wins when stored value is unknown');
+g.ODPLocale.reveal();
 
 // 2. Stored known locale wins over the browser.
 g = load({ stored: 'en', navLang: 'ru-RU' });
 assert.equal(g.odpGetLocale(), 'en', 'stored en wins');
+g.ODPLocale.reveal();
 
 // 3. Unknown browser language falls back to the base locale.
 g = load({ stored: null, navLang: 'de-DE' });
 assert.equal(g.odpGetLocale(), 'en', 'unknown browser language falls back to en');
+g.ODPLocale.reveal();
 
 // 4. A locale file that 404s falls back to English rather than blanking the UI.
 g = load({
@@ -82,7 +87,7 @@ await g.odpInitI18n({ page: 'verify' });
 assert.equal(g.odpT('a'), 'A-en', 'empty translation keeps the English string');
 
 // 6. A third locale added to the table alone loads from its own folder.
-const src3 = src.replace(
+const boot3 = boot.replace(
   '{ code: "ru", emoji: "🇷🇺", abbr: "RU", label: "Русский"',
   '{ code: "de", emoji: "🇩🇪", abbr: "DE", label: "Deutsch", readmeUrl: "https://x/README.de.md" },\n    { code: "ru", emoji: "🇷🇺", abbr: "RU", label: "Русский"',
 );
@@ -95,7 +100,7 @@ const src3 = src.replace(
     document: { documentElement: html, body: { querySelectorAll: () => [] }, querySelectorAll: () => [],
       getElementById: () => null, title: '',
       createElement: () => ({ style:{}, classList:{add(){}}, appendChild(){}, setAttribute(){}, addEventListener(){} }) },
-    console, URL, Promise, setTimeout, clearTimeout,
+    console, URL, Promise, AbortController, setTimeout, clearTimeout,
     fetch: async (url) => {
       const m = String(url).match(/([a-z-]+)\/([a-z]+)\.json/);
       const key = m ? `${m[1]}/${m[2]}.json` : '';
@@ -105,7 +110,7 @@ const src3 = src.replace(
     },
   };
   g3.window = g3; g3.globalThis = g3;
-  vm.createContext(g3); vm.runInContext(src3, g3);
+  vm.createContext(g3); vm.runInContext(boot3, g3); vm.runInContext(src, g3);
   await g3.odpInitI18n({ page: 'verify' });
   assert.equal(g3.odpGetLocale(), 'de', 'third locale resolves');
   assert.equal(g3.odpT('a'), 'A-de', 'third locale loads its own common.json');

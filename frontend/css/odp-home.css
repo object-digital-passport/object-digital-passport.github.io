@@ -24,25 +24,30 @@ html.odp-home[data-theme="blue"] {
 .odp-home .page { max-width: 940px; }
 .odp-home .home-logo { display: block; width: min(160px, 27vw); height: auto; margin-bottom: 24px; }
 .odp-home .header-row { padding-top: 28px; }
-.odp-home .header-row h1 { font-size: clamp(28px, 5vw, 42px); letter-spacing: -0.035em; }
+.odp-home .header-row h1 { font-size: clamp(1.75rem, 5vw, 2.625rem); letter-spacing: -0.035em; }
 .odp-home .header-toolbar #language { width: auto; min-width: 52px; min-height: 44px; margin: 0; padding: 10px 14px; }
 .odp-home .nav { border-color: #262626; }
-.odp-home .nav a { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; letter-spacing: 0; text-transform: none; }
-.odp-home .nav a { min-height: 46px; border-radius: 0; }
+.odp-home .nav a { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 0.8125rem; letter-spacing: 0; text-transform: none; }
+.odp-home .nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 2.875rem;
+  border-radius: 0;
+  overflow-wrap: anywhere;
+}
 .odp-home .home-content { padding-top: 16px; }
 .odp-home .home-intro { max-width: 620px; margin-bottom: 36px; }
-.odp-home .home-eyebrow { color: #aaa; font-size: 12px; letter-spacing: .12em; margin-bottom: 14px; }
-.odp-home .home-intro h2 { margin: 0 0 12px; font-size: clamp(28px, 4vw, 40px); font-weight: 500; letter-spacing: -.035em; line-height: 1.15; }
-.odp-home .home-intro > p:last-child { color: var(--text2); font-size: 16px; line-height: 1.55; }
+.odp-home .home-intro h2 { margin: 0 0 12px; font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 500; letter-spacing: -.035em; line-height: 1.15; }
+.odp-home .home-intro > p:last-child { color: var(--text2); font-size: 1rem; line-height: 1.55; }
 .odp-home .home-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: #414141; border: 1px solid #414141; }
 .odp-home .home-action { display: flex; align-items: flex-start; gap: 20px; min-height: 148px; padding: 24px; color: #fff; background: #141414; text-decoration: none; }
 .odp-home .home-action:hover { background: #222; }
 .odp-home .home-action-primary { background: #fff; color: #0d0d0d; }
 .odp-home .home-action-primary:hover { background: #ededed; }
-.odp-home .home-action-number { font-size: 12px; line-height: 1.5; opacity: .6; }
-.odp-home .home-action-content { display: grid; gap: 10px; flex: 1; min-width: 0; }
-.odp-home .home-action-content strong { font-size: 19px; font-weight: 500; line-height: 1.3; }
-.odp-home .home-action-content > span { font-size: 14px; line-height: 1.45; opacity: .72; }
+.odp-home .home-action-content { display: grid; gap: 10px; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.odp-home .home-action-content strong { font-size: 1.1875rem; font-weight: 500; line-height: 1.3; }
+.odp-home .home-action-content > span { font-size: 0.875rem; line-height: 1.45; opacity: .72; }
 .odp-home .home-action-arrow { font-size: 23px; line-height: 1; }
 .odp-home .home-legacy { margin-top: 28px; color: var(--text2); font-size: 13px; line-height: 1.6; }
 .odp-home .home-legacy a { color: inherit; }
@@ -60,13 +65,13 @@ html.odp-home[data-theme="blue"] {
 .odp-home .card-body > p[data-copy="intro"] { margin-bottom: 16px; }
 .odp-home .card-body > p[data-copy="walletHelp"] { margin-top: 14px; }
 .odp-home .card-body > label[for="restoreJob"] { display: block; margin-top: 18px; }
-.odp-home input[type="file"] { max-width: 100%; }
+.odp-home input[type="file"] { min-inline-size: 0; max-inline-size: 100%; }
 .odp-home #scan-qr { margin-top: 12px; }
 .odp-home #scan-status:empty { display: none; }
 .odp-home #qr-dialog { width: min(440px, calc(100% - 32px)); padding: 16px; color: var(--text); background: var(--bg); border: 1px solid var(--border2); }
 .odp-home #qr-dialog::backdrop { background: rgb(0 0 0 / 80%); }
 .odp-home #qr-video { display: block; width: 100%; max-height: 55dvh; margin: 12px 0; }
-.odp-home .btn { background: #fff; color: #0d0d0d; border: 1px solid #fff; border-radius: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: 0; text-transform: none; font-size: 16px; }
+.odp-home .btn { background: #fff; color: #0d0d0d; border: 1px solid #fff; border-radius: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: 0; text-transform: none; font-size: 1rem; overflow-wrap: anywhere; }
 .odp-home .btn-sec { background: transparent; color: #fff; border: 1px solid #6e6e6e; }
 .odp-home label, .odp-home input, .odp-home select, .odp-home textarea { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .odp-home label { letter-spacing: 0; text-transform: none; }
@@ -85,7 +90,7 @@ html.odp-home[data-theme="blue"] {
 .odp-home #status { overflow-wrap: anywhere; }
 .odp-home #status:not(:empty) { margin-top: 16px; }
 .odp-home #draft:not([hidden]), .odp-home #review:not([hidden]) { display: grid; gap: 12px; margin: 24px 0; }
-.odp-home #draft fieldset { display: grid; gap: 10px; padding: 16px; border: 1px solid #6e6e6e; }
+.odp-home #draft fieldset { min-inline-size: 0; display: grid; gap: 10px; padding: 16px; border: 1px solid #6e6e6e; }
 .odp-home #draft fieldset[hidden] { display: none; }
 .odp-home #summary, .odp-home #record { white-space: pre-wrap; overflow-wrap: anywhere; }
 .odp-home #preview { max-width: min(100%, 360px); max-height: 280px; object-fit: contain; }
@@ -97,7 +102,7 @@ html.odp-home[data-theme="blue"] {
   .odp-home .home-intro { margin-bottom: 24px; }
   .odp-home .home-actions { grid-template-columns: 1fr; }
   .odp-home .home-action { min-height: 108px; padding: 20px; gap: 16px; }
-  .odp-home .home-action-content strong { font-size: 17px; }
+  .odp-home .home-action-content strong { font-size: 1.0625rem; }
   .odp-home .card-body { padding: 22px 20px; }
   .odp-home .nav { gap: 8px; }
   .odp-home .nav a { min-width: 0; padding: 12px 8px; text-align: center; }
@@ -112,19 +117,16 @@ html.odp-home[data-theme="blue"] {
 .odp-home .page:has(> .nav) .header-left { display: grid; grid-template-columns: 76px minmax(0, 1fr); column-gap: 20px; align-items: center; text-align: left; }
 .odp-home .page:has(> .nav) .header-left > a { grid-row: 1 / span 2; }
 .odp-home .page:has(> .nav) .home-logo { width: 76px; margin: 0; }
-.odp-home .page:has(> .nav) .header-row h1 { grid-column: 2; margin: 0; font-size: clamp(24px, 3vw, 32px); line-height: 1.15; }
+.odp-home .page:has(> .nav) .header-row h1 { grid-column: 2; margin: 0; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.15; }
 .odp-home .page:has(> .nav) .header-left .sub { grid-column: 2; margin: 5px 0 0; }
 .odp-home .page:has(> .nav) .nav { justify-content: flex-start; gap: 8px; }
 .odp-home .page:has(> .nav) > .card { max-width: 760px; }
 @media (max-width: 520px) {
   .odp-home .page:has(> .nav) .header-row { display: flex; flex-direction: row; gap: 12px; }
-  .odp-home .page:has(> .nav) .header-left { grid-template-columns: 50px minmax(0, 1fr); column-gap: 12px; flex: 1; min-width: 0; }
+  .odp-home .page:has(> .nav) .header-left { grid-template-columns: 50px minmax(0, 1fr); column-gap: 12px; flex: 1; min-width: 0; overflow-wrap: anywhere; }
   .odp-home .page:has(> .nav) .home-logo { width: 50px; }
-  .odp-home .page:has(> .nav) .header-row h1 { font-size: 22px; }
+  .odp-home .page:has(> .nav) .header-row h1 { font-size: 1.375rem; }
   .odp-home .page:has(> .nav) .nav { flex-wrap: wrap; }
   .odp-home .page:has(> .nav) .nav a { flex: 1 1 42%; }
-}
-
-@media (max-width: 520px) {
   .odp-home .page:has(> .nav) .header-toolbar { width: auto; flex-shrink: 0; }
 }
