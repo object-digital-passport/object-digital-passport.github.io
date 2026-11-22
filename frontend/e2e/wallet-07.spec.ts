@@ -10,7 +10,7 @@ for(const screen of ['issue','release']) test(`mobile wallet connects and invali
     (window as any).odpWalletConnectConnect=async()=>mobile; (window as any).disconnectMobile=()=>handlers.disconnect();
   });
   await page.goto('/'+screen+'-07.html');
-  await page.getByRole('button',{name:'Mobile wallet · WalletConnect'}).click();
+  await page.getByRole('button',{name:'Connect with WalletConnect'}).click();
   await expect(page.locator('#status')).toContainText(screen==='issue'?'Profile ready:':'Wallet connected:');
   await page.evaluate(()=>(window as any).disconnectMobile());
   await expect(page.locator('#status')).toContainText('Wallet changed.');

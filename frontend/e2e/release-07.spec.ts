@@ -8,14 +8,16 @@ test('release requires review and does not repeat an uncertain action', async ({
     const wallet='0x'+'1'.repeat(40);
     (window as any).sent=0;
     (window as any).ethers={utils:{isAddress:()=>true,keccak256:()=>('0x'+'1'.repeat(64)),toUtf8Bytes:(s:string)=>s,Interface:class {encodeFunctionData(){return '0x1234';}}},providers:{Web3Provider:class {}}};
-    (window as any).ethereum={on(){},request:async ({method}:{method:string})=>{if(method==='eth_requestAccounts'||method==='eth_accounts')return [wallet];if(method==='eth_chainId')return '0x89';if(method==='eth_estimateGas')return '0x1234';if(method==='eth_sendTransaction'){(window as any).sent++;throw new Error('uncertain');}throw new Error('unexpected');}};
+    (window as any).odpWalletConnectConnect=async()=>({on(){},request:async ({method}:{method:string})=>{if(method==='eth_requestAccounts'||method==='eth_accounts')return [wallet];if(method==='eth_chainId')return '0x89';if(method==='eth_estimateGas')return '0x1234';if(method==='eth_sendTransaction'){(window as any).sent++;throw new Error('uncertain');}throw new Error('unexpected');}});
   });
   await page.goto('/release-07.html');
   await expect(page.getByLabel('Passport ID')).toBeHidden();
-  await page.getByRole('button',{name:'Connect wallet'}).click();
+  await page.getByRole('button',{name:'Connect with WalletConnect'}).click();
   await expect(page.getByLabel('Passport ID')).toBeVisible();
   await page.getByLabel('Passport ID').fill('ODP-2026-09-000000001');
   await page.getByRole('button',{name:'Load passport'}).click();
+  await expect(page.getByRole('button',{name:'Review action'})).toBeDisabled();
+  await page.getByLabel('Action', { exact:true }).selectOption('revoke');
   await page.getByLabel('Reason for withdrawal').fill('Example');
   await page.getByRole('button',{name:'Review action'}).click();
   await expect(page.getByRole('button',{name:'Confirm in wallet'})).toBeDisabled();
@@ -23,6 +25,9 @@ test('release requires review and does not repeat an uncertain action', async ({
   await page.getByRole('button',{name:'Confirm in wallet'}).click();
   await expect(page.getByRole('status')).toContainText('outcome is unknown');
   await page.getByRole('button',{name:'Load passport'}).click();
+  await expect(page.getByRole('button',{name:'Review action'})).toBeDisabled();
+  await page.getByLabel('Action', { exact:true }).selectOption('revoke');
+  await page.getByLabel('Reason for withdrawal').fill('Example');
   await page.getByRole('button',{name:'Review action'}).click();
   await page.getByLabel('I understand and want to continue.').check();
   await page.getByRole('button',{name:'Confirm in wallet'}).click();
@@ -35,13 +40,16 @@ test('print confirmation reviews the irreversible action before wallet hand-off'
   await page.addInitScript(() => {
     localStorage.setItem('odp_locale','en'); const wallet='0x'+'1'.repeat(40); (window as any).methods=[];
     (window as any).ethers={utils:{isAddress:()=>true,Interface:class {encodeFunctionData(method:string){(window as any).methods.push(method);return '0x1234';}}},providers:{Web3Provider:class {}}};
-    (window as any).ethereum={on(){},request:async({method}:{method:string})=>{if(method==='eth_requestAccounts'||method==='eth_accounts')return [wallet];if(method==='eth_chainId')return '0x89';if(method==='eth_estimateGas')return '0x1234';if(method==='eth_sendTransaction')return '0x'+'a'.repeat(64);throw Error('unexpected');}};
+    (window as any).odpWalletConnectConnect=async()=>({on(){},request:async({method}:{method:string})=>{if(method==='eth_requestAccounts'||method==='eth_accounts')return [wallet];if(method==='eth_chainId')return '0x89';if(method==='eth_estimateGas')return '0x1234';if(method==='eth_sendTransaction')return '0x'+'a'.repeat(64);throw Error('unexpected');}});
   });
   await page.goto('/release-07.html');
-  await page.getByRole('button',{name:'Connect wallet'}).click();
+  await page.getByRole('button',{name:'Connect with WalletConnect'}).click();
   await page.getByLabel('Passport ID').fill('ODP-2026-09-000000001');
   await page.getByRole('button',{name:'Load passport'}).click();
-  await page.getByLabel('Action').selectOption('finalize');
+  await page.getByLabel('Passport ID').fill('ODP-2026-09-000000002');
+  await expect(page.getByLabel('Action', { exact:true })).toBeHidden();
+  await page.getByRole('button',{name:'Load passport'}).click();
+  await page.getByLabel('Action', { exact:true }).selectOption('finalize');
   await expect(page.getByLabel('Reason for withdrawal')).toBeHidden();
   await page.getByRole('button',{name:'Review action'}).click();
   await expect(page.locator('#summary')).toContainText('Confirm for print');

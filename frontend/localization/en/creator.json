@@ -14,10 +14,9 @@
     "connect": {
       "cardTitle": "Connect your wallet",
       "lead": "Your wallet address becomes your identity in ODP. Your profile ID stays linked to this wallet. Make sure you have a backup of your key before continuing.",
-      "btnName": "Connect wallet",
-      "btnDesc": "Browser extension — MetaMask, Rabby, Brave Wallet, etc.",
-      "wcName": "Mobile wallet (WalletConnect)",
-      "wcDesc": "Tangem, MetaMask mobile, Rainbow — scan QR or approve in the app"
+      "wcName": "Connect with WalletConnect",
+      "wcDesc": "Choose your wallet in WalletConnect and approve the connection.",
+      "wcError": "Could not connect. Open WalletConnect again and select one account on Polygon."
     },
     "security": {
       "cardTitle": "Before you register",

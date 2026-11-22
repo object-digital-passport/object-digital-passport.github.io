@@ -57,14 +57,15 @@ html.odp-home[data-theme="blue"] {
 .odp-home .card-body { padding: 28px; }
 .odp-home .card-body > p[data-copy="intro"] { max-width: 62ch; color: #e5e5e5; line-height: 1.6; }
 .odp-home .card-body > #connect,
-.odp-home .card-body > #connectMobile,
-.odp-home .card-body > #connectSafe { max-width: 440px; }
-.odp-home .card-body > #connectMobile,
-.odp-home .card-body > #connectSafe { margin-top: 10px; }
+.odp-home .card-body > #disconnect { max-width: 440px; }
+
 .odp-home .card-head { border-color: #262626; font-style: normal; font-weight: 500; }
 .odp-home .card-body > p[data-copy="intro"] { margin-bottom: 16px; }
-.odp-home .card-body > p[data-copy="walletHelp"] { margin-top: 14px; }
-.odp-home .card-body > label[for="restoreJob"] { display: block; margin-top: 18px; }
+.odp-home #walletHelp { margin-top: 12px; }
+.odp-home .issuance-recovery { margin-block: 1.25rem; }
+.odp-home .issuance-recovery summary { cursor: pointer; padding-block: .5rem; }
+.odp-home .issuance-recovery summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.odp-home .issuance-recovery label { display: block; margin-top: .75rem; }
 .odp-home input[type="file"] { min-inline-size: 0; max-inline-size: 100%; }
 .odp-home #scan-qr { margin-top: 12px; }
 .odp-home #scan-status:empty { display: none; }

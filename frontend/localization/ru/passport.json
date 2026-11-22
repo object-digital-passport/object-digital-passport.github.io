@@ -12,10 +12,9 @@
       "lead2": "Сначала нужен профиль —",
       "registerHere": "зарегистрируйтесь здесь",
       "lead3": "если его ещё нет.",
-      "btnName": "Подключить кошелёк",
-      "btnDesc": "Расширение браузера (MetaMask, Rabby, …)",
-      "wcName": "Мобильный кошелёк (WalletConnect)",
-      "wcDesc": "Tangem, MetaMask mobile, Rainbow — QR или подтверждение в приложении"
+      "wcName": "Подключить через WalletConnect",
+      "wcDesc": "Выберите кошелёк в WalletConnect и подтвердите подключение.",
+      "wcError": "Не удалось подключиться. Откройте WalletConnect снова и выберите один аккаунт в сети Polygon."
     },
     "walletBar": {
       "disconnect": "Отключить"

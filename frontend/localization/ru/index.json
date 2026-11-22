@@ -17,6 +17,6 @@
     "verifyDescription": "Проверить паспорт или профиль.",
     "passportDescription": "Подготовить и зарегистрировать объект.",
     "profileDescription": "Создать профиль для выпуска.",
-    "actionsDescription": "Управлять существующим паспортом."
+    "actionsDescription": "Отозвать паспорт или подтвердить для печати."
   }
 }
