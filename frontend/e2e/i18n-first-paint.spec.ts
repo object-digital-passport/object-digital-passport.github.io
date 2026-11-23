@@ -50,7 +50,10 @@ for (const [route, title] of v07) {
       await page.goto(`/${route}-07.html`, { waitUntil: 'commit' });
       await expect.poll(() => readFrames(page)).toEqual([{ text: title, language: 'ru' }]);
       await expect(page).toHaveTitle(`${title} — ODP 0.7`);
-      await expect(page.getByRole('button', { name: /^EN/ })).toBeVisible();
+      const picker = page.getByRole('combobox', { name: 'Язык' });
+      await expect(picker).toHaveValue('ru');
+      await expect(picker.locator('option:checked')).toHaveText('🇷🇺 RU');
+      await expect(picker.getByRole('option', { name: 'English' })).toHaveText('🇬🇧 EN');
     } finally {
       releaseRequest();
     }
@@ -69,7 +72,7 @@ test('a saved language survives reload and links between the legacy and 0.7 page
   await page.getByRole('link', { name: /Verify —/ }).click();
   await expect(page).toHaveURL(/verify-07\.html$/);
   await expect(page.getByRole('heading', { name: 'Verify a passport' })).toBeVisible();
-  await page.getByRole('button', { name: /^RU/ }).click();
+  await page.getByRole('combobox', { name: 'Language' }).selectOption('ru');
   await page.getByRole('link', { name: 'Главная' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
   await expect(page.getByLabel('Язык', { exact: true })).toHaveValue('ru');
@@ -160,4 +163,39 @@ test.describe('without JavaScript', () => {
     await page.goto('/verify-07.html');
     await expect(page.getByRole('heading', { name: 'Verify a passport' })).toBeVisible();
   });
+});
+
+
+test('a registered third language loads 0.7 dictionaries and falls back per page and per key', async ({ page }) => {
+  await page.route('**/js/odp-i18n-boot.js?*', async route => {
+    const response = await route.fetch();
+    const body = (await response.text()).replace('var ODP_LOCALES = [', `var ODP_LOCALES = [
+      { code: "de", emoji: "🇩🇪", abbr: "DE", label: "Deutsch", switchLabel: "Sprache" },`);
+    await route.fulfill({ response, body });
+  });
+  await page.route('**/localization/de/*', async route => {
+    if (new URL(route.request().url()).pathname.endsWith('/verify-07.json')) {
+      await route.fulfill({ json: { title: 'Pass prüfen', home: 'Startseite', intro: '' } });
+    } else {
+      await route.fulfill({ status: 404 });
+    }
+  });
+  await watchHeading(page, 'h1');
+  await page.goto('/verify-07.html#lookup');
+  await page.getByRole('combobox', { name: 'Язык' }).selectOption('de');
+  const german = page.getByRole('combobox', { name: 'Sprache' });
+  await expect(german.locator('option:checked')).toHaveText('🇩🇪 DE');
+  await expect(page.getByRole('link', { name: 'Startseite' })).toBeVisible();
+  await expect(page.getByText('Enter a passport ID or odp:// locator', { exact: false })).toBeVisible();
+  await expect(page).toHaveURL(/#lookup$/);
+  await page.reload();
+  await expect.poll(() => readFrames(page)).toEqual([{ text: 'Pass prüfen', language: 'de' }]);
+
+  await page.goto('/profile-07.html');
+  await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('#language')).toHaveValue('de');
+  await expect(page.getByRole('button', { name: 'Connect with WalletConnect' })).toBeEnabled();
+  await page.locator('#language').selectOption('ru');
+  await expect(page.getByRole('heading', { name: 'Профиль' })).toBeVisible();
 });

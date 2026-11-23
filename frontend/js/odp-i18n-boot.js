@@ -5,18 +5,26 @@
   var STORAGE_KEY = "odp_locale";
   var BASE_LOCALE = "en";
   var ODP_LOCALES = [
-    { code: "en", emoji: "🇬🇧", abbr: "EN", label: "English", readmeUrl: "https://github.com/object-digital-passport/specifications/blob/main/README.md" },
-    { code: "ru", emoji: "🇷🇺", abbr: "RU", label: "Русский", readmeUrl: "https://github.com/object-digital-passport/specifications/blob/main/README.ru.md" },
+    { code: "en", emoji: "🇬🇧", abbr: "EN", label: "English", switchLabel: "Language", readmeUrl: "https://github.com/object-digital-passport/specifications/blob/main/README.md" },
+    { code: "ru", emoji: "🇷🇺", abbr: "RU", label: "Русский", switchLabel: "Язык", readmeUrl: "https://github.com/object-digital-passport/specifications/blob/main/README.ru.md" },
   ];
 
-  function resolve(supported) {
-    var codes = supported || ODP_LOCALES.map(function (entry) { return entry.code; });
+  function resolve() {
+    var codes = ODP_LOCALES.map(function (entry) { return entry.code; });
     try {
       var saved = global.localStorage.getItem(STORAGE_KEY);
       if (codes.includes(saved)) return saved;
     } catch (_) {}
-    var browser = (global.navigator.language || BASE_LOCALE).toLowerCase().split("-")[0];
-    return codes.includes(browser) ? browser : BASE_LOCALE;
+    var languages = global.navigator.languages || [global.navigator.language];
+    for (var language of languages) {
+      var tag = (language || "").toLowerCase();
+      while (tag) {
+        if (codes.includes(tag)) return tag;
+        var separator = tag.lastIndexOf("-");
+        tag = separator < 0 ? "" : tag.slice(0, separator);
+      }
+    }
+    return BASE_LOCALE;
   }
 
   function save(locale) {
@@ -44,45 +52,108 @@
     }, 2800);
   });
 
-  function initial(supported) {
-    if (expired || (supported && !supported.includes(preferred))) return BASE_LOCALE;
-    return preferred;
+  function initial() {
+    return expired ? BASE_LOCALE : preferred;
   }
 
-  // ODP 0.7 has its dictionaries in the page script, so it can translate the
-  // static interface before deferred wallet and registry dependencies run.
-  function mountPage(copy, initializeWorkflow) {
-    var locale = initial(Object.keys(copy));
-    var button = global.document.getElementById("language");
+  function populatePicker(select) {
+    ODP_LOCALES.forEach(function (entry) {
+      var option = global.document.createElement("option");
+      option.value = entry.code;
+      option.textContent = entry.emoji + " " + entry.abbr;
+      option.title = entry.label;
+      option.setAttribute("aria-label", entry.label);
+      option.lang = entry.code;
+      select.appendChild(option);
+    });
+  }
+
+  function labelPicker(select, label) {
+    select.setAttribute("aria-label", label);
+    select.title = label;
+  }
+
+  async function loadPageCopy(locale, page) {
+    var controller = new AbortController();
+    var timeout = global.setTimeout(function () { controller.abort(); }, 2800);
+    try {
+      var url = new URL("localization/" + locale + "/" + page + ".json", global.location.href);
+      url.searchParams.set("v", "1");
+      var response = await global.fetch(url, { signal: controller.signal });
+      if (!response.ok) return null;
+      var dictionary = await response.json();
+      if (!dictionary || typeof dictionary !== "object" || Array.isArray(dictionary)) return null;
+      var translated = Object.fromEntries(Object.entries(dictionary).filter(function (pair) {
+        return typeof pair[1] === "string" && pair[1].trim();
+      }));
+      return Object.keys(translated).length ? translated : null;
+    } catch (_) {
+      return null;
+    } finally {
+      global.clearTimeout(timeout);
+    }
+  }
+
+  // English and Russian render synchronously. Additional locales reuse the
+  // same first-paint deadline as the legacy pages.
+  function mountPage(page, copy, initializeWorkflow) {
+    var locale = BASE_LOCALE;
+    var select = global.document.getElementById("language");
+    var cards = global.document.querySelectorAll("main > .card");
+    var selection = 0;
+    cards.forEach(function (card) { card.inert = true; });
+    populatePicker(select);
 
     function translate(key) {
       return copy[locale][key] || copy.en[key];
     }
 
-    function render() {
+    function render(code) {
+      locale = copy[code] ? code : BASE_LOCALE;
       html.lang = locale;
       global.document.title = translate("title") + " — ODP 0.7";
       global.document.querySelectorAll("[data-copy]").forEach(function (element) {
         var value = translate(element.dataset.copy);
         if (value !== undefined) element.textContent = value;
       });
-      button.textContent = locale === BASE_LOCALE ? "RU" : "EN";
-      button.setAttribute("aria-label", button.textContent + " — " + translate("switch"));
+      select.value = code;
+      var entry = ODP_LOCALES.find(function (item) { return item.code === locale; });
+      labelPicker(select, entry.switchLabel || "Language");
+      select.closest(".odp-lang-wrap").hidden = false;
     }
 
-    button.addEventListener("click", function () {
-      locale = locale === BASE_LOCALE ? "ru" : BASE_LOCALE;
-      save(locale);
-      render();
+    var requested = initial();
+    var ready;
+    if (copy[requested]) {
+      render(requested);
+      reveal();
+      ready = Promise.resolve();
+    } else {
+      ready = Promise.race([loadPageCopy(requested, page), deadline]).then(function (dictionary) {
+        if (dictionary) copy[requested] = dictionary;
+        render(requested);
+        reveal();
+      });
+    }
+
+    select.addEventListener("change", async function () {
+      var code = select.value;
+      var request = ++selection;
+      if (!copy[code]) {
+        var dictionary = await loadPageCopy(code, page);
+        if (request !== selection) return;
+        if (dictionary) copy[code] = dictionary;
+      }
+      save(code);
+      render(code);
+      select.dispatchEvent(new Event("odp:localechange"));
     });
-    render();
-    button.hidden = false;
-    reveal();
-    var cards = global.document.querySelectorAll("main > .card");
-    cards.forEach(function (card) { card.inert = true; });
+
     global.document.addEventListener("DOMContentLoaded", function () {
-      initializeWorkflow({ translate: translate, getLocale: function () { return locale; } });
-      cards.forEach(function (card) { card.inert = false; });
+      ready.then(function () {
+        initializeWorkflow({ translate: translate, getLocale: function () { return locale; } });
+        cards.forEach(function (card) { card.inert = false; });
+      });
     }, { once: true });
   }
 
@@ -92,6 +163,8 @@
     save: save,
     reveal: reveal,
     deadline: deadline,
+    populatePicker: populatePicker,
+    labelPicker: labelPicker,
     mountPage: mountPage
   };
 })(typeof window !== "undefined" ? window : globalThis);
