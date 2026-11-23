@@ -10,7 +10,7 @@
 <link rel="preload" as="script" href="js/odp-v07-verify.js?v=3">
 
   <link rel="stylesheet" href="css/odp.css?v=20261122">
-  <link rel="stylesheet" href="css/odp-home.css?v=20261123lang">
+  <link rel="stylesheet" href="css/odp-home.css?v=20261123layout">
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" integrity="sha384-Htz1SE4Sl5aitpvFgr2j0sfsGUIuSXI6t8hEyrlQ93zflEF3a29bH2AvkUROUw7J" crossorigin="anonymous" defer></script>
   <script src="backend/js/odp-v07-reader.js" defer></script>
   <script src="backend/js/odp-v07-canonical.js" defer></script>
@@ -29,7 +29,7 @@
     <div class="header-toolbar"><div class="odp-lang-wrap odp-workflow-language" hidden><select id="language" class="odp-lang-select" aria-label="Language"></select></div></div>
   </header>
   <nav class="nav" aria-label="ODP"><a href="index.html" data-copy="home">Home</a><a href="verify.html" data-copy="legacy">Other verification tools</a></nav>
-  <section class="card" style="margin-top:24px"><div class="card-body">
+  <section class="card"><div class="card-body">
     <p data-copy="intro">Enter a passport ID to read its registration. No wallet is needed.</p>
     <button class="btn btn-sec" id="scan-qr" type="button" data-copy="scan">Scan passport QR code</button>
     <p id="scan-status" role="status"></p>
@@ -38,7 +38,7 @@
     <p class="fhint" data-copy="scope">File integrity and possession of an edition item are not checked here yet.</p>
     <div id="result" aria-live="polite"></div>
   </div></section>
-  <section class="card" style="margin-top:24px"><div class="card-body">
+  <section class="card"><div class="card-body">
     <h2 data-copy="profileTitle">Verify a profile</h2>
     <form id="profile-lookup">
       <label for="profile-id" data-copy="profileLabel">Profile ID</label>

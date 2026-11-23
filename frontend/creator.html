@@ -11,14 +11,14 @@
 <script src="js/odp-i18n-boot.js?v=4"></script>
 <script src="backend/config/odp-wc-config.js?v=1"></script>
 <script src="backend/js/odp-wallet-wc-loader.js?v=1"></script>
-<title>ODP v0.6 — Register profile</title>
+<title>ODP v0.6 — Profile</title>
 <link rel="stylesheet" href="css/odp.css?v=20261122wc">
 <script src="js/odp-theme.js?v=0.3.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" integrity="sha384-Htz1SE4Sl5aitpvFgr2j0sfsGUIuSXI6t8hEyrlQ93zflEF3a29bH2AvkUROUw7J" crossorigin="anonymous"></script>
 <script src="backend/js/odp-contract.js?v=20261122"></script>
 <script src="js/odp-date-format.js?v=1"></script>
 <script src="backend/js/odp-passport-v03-ops.js?v=0.5.0"></script>
-<script>window.ODP_I18N_VERSION="20261122wc";</script>
+<script>window.ODP_I18N_VERSION="20261123legacyprofile";</script>
 <script src="js/odp-i18n.js?v=19"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
@@ -140,7 +140,6 @@ function formatProfileWalletDisplay(addr) {
   return s.length > 14 ? s.slice(0, 6) + "…" + s.slice(-4) : s;
 }
 
-let ABI = null;
 let odpContractGeneration = null;
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -150,10 +149,10 @@ let signer     = null;
 let contract   = null;
 let wallet     = null;
 let creatorId  = null;
-let selType    = "C";
+
 /** Prevents parallel wallet prompts (double-click → “already pending”). */
 let odpConnectInFlight = false;
-let secOk      = false;
+
 /** One-shot banner on connect screen (e.g. multi-account rejection). */
 let walletConnectError = null;
 /** When true, `walletConnectError` is trusted HTML (neutral hint, not escaped). */
@@ -251,8 +250,9 @@ function render() {
     return;
   }
 
-  app.innerHTML = renderForm();
-  updateTypeUI();
+  app.innerHTML = `
+    ${creatorStackStripHtml()}
+    <p class="info neutral" role="status">${esc(t("creator.noLegacyProfile"))}</p>`;
   syncOdpHeaderDisconnect();
 }
 
@@ -265,7 +265,7 @@ function creatorStackStripHtml() {
   return '<div class="odp-stack-under-steps">' + odpFormatStackSummaryHtml(odpContractGeneration) + "</div>";
 }
 
-// ── Step 1: Connect wallet ────────────────────────────────────────────────────
+// ── Connect wallet ────────────────────────────────────────────────────
 
 function renderConnect() {
   const errBanner = walletConnectError
@@ -276,14 +276,6 @@ function renderConnect() {
   walletConnectError = null;
   walletConnectErrorNeutral = false;
   return `
-    <div class="step-indicator">
-      <div class="si-item active"><div class="si-num">1</div><span>${esc(t("creator.steps.wallet"))}</span></div>
-      <div class="si-line"></div>
-      <div class="si-item"><div class="si-num">2</div><span>${esc(t("creator.steps.security"))}</span></div>
-      <div class="si-line"></div>
-      <div class="si-item"><div class="si-num">3</div><span>${esc(t("creator.steps.register"))}</span></div>
-    </div>
-
     ${creatorStackStripHtml()}
 
     <div class="card wallet-connect-card">
@@ -300,128 +292,6 @@ function renderConnect() {
         </div>
 
         <div id="connectErr"></div>
-      </div>
-    </div>`;
-}
-
-// ── Step 2: Security ──────────────────────────────────────────────────────────
-
-function renderSecurity() {
-  return `
-    <div class="step-indicator">
-      <div class="si-item done"><div class="si-num">✓</div><span>${esc(t("creator.steps.wallet"))}</span></div>
-      <div class="si-line"></div>
-      <div class="si-item active"><div class="si-num">2</div><span>${esc(t("creator.steps.security"))}</span></div>
-      <div class="si-line"></div>
-      <div class="si-item"><div class="si-num">3</div><span>${esc(t("creator.steps.register"))}</span></div>
-    </div>
-
-    ${creatorStackStripHtml()}
-
-    <div class="card">
-      <div class="card-head">${esc(t("creator.security.cardTitle"))}</div>
-      <div class="card-body">
-        <p style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.7">
-          ${esc(t("creator.security.intro"))}
-        </p>
-
-        <ul class="checklist">
-          <li>
-            <span class="checklist-icon">📝</span>
-            <div>
-              <strong>${esc(t("creator.security.li1t"))}</strong>
-              ${esc(t("creator.security.li1"))}
-            </div>
-          </li>
-          <li>
-            <span class="checklist-icon">💳</span>
-            <div>
-              <strong>${esc(t("creator.security.li2t"))}</strong>
-              ${esc(t("creator.security.li2"))}
-            </div>
-          </li>
-          <li>
-            <span class="checklist-icon">🔒</span>
-            <div>
-              <strong>${esc(t("creator.security.li3t"))}</strong>
-              ${esc(t("creator.security.li3"))}
-            </div>
-          </li>
-          <li>
-            <span class="checklist-icon">ℹ️</span>
-            <div>
-              <strong>${esc(t("creator.security.li4t"))}</strong>
-              ${esc(t("creator.security.li4"))}
-            </div>
-          </li>
-        </ul>
-
-        <div class="confirm-row" onclick="toggleSec()">
-          <input type="checkbox" id="secCheck">
-          <label for="secCheck">
-            ${esc(t("creator.security.checkbox"))}
-          </label>
-        </div>
-
-        <button class="btn" id="secBtn" onclick="showRegister()" disabled>
-          ${esc(t("creator.security.continueBtn"))}
-        </button>
-      </div>
-    </div>`;
-}
-
-// ── Step 3: Register ──────────────────────────────────────────────────────────
-
-function renderForm() {
-  return `
-    <div class="step-indicator">
-      <div class="si-item done"><div class="si-num">✓</div><span>${esc(t("creator.steps.wallet"))}</span></div>
-      <div class="si-line"></div>
-      <div class="si-item done"><div class="si-num">✓</div><span>${esc(t("creator.steps.security"))}</span></div>
-      <div class="si-line"></div>
-      <div class="si-item active"><div class="si-num">3</div><span>${esc(t("creator.steps.register"))}</span></div>
-    </div>
-
-    ${creatorStackStripHtml()}
-
-    <div class="card">
-      <div class="card-head">${esc(t("creator.register.cardTitle"))}</div>
-      <div class="card-body">
-
-        <div class="type-grid">
-          <div class="type-opt sel" id="opt-C" onclick="selType='C';updateTypeUI()">
-            <span class="type-letter">C</span>
-            <div class="type-name">${esc(t("creator.type.C"))}</div>
-            <div class="type-desc">${esc(t("creator.type.Cd"))}</div>
-          </div>
-          <div class="type-opt" id="opt-B" onclick="selType='B';updateTypeUI()">
-            <span class="type-letter">B</span>
-            <div class="type-name">${esc(t("creator.type.B"))}</div>
-            <div class="type-desc">${esc(t("creator.type.Bd"))}</div>
-          </div>
-          <div class="type-opt" id="opt-P" onclick="selType='P';updateTypeUI()">
-            <span class="type-letter">P</span>
-            <div class="type-name">${esc(t("creator.type.P"))}</div>
-            <div class="type-desc">${esc(t("creator.type.Pd"))}</div>
-          </div>
-          <div class="type-opt" id="opt-M" onclick="selType='M';updateTypeUI()">
-            <span class="type-letter">M</span>
-            <div class="type-name">${esc(t("creator.type.M"))}</div>
-            <div class="type-desc">${esc(t("creator.type.Md"))}</div>
-          </div>
-        </div>
-
-        <div id="typeInfo" class="info neutral" style="margin-bottom:16px"></div>
-
-        <div class="info warn" style="margin-bottom:16px">
-          ${esc(t("creator.register.warn"))}
-        </div>
-
-        <div id="regErr"></div>
-
-        <button class="btn" id="regBtn" onclick="doRegister()">
-          ${registerButtonLabel()}
-        </button>
       </div>
     </div>`;
 }
@@ -1113,40 +983,6 @@ function renderAlready() {
     `;
 }
 
-// ── UI helpers ────────────────────────────────────────────────────────────────
-
-function getTypeInfo() {
-  return {
-    C: t("creator.typeInfo.C"),
-    B: t("creator.typeInfo.B"),
-    P: t("creator.typeInfo.P"),
-    M: t("creator.typeInfo.M"),
-  };
-}
-
-function updateTypeUI() {
-  const TI = getTypeInfo();
-  ["C","B","P","M"].forEach(tn => {
-    const el = document.getElementById(`opt-${tn}`);
-    if (el) el.classList.toggle("sel", tn === selType);
-  });
-  const info = document.getElementById("typeInfo");
-  if (info) info.textContent = TI[selType] || "";
-}
-
-function toggleSec() {
-  const cb  = document.getElementById("secCheck");
-  const btn = document.getElementById("secBtn");
-  if (!cb || !btn) return;
-  cb.checked = !cb.checked;
-  btn.disabled = !cb.checked;
-}
-
-function showRegister() {
-  secOk = true;
-  render();
-}
-
 async function disconnect() {
   if (typeof odpWalletConnectIsActive === "function" && odpWalletConnectIsActive()) {
     if (typeof odpWalletConnectDisconnect === "function") await odpWalletConnectDisconnect();
@@ -1154,12 +990,7 @@ async function disconnect() {
   try { sessionStorage.setItem(ODP_SKIP_WALLET_AUTOCONNECT, "1"); } catch {}
   wallet = null; provider = null; signer = null; contract = null; creatorId = null;
   odpContractGeneration = null;
-  ABI = null;
   render();
-}
-
-function registerButtonLabel() {
-  return t("creator.register.btn");
 }
 
 // ── Wallet connection ─────────────────────────────────────────────────────────
@@ -1259,60 +1090,17 @@ async function _finish(web3p) {
     contract = null;
     wallet = null;
     odpContractGeneration = null;
-    ABI = null;
     const msg = fin.message || (typeof ODP_UNSUPPORTED_LEGACY_CONTRACT_MSG !== "undefined" ? ODP_UNSUPPORTED_LEGACY_CONTRACT_MSG : "Legacy contract not supported.");
     const ce = document.getElementById("connectErr");
     if (ce) ce.innerHTML = `<div class="info error">${esc(msg)}</div>`;
     return;
   }
   odpContractGeneration = fin.generation;
-  ABI = fin.abi;
   contract = fin.contract;
   if (typeof odpPersistRegistryContractToSession === "function") odpPersistRegistryContractToSession(net);
 
-  // Check existing
-  const existing = await contract.getCreatorByWallet(wallet);
-  if (existing) {
-    creatorId = existing;
-    render();
-    return;
-  }
-
-  // Show security step first
-  document.getElementById("app").innerHTML = renderSecurity();
-  syncOdpHeaderDisconnect();
-}
-
-// ── Register ──────────────────────────────────────────────────────────────────
-
-async function doRegister() {
-  const btn = document.getElementById("regBtn");
-  const err = document.getElementById("regErr");
-  btn.disabled = true;
-  btn.textContent = t("creator.register.waiting");
-  err.innerHTML = "";
-
-  try {
-    const Er = odpEthersLib();
-    if (!Er || !Er.utils) {
-      err.innerHTML = `<div class="info error">${esc("ethers v5 failed to load.")}</div>`;
-      btn.disabled = false;
-      btn.textContent = registerButtonLabel();
-      return;
-    }
-    // bytes1 encoding: "C" → 0x43, "B" → 0x42, "P" → 0x50
-    const typeBytes = Er.utils.hexlify(Er.utils.toUtf8Bytes(selType)); // e.g. "0x43" for "C"
-    const tx = await contract.registerCreator(typeBytes);
-    btn.textContent = t("creator.register.confirming");
-    err.innerHTML = `<div class="info neutral" style="margin-bottom:10px">${esc(t("creator.register.txPrefix"))} ${tx.hash.slice(0,20)}…</div>`;
-    await tx.wait();
-    creatorId = await contract.getCreatorByWallet(wallet);
-    render();
-  } catch(e) {
-    err.innerHTML = `<div class="info error" style="margin-bottom:10px">${esc(e.message)}</div>`;
-    btn.disabled = false;
-    btn.textContent = registerButtonLabel();
-  }
+  creatorId = await contract.getCreatorByWallet(wallet);
+  render();
 }
 
 document.addEventListener("keydown", (e) => {

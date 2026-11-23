@@ -49,6 +49,46 @@ for (const route of ['creator', 'passport']) {
   });
 }
 
+for (const profileId of ['', 'C-123-456-789-012']) {
+  test(`legacy profile page handles a wallet ${profileId ? 'with' : 'without'} a 0.6 profile`, async ({ page }) => {
+    await page.route('**/backend/js/odp-contract.js?*', route => route.fulfill({
+      contentType: 'application/javascript',
+      body: `
+        window.odpMergeRegistryConfigAsync = async () => {};
+        window.odpRequireSingleEthereumAccount = async () => ({ ok: true });
+        window.odpHasValidRegistryAddress = () => true;
+        window.odpFinalizeWalletContract = async () => ({
+          generation: 6,
+          contract: { getCreatorByWallet: async () => ${JSON.stringify(profileId)} },
+        });
+      `,
+    }));
+    await page.addInitScript(() => {
+      sessionStorage.setItem('odp_skip_wallet_autoconnect', '1');
+      sessionStorage.setItem('odp_site_trust_disclosure_ok', '1');
+      Object.assign(window, {
+        odpWalletConnectConnect: async () => ({}),
+        ethers: { providers: { Web3Provider: class {
+          getSigner() { return { getAddress: async () => '0x' + '1'.repeat(40) }; }
+        } } },
+      });
+    });
+    await page.goto('/creator.html');
+    const register = page.getByRole('link', { name: 'Register an ODP 0.7 profile' });
+    await expect(register).toHaveAttribute('href', 'profile-07.html');
+    await page.getByRole('button', { name: 'Connect with WalletConnect' }).click();
+
+    if (profileId) {
+      await expect(page.getByRole('link', { name: /Verify profile/ })).toHaveAttribute('href', /verify\.html/);
+    } else {
+      await expect(page.getByRole('status')).toContainText('This wallet has no ODP 0.6 profile.');
+    }
+    await expect(page.getByRole('button', { name: /register/i })).toHaveCount(0);
+    await register.click();
+    await expect(page).toHaveURL(/profile-07\.html$/);
+  });
+}
+
 test('legacy verification tools open and return to the list', async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem('odp_site_trust_disclosure_ok', '1');
