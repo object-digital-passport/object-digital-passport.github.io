@@ -1,8 +1,8 @@
 (function (initializeWorkflow) {
   "use strict";
   const copy = {
-    en: { title: "Verify a passport", subtitle: "ODP 0.7 · Polygon", home: "Home", legacy: "Other verification tools", intro: "Enter a passport ID or odp:// locator to read its registration. No wallet, password or recovery phrase is needed.", label: "Passport ID", button: "Check registration", scope: "Files and individual edition items are not checked here yet.", checking: "Reading the registry…", invalid: "Enter a passport ID in the format ODP-YYYY-MM-000000000.", error: "The registration could not be read. Check the ID and connection, then try again.", registered: "Registration found on the ODP 0.7 registry", revoked: "This passport has been withdrawn.", active: "This passport is not withdrawn.", printed: "Confirmed for print", deadline: "Withdrawal deadline", issuer: "Profile", author: "Author name declared by issuer", object: "Object", block: "Finalized block", files: "Files: not checked", item: "Individual edition item: not checked", detail: "Registration records what the issuer submitted. It does not establish the identity of the issuer or the authenticity of the object.", switch: "Change language to Russian" },
-    ru: { title: "Проверить паспорт", subtitle: "ODP 0.7 · Polygon", home: "Главная", legacy: "Другие инструменты проверки", intro: "Введите номер паспорта или адрес odp://, чтобы прочитать запись в реестре. Кошелёк, пароль и секретная фраза не нужны.", label: "Номер паспорта", button: "Проверить запись", scope: "Файлы и отдельные экземпляры тиража здесь пока не проверяются.", checking: "Читаем реестр…", invalid: "Введите номер в формате ODP-ГГГГ-ММ-000000000.", error: "Не удалось прочитать запись. Проверьте номер и подключение и попробуйте снова.", registered: "Запись найдена в реестре ODP 0.7", revoked: "Этот паспорт отозван.", active: "Этот паспорт не отозван.", printed: "Подтверждён для печати", deadline: "Срок отзыва", issuer: "Профиль", author: "Имя автора по заявлению издателя", object: "Объект", block: "Финализированный блок", files: "Файлы: не проверены", item: "Экземпляр тиража: не проверен", detail: "Реестр хранит сведения, внесённые издателем. Запись не подтверждает личность издателя или подлинность объекта.", switch: "Switch language to English" },
+    en: { title: "Verify a passport", subtitle: "ODP 0.7 · Polygon", home: "Home", legacy: "Other verification tools", intro: "Enter a passport ID or odp:// locator to read its registration. No wallet, password or recovery phrase is needed.", label: "Passport ID", button: "Check registration", scope: "Files and individual edition items are not checked here yet.", checking: "Reading the registry…", invalid: "Enter a passport ID in the format ODP-YYYY-MM-000000000.", error: "The registration could not be read. Check the ID and connection, then try again.", registered: "Registration found on the ODP 0.7 registry", revoked: "This passport has been withdrawn.", active: "This passport is not withdrawn.", printed: "Confirmed for print", deadline: "Withdrawal deadline", issuer: "Profile", author: "Author name declared by issuer", object: "Object", block: "Finalized block", files: "Files: not checked", item: "Individual edition item: not checked", detail: "Registration records what the issuer submitted. It does not establish the identity of the issuer or the authenticity of the object." },
+    ru: { title: "Проверить паспорт", subtitle: "ODP 0.7 · Polygon", home: "Главная", legacy: "Другие инструменты проверки", intro: "Введите номер паспорта или адрес odp://, чтобы прочитать запись в реестре. Кошелёк, пароль и секретная фраза не нужны.", label: "Номер паспорта", button: "Проверить запись", scope: "Файлы и отдельные экземпляры тиража здесь пока не проверяются.", checking: "Читаем реестр…", invalid: "Введите номер в формате ODP-ГГГГ-ММ-000000000.", error: "Не удалось прочитать запись. Проверьте номер и подключение и попробуйте снова.", registered: "Запись найдена в реестре ODP 0.7", revoked: "Этот паспорт отозван.", active: "Этот паспорт не отозван.", printed: "Подтверждён для печати", deadline: "Срок отзыва", issuer: "Профиль", author: "Имя автора по заявлению издателя", object: "Объект", block: "Финализированный блок", files: "Файлы: не проверены", item: "Экземпляр тиража: не проверен", detail: "Реестр хранит сведения, внесённые издателем. Запись не подтверждает личность издателя или подлинность объекта." },
   };
   Object.assign(copy.en, { unitLabel: "Unit index, if known (starts at 0)", scope: "File integrity and possession of an edition item are not checked here yet.", editionOpen: "Edition opened", editionClosed: "Edition not opened", editionCount: "Edition size", editionUnavailable: "Edition state could not be read", unitActive: "First proof of access to the unit key is recorded; the buyer is not recorded", unitInactive: "Unit activation not recorded", unitInvalid: "Enter a unit index from 0 to 1048575." });
   Object.assign(copy.ru, { unitLabel: "Индекс экземпляра, если известен (с 0)", scope: "Целостность файлов и владение экземпляром тиража здесь пока не проверяются.", editionOpen: "Тираж открыт", editionClosed: "Тираж не открыт", editionCount: "Размер тиража", editionUnavailable: "Не удалось прочитать состояние тиража", unitActive: "Записано первое подтверждение доступа к ключу экземпляра; покупатель не указан", unitInactive: "Активация экземпляра не записана", unitInvalid: "Введите индекс экземпляра от 0 до 1048575." });
@@ -19,7 +19,7 @@
   Object.assign(copy.en, {profileTitle:"Verify a profile",profileLabel:"Profile ID",profileButton:"Check profile",profileInvalid:"Enter a C, B, P or M profile ID in the format B-123-456-789-012.",profileFound:"Profile found in the ODP 0.7 registry",profileWallet:"Registered wallet",profileDate:"Registered at",profileDetail:"Registration does not establish the identity of the wallet holder."});
   Object.assign(copy.ru, {profileTitle:"Проверить профиль",profileLabel:"Номер профиля",profileButton:"Проверить профиль",profileInvalid:"Введите номер C, B, P или M в формате B-123-456-789-012.",profileFound:"Профиль найден в реестре ODP 0.7",profileWallet:"Зарегистрированный кошелёк",profileDate:"Дата регистрации",profileDetail:"Регистрация не подтверждает личность владельца кошелька."});
 
-  window.ODPLocale?.mountPage(copy, initializeWorkflow);
+  window.ODPLocale?.mountPage("verify-07", copy, initializeWorkflow);
 })(function (i18n) {
   'use strict';
   const { translate: text, getLocale } = i18n;
@@ -38,7 +38,7 @@
     add(text("profileFound"));
     add(profile.creatorId);
     add(text("profileWallet") + ": " + profile.wallet);
-    add(text("profileDate") + ": " + new Date(Number(profile.timestamp.toString()) * 1000).toLocaleString(getLocale() === "ru" ? "ru-RU" : "en-US"));
+    add(text("profileDate") + ": " + new Date(Number(profile.timestamp.toString()) * 1000).toLocaleString(getLocale()));
     add(text("block") + ": " + profileState.record.blockNumber);
     add(text("profileDetail"));
   }
@@ -180,7 +180,7 @@
     if (!state) return;
     if (state.kind === "bundleOffline") { append("p", text("localMatched")); append("p", text("chainUnconfirmed")); append("p", text("detail")); return; }
     if (state.kind !== "record") { append("p", text(state.kind)); return; }
-    const r = state.record, date = value => new Date(Number(value.toString()) * 1000).toLocaleString(getLocale() === "ru" ? "ru-RU" : "en-US");
+    const r = state.record, date = value => new Date(Number(value.toString()) * 1000).toLocaleString(getLocale());
     append("h2", text("registered"));
     append("p", r.classification.revoked ? text("revoked") : text("active"));
     append("p", text("object") + ": " + r.header.title);
@@ -209,7 +209,7 @@
     }
     append("p", text("detail"));
   }
-  language.addEventListener("click", render);
+  language.addEventListener("odp:localechange", render);
   for (const input of [field, unit]) input.addEventListener("input", () => { state = null; for (const control of [field, unit]) { control.removeAttribute("aria-invalid"); control.removeAttribute("aria-describedby"); } render(); });
   form.addEventListener("submit", async event => {
     event.preventDefault();

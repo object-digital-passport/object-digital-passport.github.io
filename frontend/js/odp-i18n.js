@@ -112,16 +112,9 @@
     var sel = global.document.createElement("select");
     sel.className = "odp-lang-select";
     sel.id = "odpLangSelect";
-    sel.setAttribute("aria-label", t("lang.switchLabel"));
-    sel.setAttribute("title", t("lang.switchLabel"));
-    ODP_LOCALES.forEach(function (L) {
-      var opt = global.document.createElement("option");
-      opt.value = L.code;
-      opt.textContent = L.emoji + " " + L.abbr;
-      opt.setAttribute("title", L.label);
-      if (L.code === loc) opt.selected = true;
-      sel.appendChild(opt);
-    });
+    startup.labelPicker(sel, t("lang.switchLabel"));
+    startup.populatePicker(sel);
+    sel.value = loc;
     sel.addEventListener("change", function () {
       var v = sel.value;
       if (v && v !== loc) odpSetLocale(v);

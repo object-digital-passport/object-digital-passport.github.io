@@ -14,7 +14,7 @@ test("0.7 lookup renders registry facts and separates unchecked files", async ({
   await expect(page.getByText("Files: not checked")).toBeVisible();
   await expect(page.getByText("Individual edition item: not checked")).toBeVisible();
   await expect(page.locator("#result img")).toHaveCount(0);
-  await page.getByRole("button", { name: "Change language to Russian" }).click();
+  await page.locator('#language').selectOption('ru');
   await expect(page.getByText("Файлы: не проверены")).toBeVisible();
   await page.getByLabel("Номер паспорта").fill("ODP-2026-09-000000028");
   await expect(page.locator("#result")).toBeEmpty();
@@ -40,7 +40,7 @@ test('edition lookup displays activation without claiming possession', async ({ 
   await expect(page.getByText('Activation block: 120')).toBeVisible();
   await expect(page.getByText('Individual edition item: not checked')).toBeVisible();
   expect(await page.evaluate(()=>(window as any).requestedUnit)).toBe(3);
-  await page.getByRole('button',{name:'Change language to Russian'}).click();
+  await page.locator('#language').selectOption('ru');
   await expect(page.getByText(/Издатель может отозвать этот паспорт до/)).toBeVisible();
 });
 
@@ -232,6 +232,6 @@ test('validation state clears across related fields and title follows language',
   await page.locator('#unit-index').fill('1');
   await expect(page.locator('#passport-id')).not.toHaveAttribute('aria-invalid');
   await expect(page).toHaveTitle('Verify a passport — ODP 0.7');
-  await page.locator('#language').click();
+  await page.locator('#language').selectOption('ru');
   await expect(page).toHaveTitle('Проверить паспорт — ODP 0.7');
 });

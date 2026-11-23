@@ -53,19 +53,19 @@ TMP=$(mktemp -d) && cp -r frontend/. "$TMP/" && cp -r backend "$TMP/backend" && 
 
 Interface strings live in `frontend/localization/<lang>/*.json`. English and Russian exist.
 
-**Fixing or improving an existing string is a pure data change** — edit the JSON, nothing else. A
-key you leave out falls back to the English string rather than rendering blank, because
-`odp-i18n.js` merges the translation over the English set and skips empty values. A partial
-translation is therefore usable, which makes it a reasonable first pull request.
+On the home and legacy pages, edit the matching JSON file. On the ODP 0.7 pages, English
+and Russian strings are in the matching `frontend/js/odp-v07-*.js` page script.
 
-**Adding a language is a folder and one line.** Create
-`frontend/localization/<code>/` with `common.json` and one file per page, then add an entry to
-`ODP_LOCALES` at the top of `frontend/js/odp-i18n-boot.js` — code, flag, abbreviation, label, and the
-README URL for that language. The JSON loader uses that list.
+To add a language, register its lowercase language tag, flag, abbreviation and native name
+in `ODP_LOCALES` in `frontend/js/odp-i18n-boot.js`. You can also supply `switchLabel` for
+the 0.7 language picker and `readmeUrl` for the link to the translated specification README.
 
-You do not have to translate everything first. A missing key, an empty string, and a missing
-*file* all fall back to the English text, so a language can land one page at a time.
-`frontend/test/odp-i18n.test.mjs` holds that behaviour in place.
+Add translations under `frontend/localization/<code>/`:
+
+- Home and legacy pages use `common.json` and their existing page JSON files.
+- ODP 0.7 uses `verify-07.json`, `profile-07.json`, `issue-07.json` and `release-07.json`.
+  Use a flat object with the keys from the page script's English dictionary.
+- Missing or empty strings and missing files fall back to English. Test the translation in a browser.
 
 **Documentation is translated too, and CI enforces it.** Every document in this repository has a
 Russian version or a written reason why it does not — the record is

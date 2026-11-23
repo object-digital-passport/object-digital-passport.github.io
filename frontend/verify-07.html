@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#0d0d0d">
   <meta name="color-scheme" content="dark">
   <title>ODP 0.7 — Verify</title>
-<script src="js/odp-i18n-boot.js?v=3"></script>
-<link rel="preload" as="script" href="js/odp-v07-verify.js?v=2">
+<script src="js/odp-i18n-boot.js?v=4"></script>
+<link rel="preload" as="script" href="js/odp-v07-verify.js?v=3">
 
   <link rel="stylesheet" href="css/odp.css?v=20261122">
-  <link rel="stylesheet" href="css/odp-home.css?v=20261122">
+  <link rel="stylesheet" href="css/odp-home.css?v=20261123lang">
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" integrity="sha384-Htz1SE4Sl5aitpvFgr2j0sfsGUIuSXI6t8hEyrlQ93zflEF3a29bH2AvkUROUw7J" crossorigin="anonymous" defer></script>
   <script src="backend/js/odp-v07-reader.js" defer></script>
   <script src="backend/js/odp-v07-canonical.js" defer></script>
@@ -26,7 +26,7 @@
 <main class="page">
   <header class="header-row">
     <div class="header-left"><a href="index.html"><img class="home-logo" src="odp-logo.png" width="720" height="463" alt="ODP"></a><h1 data-copy="title">Verify a passport</h1><p class="sub" data-copy="subtitle">ODP 0.7 · Polygon</p></div>
-    <div class="header-toolbar"><button type="button" id="language" hidden class="btn btn-sec" aria-label="Change language">RU</button></div>
+    <div class="header-toolbar"><div class="odp-lang-wrap odp-workflow-language" hidden><select id="language" class="odp-lang-select" aria-label="Language"></select></div></div>
   </header>
   <nav class="nav" aria-label="ODP"><a href="index.html" data-copy="home">Home</a><a href="verify.html" data-copy="legacy">Other verification tools</a></nav>
   <section class="card" style="margin-top:24px"><div class="card-body">
@@ -53,6 +53,6 @@
   <video id="qr-video" muted playsinline></video>
   <form method="dialog"><button class="btn btn-sec" autofocus data-copy="closeScan">Close camera</button></form>
 </dialog>
-<script src="js/odp-v07-verify.js?v=2"></script>
+<script src="js/odp-v07-verify.js?v=3"></script>
 </body>
 </html>

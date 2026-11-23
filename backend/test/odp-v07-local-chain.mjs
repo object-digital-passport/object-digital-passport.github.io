@@ -249,9 +249,8 @@ example.anchors.find(a => a.type === 'photo').hash = photoHash;
 const profile = (await reader.readProfileByWallet(accounts[0].address)).profile;
 const opts = { abi, ethers:compat }, preparedJob = await jobTools.prepare({ document:example, originals:[{hash:photoHash,bytes:photoBytes}], profile, wallet:accounts[0].address, ...opts });
 const db = await jobStore.open(new IDBFactory()); await jobStore.save(db, preparedJob, opts);
-const backedUp = await jobBackup.exportJob(preparedJob, opts);
 const walletProvider = { request:async request => request.method === 'eth_accounts' ? [accounts[0].address] : connection.provider.request(request) };
-const issueArgs = { db, operationId:preparedJob.identity.operationId, expectedFingerprint:preparedJob.fingerprint, backupBytes:backedUp, reader, ethereum:walletProvider, wallet:accounts[0].address, locks, ...opts };
+const issueArgs = { db, operationId:preparedJob.identity.operationId, expectedFingerprint:preparedJob.fingerprint, reader, ethereum:walletProvider, wallet:accounts[0].address, locks, ...opts };
 assert.equal((await issue.send(issueArgs)).state, 'submitted');
 assert.equal((await issue.send(issueArgs)).state, 'minted');
 const mintedJob = await jobStore.get(db,preparedJob.identity.operationId,opts);
@@ -299,7 +298,7 @@ for (const [role, kind, signer] of [
   const testDb = await jobStore.open(new IDBFactory());
   await jobStore.save(testDb,prepared,flowOpts);
   const backup = await jobBackup.exportJob(prepared,flowOpts);
-  const args = {db:testDb,operationId:prepared.identity.operationId,expectedFingerprint:prepared.fingerprint,backupBytes:backup,reader:flowReader,ethereum,wallet,locks,...flowOpts};
+  const args = {db:testDb,operationId:prepared.identity.operationId,expectedFingerprint:prepared.fingerprint,reader:flowReader,ethereum,wallet,locks,...flowOpts};
   assert.equal((await issue.send(args)).state,'submitted');
   // An older backup must not erase a locally recorded submission or send it again.
   const restored = await jobBackup.restore(backup,flowOpts);

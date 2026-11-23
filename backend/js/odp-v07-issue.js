@@ -4,7 +4,7 @@
   else root.ODPV07Issue = factory(root.ODPV07JobStore, root.ODPV07JobBackup, root.ODPV07Passport, root.ODPV07Canonical, root.ODPV07Safe, root.ODPV07Job);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (store, backup, passportTools, canonical, safeTools, jobs) {
   'use strict';
-  async function send({ db, operationId, expectedFingerprint, backupBytes, reader, ethereum, wallet, locks, abi, ethers }) {
+  async function send({ db, operationId, expectedFingerprint, reader, ethereum, wallet, locks, abi, ethers }) {
     if (!db || !reader || !ethereum || !locks || typeof locks.request !== 'function' || !ethers || !ethers.utils.isAddress(wallet)) throw new Error('Issuance prerequisites unavailable');
     const options = { abi, ethers }, key = 'odp-v07-issue:' + wallet.toLowerCase() + ':' + operationId;
     return locks.request(key, { ifAvailable:true }, async lock => {
@@ -28,8 +28,6 @@
         return {state:Number(block.timestamp)>=job.safeProposal.deadline?'safe_expired':'safe_pending',safeTxHash:job.safeProposal.safeTxHash};
       }
       if (job.state !== 'prepared') return { state:'unresolved', transactionHash:job.transactionHash || null };
-      const restored = await backup.restore(backupBytes, options);
-      if (restored.state !== 'prepared' || restored.fingerprint !== job.fingerprint) throw new Error('Issuance backup does not match');
       const profile = await reader.readProfileByWallet(wallet);
       if (!profile.profile || profile.profile.creatorId !== job.identity.creatorId) throw new Error('Issuer profile changed');
       const doc = canonical.parseJSON(job.canonicalPassport), method = {physical:'mintPhysical',digital:'mintDigital',mixed:'mintMixed'}[doc.objectType];
@@ -144,15 +142,13 @@
     });
   }
   /** Caller must explicitly confirm that no signed or pending copy exists on any device. */
-  async function recoverUnsent({db,operationId,expectedFingerprint,backupBytes,reader,ethereum,wallet,locks,abi,ethers}) {
+  async function recoverUnsent({db,operationId,expectedFingerprint,reader,ethereum,wallet,locks,abi,ethers}) {
     if(!db||!reader||!ethereum||!locks||typeof locks.request!=='function'||!ethers||!ethers.utils.isAddress(wallet))throw Error('Recovery prerequisites unavailable');
     const options={abi,ethers},normalized=wallet.toLowerCase(),key='odp-v07-issue:'+normalized+':'+operationId;
     return locks.request(key,{ifAvailable:true},async lock=>{
       if(!lock)throw Error('Issuance already in progress');
       const job=await store.get(db,operationId,options);
       if(!job||job.state!=='handoff'||job.identity.issuer!==normalized||job.fingerprint!==expectedFingerprint)throw Error('Recovery job changed');
-      const restored=await backup.restore(backupBytes,options);
-      if(restored.state!=='prepared'||restored.fingerprint!==job.fingerprint)throw Error('Prepared backup does not match');
       async function check(){
         const [chain,accounts,code,latest,pending,block,op]=await Promise.all([ethereum.request({method:'eth_chainId'}),ethereum.request({method:'eth_accounts'}),ethereum.request({method:'eth_getCode',params:[wallet,'latest']}),ethereum.request({method:'eth_getTransactionCount',params:[wallet,'latest']}),ethereum.request({method:'eth_getTransactionCount',params:[wallet,'pending']}),ethereum.request({method:'eth_getBlockByNumber',params:['latest',false]}),reader.readMintOperation(wallet,operationId,job.identity.digest)]);
         if(Number(chain)!==137||!Array.isArray(accounts)||accounts.length!==1||String(accounts[0]).toLowerCase()!==normalized||typeof code!=='string'||code.toLowerCase()!=='0x'||!/^0x[0-9a-f]+$/i.test(latest||'')||!/^0x[0-9a-f]+$/i.test(pending||'')||BigInt(latest)!==BigInt(pending)||!block||!/^0x[0-9a-f]+$/i.test(block.timestamp||'')||!Number.isSafeInteger(Number(block.timestamp))||op.state!=='not-finalized')throw Error('Wallet or pending transaction cannot be verified');

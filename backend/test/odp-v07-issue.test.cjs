@@ -16,13 +16,13 @@ async function fixture() {
   const ethers = { utils:{ isAddress:() => true, defaultAbiCoder:{ encode:() => 'data' }, keccak256:() => '0x'+'2'.repeat(64), Interface:class { encodeFunctionData() { return '0x1234'; } decodeFunctionData() { return []; } } } };
   const abi = [], options = {abi,ethers}, job = await jobs.prepare({ document, originals:[{hash,bytes}], profile, wallet, ...options });
   const db = await store.open(new IDBFactory()); await store.save(db,job,options);
-  const backupBytes = await backup.exportJob(job,options), calls = [];
+  const calls = [];
   const ethereum = { request:async ({method}) => { calls.push(method); if (method === 'eth_chainId') return '0x89'; if (method === 'eth_accounts') return [wallet]; if (method === 'eth_getCode') return '0x'; if (method === 'eth_getBlockByNumber') return {timestamp:'0x'+document.registeredAt.toString(16)}; if (method === 'eth_estimateGas') return '0x1234'; if (method === 'eth_sendTransaction') return '0x'+'a'.repeat(64); throw Error('unexpected'); } };
   const reader = { readMintOperation:async () => ({state:'not-finalized'}), readProfileByWallet:async () => ({profile}) };
-  const input = { db, operationId:job.identity.operationId, expectedFingerprint:job.fingerprint, backupBytes, reader, ethereum, wallet, locks:{request:async (_k,_o,fn)=>fn({})}, ...options };
+  const input = { db, operationId:job.identity.operationId, expectedFingerprint:job.fingerprint, reader, ethereum, wallet, locks:{request:async (_k,_o,fn)=>fn({})}, ...options };
   return { input, job, document, calls, options };
 }
-test('saved backed-up job is handed off once and never silently resent', async () => {
+test('locally saved job is handed off once and never silently resent', async () => {
   const f = await fixture();
   assert.equal((await issue.send(f.input)).state, 'submitted');
   assert.equal((await store.get(f.input.db,f.input.operationId,f.options)).state, 'submitted');
@@ -30,9 +30,9 @@ test('saved backed-up job is handed off once and never silently resent', async (
   assert.equal(f.calls.filter(x => x === 'eth_sendTransaction').length, 1);
   f.input.db.close();
 });
-test('backup mismatch and uncertain wallet result cannot create another operation', async () => {
-  const f = await fixture(), bad = f.input.backupBytes.slice(); bad[bad.length-1] ^= 1;
-  await assert.rejects(issue.send({...f.input,backupBytes:bad}), /hash mismatch/);
+test('changed confirmation and uncertain wallet result cannot create another operation', async () => {
+  const f = await fixture();
+  await assert.rejects(issue.send({...f.input,expectedFingerprint:'different'}), /confirmation changed/);
   assert.equal(f.calls.includes('eth_sendTransaction'), false);
   const prior = f.input.ethereum.request;
   f.input.ethereum.request = async args => { if (args.method === 'eth_sendTransaction') throw Error('lost'); return prior(args); };
@@ -178,7 +178,7 @@ test('re-preparation needs finalized Safe cancellation and preserves operation a
   f.input.db.close();db.close();
 });
 
-test('restored unsent job requires a matching backup, EOA, empty node queue and absent operation',async()=>{
+test('unsent job recovery checks the confirmation, EOA, node queue and registry',async()=>{
   const f=await fixture(),db=await store.open(new IDBFactory());await store.importBackup(db,f.job,f.options);
   let pending='0x2',code='0x',state='not-finalized';const previous=f.input.ethereum.request;
   const ethereum={request:async args=>args.method==='eth_getTransactionCount'?(args.params[1]==='pending'?pending:'0x1'):args.method==='eth_getCode'?code:previous(args)};
@@ -186,7 +186,7 @@ test('restored unsent job requires a matching backup, EOA, empty node queue and 
   await assert.rejects(issue.recoverUnsent(args),/pending transaction/);pending='0x1';code='0x1234';
   await assert.rejects(issue.recoverUnsent(args),/pending transaction/);code='0x';state='committed';
   await assert.rejects(issue.recoverUnsent(args),/pending transaction/);state='not-finalized';
-  const bad=f.input.backupBytes.slice();bad[bad.length-1]^=1;await assert.rejects(issue.recoverUnsent({...args,backupBytes:bad}));
+  await assert.rejects(issue.recoverUnsent({...args,expectedFingerprint:'different'}),/Recovery job changed/);
   assert.equal((await issue.recoverUnsent(args)).state,'prepared');
   const recovered=await store.get(db,f.input.operationId,f.options);assert.equal(recovered.identity.operationId,f.job.identity.operationId);assert.equal(recovered.fingerprint,f.job.fingerprint);
   assert.equal(f.calls.includes('eth_sendTransaction'),false);f.input.db.close();db.close();
