@@ -23,7 +23,7 @@ The 0.7 pages are `verify-07.html`, `profile-07.html`, `issue-07.html` and `rele
 - `ODP_TEST_BROWSER=chromium ODP_TEST_PORT=4187 npx playwright test` in `frontend/e2e`: 22 tests passed locally, including review of all four profile roles, print confirmation, and digital-original review (text rendered as text and image preview), exact-byte download and confirmation before issuance. Wallets, Safe SDK and registry responses are simulated; these tests do not establish real wallet or RPC compatibility. Layout checks cover 390px and 1440px. A Firefox retry on this machine timed out in browser launch with sandbox and graphics initialization errors; five launches failed, remaining tests were interrupted or not run. Firefox compatibility is unverified here.
 - `node frontend/test/odp-i18n.test.mjs`: 13 assertions passed, including the intended English fallback test.
 - `node backend/test/odp-contract-0.7.test.mjs`: 27 assertions passed for the existing 0.7 read layer. `node tools/check-translations.mjs --all` also passed after registering this review note.
-- `npm run build:schemas` and `npm run build:safe` in `backend` reproduced the checked-in browser bundles byte for byte with the installed dependencies. CI also rebuilds and compares them.
+- At the time of this review, the schema and Safe App builds reproduced the checked-in bundles byte for byte. CI now verifies the schema and WalletConnect bundles.
 
 ## Review limits and follow-up
 

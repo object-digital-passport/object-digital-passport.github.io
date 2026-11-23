@@ -38,7 +38,8 @@
           { "context": "Playwright smoke" },
           { "context": "Read-layer unit tests" },
           { "context": "Markdown links" },
-          { "context": "Translation parity" }
+          { "context": "Translation parity" },
+          { "context": "Dependency review" }
         ]
       }
     }
