@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 for (const kind of ['physical','digital','mixed']) {
-  test(`prepares and verifies a saved ${kind} issuance backup`, async ({page}) => {
+  test(`issues a ${kind} passport without a backup file`, async ({page}) => {
     await page.route('**/ethers@5.7.2/**', route => route.abort());
     await page.route('**/backend/js/odp-v07-reader.js', route => route.fulfill({contentType:'application/javascript',body:`window.ODPV07Reader={open:async()=>({readProfileByWallet:async wallet=>({profile:{wallet,creatorId:'C-123-456-789-012',typePrefix:'0x43'}}),readMintOperation:async()=>({state:'not-finalized'}),verifyFailedMint:async()=>({blockNumber:1})})};`}));
     await page.addInitScript(() => {
@@ -9,7 +9,7 @@ for (const kind of ['physical','digital','mixed']) {
       const wallet='0x'+'1'.repeat(40);
       (window as any).ethers={utils:{isAddress:()=>true,defaultAbiCoder:{encode:()=> '0x1234'},keccak256:()=> '0x'+'2'.repeat(64),Interface:class {encodeFunctionData(){return '0x1234';} decodeFunctionData(){return [];}}},providers:{Web3Provider:class {}}};
       const handlers:Record<string,Function>={};
-      (window as any).odpWalletConnectConnect=async()=>({on(event:string,fn:Function){handlers[event]=fn;},request:async ({method}:{method:string})=>{if(method==='eth_requestAccounts'||method==='eth_accounts')return [wallet];if(method==='eth_chainId')return '0x89';if(method==='eth_getBlockByNumber')return {timestamp:'0x'+Math.floor(Date.now()/1000).toString(16)};if(method==='eth_getCode')return '0x';if(method==='eth_estimateGas')return '0x1234';if(method==='eth_sendTransaction'){if((window as any).delayMint)return await new Promise(resolve=>(window as any).finishMint=resolve);return '0x'+'a'.repeat(64);}if(method==='eth_getTransactionCount')return '0x1';throw new Error('unexpected wallet request');}});
+      (window as any).odpWalletConnectConnect=async()=>({on(event:string,fn:Function){handlers[event]=fn;},request:async ({method}:{method:string})=>{if(method==='eth_requestAccounts'||method==='eth_accounts')return [wallet];if(method==='eth_chainId')return '0x89';if(method==='eth_getBlockByNumber')return {timestamp:'0x'+Math.floor(Date.now()/1000).toString(16)};if(method==='eth_getCode')return '0x';if(method==='eth_estimateGas')return '0x1234';if(method==='eth_sendTransaction'){if((window as any).uncertainMint)throw new Error('Connection lost');if((window as any).delayMint)return await new Promise(resolve=>(window as any).finishMint=resolve);return '0x'+'a'.repeat(64);}if(method==='eth_getTransactionCount')return '0x1';throw new Error('unexpected wallet request');}});
       (window as any).disconnectTestWallet=()=>handlers.disconnect();
     });
     await page.goto('/issue-07.html');
@@ -36,10 +36,6 @@ for (const kind of ['physical','digital','mixed']) {
     await expect(page.getByRole('heading',{name:'Review before issuing'})).toBeVisible();
     if(kind==='physical'){
       await expect(page.locator('#photoStatus')).toContainText('cannot be displayed');
-      const badDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Download issuance file (.odpjob)'}).click();
-      const badPath=await (await badDownload).path();if(!badPath)throw Error('Download unavailable');
-      await page.getByLabel('Select the downloaded .odpjob file').setInputFiles(badPath);
-      await expect(page.getByText('Backup matches this job.')).toBeVisible();
       await page.getByLabel('I reviewed these details and want to issue permanently.').check();
       await expect(page.getByRole('button',{name:'Issue permanently'})).toBeDisabled();
       await page.getByRole('button',{name:'Edit details'}).click();
@@ -67,11 +63,7 @@ for (const kind of ['physical','digital','mixed']) {
       expect(require('fs').readFileSync(originalPath)).toEqual(kind==='digital'?Buffer.from('<img src=x onerror=alert(1)>'):Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=','base64'));
     }
     await expect(page.getByRole('button',{name:'Issue permanently'})).toBeDisabled();
-    const downloaded=page.waitForEvent('download');
-    await page.getByRole('button',{name:'Download issuance file (.odpjob)'}).click();
-    const file=await downloaded; const path=await file.path(); if(!path)throw new Error('Download unavailable');
-    await page.getByLabel('Select the downloaded .odpjob file').setInputFiles(path);
-    await expect(page.getByText('Backup matches this job.')).toBeVisible();
+    await expect(page.getByText(/\.odpjob/i)).toHaveCount(0);
     await page.getByLabel('I reviewed these details and want to issue permanently.').check();
     if(kind!=='physical'){
       await expect(page.getByRole('button',{name:'Issue permanently'})).toBeDisabled();
@@ -79,14 +71,9 @@ for (const kind of ['physical','digital','mixed']) {
     }
     await expect(page.getByRole('button',{name:'Issue permanently'})).toBeEnabled();
     if(kind==='physical'){
-      await page.getByText('Resume a saved issuance', { exact:true }).click();
-      await page.getByLabel('Select a saved issuance file (.odpjob)').setInputFiles({
-        name: 'invalid.odpjob', mimeType: 'application/octet-stream', buffer: Buffer.from('invalid'),
-      });
-      await expect(page.getByText(/Could not open this file/)).toBeVisible();
-      await page.getByLabel('Select a saved issuance file (.odpjob)').setInputFiles(path);
-      await expect(page.getByText(/The site has not sent another request/)).toBeVisible();
-      await expect(page.getByRole('button',{name:'Issue permanently'})).toBeDisabled();
+      await page.evaluate(() => { (window as any).uncertainMint=true; });
+      await page.getByRole('button',{name:'Issue permanently'}).click();
+      await expect(page.getByText(/The result is unknown/)).toBeVisible();
       await page.getByRole('button',{name:'Check issuance status'}).click();
       await expect(page.getByText(/The result is unknown/)).toBeVisible();
       await expect(page.getByRole('button',{name:'Check wallet and prepare the saved job'})).toBeDisabled();

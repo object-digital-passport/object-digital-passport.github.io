@@ -29,14 +29,6 @@ for (const route of ['profile', 'issue', 'release']) {
   });
 }
 
-test('resuming a saved issuance explains the file and requires a connected wallet', async ({ page }) => {
-  await page.goto('/issue-07.html');
-  await expect(page.getByLabel('Select a saved issuance file (.odpjob)')).toBeHidden();
-  await page.getByText('Resume a saved issuance', { exact: true }).click();
-  await expect(page.getByLabel('Select a saved issuance file (.odpjob)')).toBeDisabled();
-  await expect(page.getByText('Connect the same wallet to open it.', { exact: false })).toBeVisible();
-});
-
 for (const route of ['creator', 'passport']) {
   test(`legacy ${route} offers a keyboard-accessible WalletConnect button`, async ({ page }) => {
     await page.addInitScript(() => {
