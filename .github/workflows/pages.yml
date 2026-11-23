@@ -15,18 +15,17 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+  pages: read
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      deployment: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -66,5 +65,17 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
+
+  deploy:
+    # Let the build job finish before Pages looks up the uploaded artifact.
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v5
