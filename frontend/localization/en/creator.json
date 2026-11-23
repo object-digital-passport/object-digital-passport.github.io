@@ -1,60 +1,24 @@
 {
   "creator": {
     "v07Link": "Register an ODP 0.7 profile",
+    "noLegacyProfile": "This wallet has no ODP 0.6 profile. You can register an ODP 0.7 profile using the link above.",
     "meta": {
-      "documentTitle": "ODP v0.6 — Register profile",
+      "documentTitle": "ODP v0.6 — Profile",
       "h1": "Profile",
-      "sub": "Object Digital Passport · version\u00a00.5.0"
-    },
-    "steps": {
-      "wallet": "Wallet",
-      "security": "Security",
-      "register": "Register"
+      "sub": "Object Digital Passport · Specification v0.6"
     },
     "connect": {
       "cardTitle": "Connect your wallet",
-      "lead": "Your wallet address becomes your identity in ODP. Your profile ID stays linked to this wallet. Make sure you have a backup of your key before continuing.",
+      "lead": "Connect the wallet linked to your ODP 0.6 profile to view it.",
       "wcName": "Connect with WalletConnect",
       "wcDesc": "Choose your wallet in WalletConnect and approve the connection.",
       "wcError": "Could not connect. Open WalletConnect again and select one account on Polygon."
     },
-    "security": {
-      "cardTitle": "Before you register",
-      "intro": "Your profile is tied to this wallet permanently. If you lose access to the wallet, the ID cannot be transferred or recovered. Read the following carefully.",
-      "li1t": "Seed phrase wallets — back up before anything else",
-      "li1": "Write the 12–24 words on paper. Verify word order when prompted. Store offline. Keep a second copy in a different location. Never store digitally — no photos, no cloud, no messaging apps.",
-      "li2t": "Seed-less hardware wallets — get a backup device now",
-      "li2": "The key lives only in the hardware chip. There is no seed phrase. Losing all copies of the device means permanent loss of access. Always have at least one backup device before registering.",
-      "li3t": "Never share your key or seed phrase with anyone",
-      "li3": "No legitimate service or support team will ever ask for it. Ransomware and phishing specifically target seed phrases.",
-      "li4t": "If you lose wallet access — your passports are safe",
-      "li4": "All passports you created remain valid and checkable forever. You only lose the ability to create new passports under that identity.",
-      "checkbox": "I have backed up my key and understand the risks. My seed phrase is on paper / I have a backup hardware device.",
-      "continueBtn": "Continue to Registration"
-    },
-    "register": {
-      "cardTitle": "Choose your type",
-      "warn": "⚠ Your type prefix cannot be changed after registration. One profile per wallet. Permanent.",
-      "btn": "Register — only a small network fee (~US$0.01 typical)",
-      "waiting": "Waiting for wallet…",
-      "confirming": "Confirming…",
-      "txPrefix": "Request sent:"
-    },
     "type": {
       "C": "Creator",
-      "Cd": "Individual artist, photographer, maker, craftsperson",
       "B": "Brand",
-      "Bd": "Company, studio, label, collective (museums/collections use M)",
       "P": "Proof institution",
-      "Pd": "Expert, auction house, certification — attestations on passports",
-      "M": "Museum",
-      "Md": "Collection or museum: unlimited passports for holdings (e.g. works by deceased artists)"
-    },
-    "typeInfo": {
-      "C": "Individual creator — artist, photographer, maker, or craftsperson. Use this if you are registering as a person.",
-      "B": "Brand or collective — company, studio, label, or group. Use this for organizations; museums/collections should use M.",
-      "P": "Proof institution — expert, auction house, or certification body. P-type accounts can attach confirmations to any passport.",
-      "M": "Museum or collection — create passports for objects you hold in institutional custody (no monthly cap like smaller tiers). Use this for museums digitizing collections; you can attach confirmations like P-type institutions."
+      "M": "Museum"
     },
     "walletBar": {
       "disconnect": "Disconnect"
